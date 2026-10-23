@@ -401,7 +401,21 @@ if (document.readyState === 'loading') {
 
 function initApp() {
   window.keffStation = new KeffStation();
-  window.keffStation.init().catch(e => console.error('App init failed:', e));
+  window.keffStation.init().then(() => {
+    const loading = document.getElementById('loading');
+    if (loading) {
+      loading.textContent = '✅ KeffStation prêt';
+      loading.style.color = '#27d17f';
+      setTimeout(() => loading.classList.add('hidden'), 1000);
+    }
+  }).catch(e => {
+    console.error('App init failed:', e);
+    const loading = document.getElementById('loading');
+    if (loading) {
+      loading.textContent = '❌ Erreur: ' + e.message;
+      loading.style.color = '#ff3d9a';
+    }
+  });
 }
 
 // Expose for debugging
