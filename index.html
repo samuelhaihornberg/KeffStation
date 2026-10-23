@@ -24,8 +24,8 @@
   /* --- Lecteur principal : octogone hybride --- */
   .reader{
     position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-    width:min(85vw,520px);aspect-ratio:1;
-    z-index:10;display:flex;flex-direction:column;
+    width:min(85vw,520px);
+    z-index:10;display:flex;flex-direction:column;align-items:center;gap:0;
   }
 
   /* Octogone hybride : carré + triangles aux coins = 8 côtés */
@@ -155,20 +155,17 @@
 
   /* --- Roadmap carrée (navigation articles) --- */
   .nav{
-    position:absolute;
-    bottom:clamp(8px,2vh,16px);
-    left:50%;
-    transform:translateX(-50%);
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:clamp(6px,1.5vw,10px);
     width:clamp(120px,30vw,200px);
-    z-index:5;
-    padding:clamp(6px,1.5vh,10px);
-    background:rgba(10,12,34,.6);
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:12px;
-    backdrop-filter:blur(8px);
+    margin:clamp(10px,2vh,16px) auto 0;
+    padding:clamp(8px,2vh,12px);
+    background:rgba(10,12,34,.7);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:14px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 8px 32px rgba(0,0,0,.4);
   }
   .nav button{
     width:100%;aspect-ratio:1;
@@ -246,7 +243,6 @@
     <div class="carousel" id="carousel">
       <div class="prisme" id="prisme"></div>
     </div>
-    <nav class="nav" id="nav" aria-label="Navigation applications"></nav>
     <div class="gesture-zone" id="gesture"></div>
     <div class="arrows" id="arrows" aria-label="Navigation directionnelle">
       <button class="arrow-up" type="button" aria-label="Article précédent" title="Précédent">▲</button>
@@ -255,6 +251,8 @@
       <button class="arrow-right" type="button" aria-label="Article suivant" title="Suivant">▶</button>
     </div>
   </div>
+  <!-- Roadmap OUTSIDE vitrine to avoid clip-path clipping -->
+  <nav class="nav" id="nav" aria-label="Navigation applications"></nav>
 </div>
 
 <script>
