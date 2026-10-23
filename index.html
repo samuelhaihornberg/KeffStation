@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070816">
+<title>KeffStation — Lecteur d'articles horizontal</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
+  a{color:#1e6bff}
+  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(7,8,22,1) 0%,rgba(7,8,22,0) 100%);padding:12px 16px;text-align:center}
+  header h1{font-size:clamp(1.2rem,4vw,1.6rem);font-weight:800;background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);-webkit-background-clip:text;background-clip:text;color:transparent}
+  main{padding:16px 0 80px}
+  .carousel{position:relative;overflow:hidden}
+  .track{display:flex;gap:16px;will-change:transform;touch-action:pan-y}
+  .card{flex:0 0 calc(100% - 32px);max-width:calc(100% - 32px);min-width:280px;background:rgba(9,11,34,.68);border:1px solid rgba(255,255,255,.16);border-radius:22px;padding:24px;backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  .card .num{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:#b9c0e6;margin-bottom:.4em}
+  .card h2{font-size:clamp(1.35rem,5vw,1.9rem);margin:0 0 .4em;line-height:1.15;background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .card p{color:#b9c0e6;margin:.5em 0}
+  .card .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:1em}
+  .card .tag{font-size:.7rem;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#ffd23f}
+  nav.dots{display:flex;justify-content:center;gap:8px;margin-top:24px;padding-bottom:16px}
+  nav.dots button{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);cursor:pointer;transition:transform .2s,background .2s}
+  nav.dots button.active{background:#ffd23f;transform:scale(1.4);border-color:#ffd23f}
+  nav.dots button:focus-visible{outline:2px solid #ffd23f;outline-offset:2px}
+  footer{text-align:center;color:#b9c0e6;padding:24px;font-size:.85rem}
+  @media (prefers-reduced-motion:reduce){.track{transition:none!important}}
+</style>
+</head>
+<body>
+<header><h1>KeffStation — Lecteur d'articles</h1></header>
+<main>
+  <section class="carousel" aria-roledescription="carrousel" aria-label="Articles">
+    <div class="track" id="track" role="list"></div>
+  </section>
+  <nav class="dots" id="dots" aria-label="Navigation articles"></nav>
+</main>
+<footer>Kifftech · Tricktrocjob · ViArtificial labs — Lecteur horizontal PWA</footer>
+
+<script>
+(() => {
+  const articles = [
+    {
+      num: "Kifftech",
+      title: "Smart devices & gadgets",
+      desc: "Boutique PWA : Samsung, Xiaomi, prix sous officiels, livraison mondiale. Backend Node unique, zéro dépendance, données JSON.",
+      tags: ["PWA", "Node", "E-commerce", "Smart tech"]
+    },
+    {
+      num: "Tricktrocjob",
+      title: "Plateforme Trix / Trox / Services",
+      desc: "Échange d'astuces pas à pas, troc d'objets, services entre particuliers. Frais dégressifs 17%→5%, double porte-monnaie (solde + crédits).",
+      tags: ["Marketplace", "Troc", "Crédits", "Communauté"]
+    },
+    {
+      num: "ViArtificial labs",
+      title: "cos, SuperBots, BLM, BLSM",
+      desc: "Syntaxe cos (connexions), famille SuperBots (ViA, BTB+Golem, Geeko, Guideoplan), blocs logiques BLM/BLSM, motor.s injection.",
+      tags: ["cos", "SuperBots", "BLM", "motor.s"]
+    }
+  ];
+
+  const track = document.getElementById('track');
+  const dotsEl = document.getElementById('dots');
+
+  articles.forEach((a, i) => {
+    const card = document.createElement('article');
+    card.role = 'listitem';
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="num">${a.num}</div>
+      <h2>${a.title}</h2>
+      <p>${a.desc}</p>
+      <div class="tags">${a.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+    `;
+    track.appendChild(card);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.setAttribute('aria-label', `Article ${i+1}: ${a.num}`);
+    if (i === 0) btn.classList.add('active');
+    btn.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(btn);
+  });
+
+  let current = 0;
+  const cards = track.children;
+  const dots = dotsEl.children;
+
+  function goTo(i) {
+    if (i < 0 || i >= cards.length) return;
+    current = i;
+    const cardWidth = cards[0].offsetWidth + 16; // card + gap
+    track.style.transform = `translateX(-${current * cardWidth}px)`;
+    Array.from(dots).forEach((d, idx) => d.classList.toggle('active', idx === current));
+  }
+
+  // Touch swipe
+  let startX = 0, startScroll = 0;
+  track.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startScroll = track.scrollLeft;
+  }, {passive: true});
+  track.addEventListener('touchmove', e => {
+    const dx = e.touches[0].clientX - startX;
+    track.scrollLeft = startScroll - dx;
+  }, {passive: true});
+  track.addEventListener('touchend', e => {
+    const cardWidth = cards[0].offsetWidth + 16;
+    const idx = Math.round(track.scrollLeft / cardWidth);
+    goTo(Math.max(0, Math.min(idx, cards.length - 1)));
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') goTo(current - 1);
+    else if (e.key === 'ArrowRight') goTo(current + 1);
+  });
+
+  // Resize recalc
+  new ResizeObserver(() => goTo(current)).observe(track);
+})();
+</script>
+</body>
+</html>
