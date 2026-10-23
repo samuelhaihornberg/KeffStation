@@ -153,15 +153,49 @@
   .face .tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:1.2em}
   .face .tag{font-size:clamp(.6rem,1.8vw,.68rem);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#ffd23f;white-space:nowrap}
 
-  /* --- Navigation : points circulaires --- */
-  .nav{position:absolute;bottom:clamp(12px,3vh,20px);left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:5}
-  .nav button{
-    width:12px;height:12px;border-radius:50%;
-    border:1px solid rgba(255,255,255,.28);
-    background:rgba(255,255,255,.08);
-    cursor:pointer;transition:transform .2s,background .2s,border-color .2s;
+  /* --- Roadmap carrée (navigation articles) --- */
+  .nav{
+    position:absolute;
+    bottom:clamp(8px,2vh,16px);
+    left:50%;
+    transform:translateX(-50%);
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:clamp(6px,1.5vw,10px);
+    width:clamp(120px,30vw,200px);
+    z-index:5;
+    padding:clamp(6px,1.5vh,10px);
+    background:rgba(10,12,34,.6);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;
+    backdrop-filter:blur(8px);
   }
-  .nav button.active{background:#ffd23f;border-color:#ffd23f;transform:scale(1.35);box-shadow:0 0 12px rgba(255,210,63,.5)}
+  .nav button{
+    width:100%;aspect-ratio:1;
+    border-radius:6px;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.05);
+    color:#b9c0e6;
+    font-size:clamp(.6rem,1.5vw,.75rem);
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    cursor:pointer;
+    transition:transform .15s,background .15s,border-color .15s,color .15s,box-shadow .15s;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .nav button:hover{
+    background:rgba(30,107,255,.2);
+    border-color:#1e6bff;
+    color:#ffd23f;
+  }
+  .nav button.active{
+    background:#ffd23f;
+    border-color:#ffd23f;
+    color:#070816;
+    box-shadow:0 0 16px rgba(255,210,63,.6),inset 0 0 0 1px rgba(255,210,63,.3);
+    transform:scale(1.05);
+  }
   .nav button:focus-visible{outline:2px solid #ffd23f;outline-offset:2px}
 
   /* --- Flèches de navigation (4 directions) --- */
@@ -269,6 +303,7 @@
 
     const btn = document.createElement('button');
     btn.type = 'button';
+    btn.textContent = app.num;
     btn.setAttribute('aria-label', `${app.num}`);
     if (i === 0) btn.classList.add('active');
     btn.addEventListener('click', () => goTo(i));
