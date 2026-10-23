@@ -255,39 +255,106 @@
   .face .sub-article h3{font-size:clamp(.9rem,2.5vw,1.1rem);margin:0 0 .4em;color:#ffd23f}
   .face .sub-article p{font-size:clamp(.8rem,2vw,.9rem);color:#b9c0e6;line-height:1.5;max-width:90%}
   .face .sub-article .tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:.8em}
-  .face .sub-nav{margin-top:.8em;opacity:.7}
-  .face .sub-indicator{font-size:clamp(.6rem,1.5vw,.7rem);color:#ffd23f;opacity:.8}
-  .face .tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:1.2em}
-  .face .tag{font-size:clamp(.6rem,1.8vw,.68rem);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#ffd23f;white-space:nowrap}
-  .face .app-link{color:#ffd23f;text-decoration:none;transition:opacity .2s}
-  .face .app-link:hover{opacity:.7;text-decoration:underline}
-
-  /* Sub-article 3D card */
-  .face .sub-article{
-    background:rgba(10,12,34,.5);
-    border:1px solid rgba(255,255,255,.1);
+  /* Sub-article 3D card - Face 1 (Kifftech: Bleu/Violet) */
+  .face:nth-child(1) .sub-article{
+    background:rgba(30,107,255,.15);
+    border:1px solid rgba(30,107,255,.3);
     border-radius:12px;
     padding:clamp(10px,2.5vw,16px);
     margin-top:.8em;
     -webkit-backdrop-filter:blur(8px);
     backdrop-filter:blur(8px);
-    box-shadow:inset 0 0 20px rgba(0,0,0,.3);
+    box-shadow:inset 0 0 20px rgba(30,107,255,.2);
   }
-  .face .sub-nav{
+  .face:nth-child(1) .sub-nav{
     margin-top:.8em;
     padding-top:.6em;
-    border-top:1px solid rgba(255,255,255,.1);
+    border-top:1px solid rgba(30,107,255,.2);
     display:flex;align-items:center;justify-content:space-between;
   }
-  .face .sub-indicator{
+  .face:nth-child(1) .sub-indicator{
     font-size:clamp(.6rem,1.5vw,.7rem);
-    color:#ffd23f;
-    opacity:.8;
-    background:rgba(255,210,63,.15);
+    color:#fff;
+    opacity:.9;
+    background:rgba(30,107,255,.4);
     padding:2px 8px;
     border-radius:999px;
-    border:1px solid rgba(255,210,63,.3);
+    border:1px solid rgba(30,107,255,.5);
   }
+
+  /* Sub-article 3D card - Face 2 (Tricktrocjob: Rose/Or) */
+  .face:nth-child(2) .sub-article{
+    background:rgba(255,61,154,.15);
+    border:1px solid rgba(255,61,154,.3);
+    border-radius:12px;
+    padding:clamp(10px,2.5vw,16px);
+    margin-top:.8em;
+    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(8px);
+    box-shadow:inset 0 0 20px rgba(255,61,154,.2);
+  }
+  .face:nth-child(2) .sub-nav{
+    margin-top:.8em;
+    padding-top:.6em;
+    border-top:1px solid rgba(255,61,154,.2);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .face:nth-child(2) .sub-indicator{
+    font-size:clamp(.6rem,1.5vw,.7rem);
+    color:#fff;
+    opacity:.9;
+    background:rgba(255,61,154,.4);
+    padding:2px 8px;
+    border-radius:999px;
+    border:1px solid rgba(255,61,154,.5);
+  }
+
+  /* Sub-article 3D card - Face 3 (ViArtificial: Vert/Violet) */
+  .face:nth-child(3) .sub-article{
+    background:rgba(39,209,127,.15);
+    border:1px solid rgba(39,209,127,.3);
+    border-radius:12px;
+    padding:clamp(10px,2.5vw,16px);
+    margin-top:.8em;
+    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(8px);
+    box-shadow:inset 0 0 20px rgba(39,209,127,.2);
+  }
+  .face:nth-child(3) .sub-nav{
+    margin-top:.8em;
+    padding-top:.6em;
+    border-top:1px solid rgba(39,209,127,.2);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .face:nth-child(3) .sub-indicator{
+    font-size:clamp(.6rem,1.5vw,.7rem);
+    color:#fff;
+    opacity:.9;
+    background:rgba(39,209,127,.4);
+    padding:2px 8px;
+    border-radius:999px;
+    border:1px solid rgba(39,209,127,.5);
+  }
+
+  /* Tags par face */
+  .face:nth-child(1) .tag{
+    background:rgba(30,107,255,.2);
+    border:1px solid rgba(30,107,255,.4);
+    color:#8ab4ff;
+  }
+  .face:nth-child(2) .tag{
+    background:rgba(255,61,154,.2);
+    border:1px solid rgba(255,61,154,.4);
+    color:#ffb3d1;
+  }
+  .face:nth-child(3) .tag{
+    background:rgba(39,209,127,.2);
+    border:1px solid rgba(39,209,127,.4);
+    color:#a3f5c7;
+  }
+
+  .face .app-link{color:#ffd23f;text-decoration:none;transition:opacity .2s}
+  .face .app-link:hover{opacity:.7;text-decoration:underline}
 
   /* --- Roadmap carrée (navigation articles) --- */
   .nav{
@@ -357,6 +424,18 @@
   .arrow-down{bottom:clamp(8px,2vh,16px);left:50%;transform:translateX(-50%)}
   .arrow-left{left:clamp(8px,2vw,16px);top:50%;transform:translateY(-50%)}
   .arrow-right{right:clamp(8px,2vw,16px);top:50%;transform:translateY(-50%)}
+
+  /* Flèches et nav selon face active (via data-face) */
+  .arrows[data-face="0"] button{background:rgba(30,107,255,.2);border-color:#1e6bff;color:#8ab4ff}
+  .arrows[data-face="0"] button:hover{background:rgba(30,107,255,.4);box-shadow:0 0 20px rgba(30,107,255,.5)}
+  .arrows[data-face="1"] button{background:rgba(255,61,154,.2);border-color:#ff3d9a;color:#ffb3d1}
+  .arrows[data-face="1"] button:hover{background:rgba(255,61,154,.4);box-shadow:0 0 20px rgba(255,61,154,.5)}
+  .arrows[data-face="2"] button{background:rgba(39,209,127,.2);border-color:#27d17f;color:#a3f5c7}
+  .arrows[data-face="2"] button:hover{background:rgba(39,209,127,.4);box-shadow:0 0 20px rgba(39,209,127,.5)}
+
+  .nav[data-face="0"] button.active{background:#1e6bff;border-color:#1e6bff;color:#fff;box-shadow:0 0 16px rgba(30,107,255,.6),inset 0 0 0 1px rgba(30,107,255,.3)}
+  .nav[data-face="1"] button.active{background:#ff3d9a;border-color:#ff3d9a;color:#fff;box-shadow:0 0 16px rgba(255,61,154,.6),inset 0 0 0 1px rgba(255,61,154,.3)}
+  .nav[data-face="2"] button.active{background:#27d17f;border-color:#27d17f;color:#070816;box-shadow:0 0 16px rgba(39,209,127,.6),inset 0 0 0 1px rgba(39,209,127,.3)}
 
   /* --- Gestes tactiles zone --- */
   .gesture-zone{position:absolute;inset:0;z-index:3;touch-action:none}
@@ -543,6 +622,13 @@ function releasePointerCapture(e) { if (HAS_POINTER && e.target.releasePointerCa
       f.classList.toggle('active', idx === current);
     });
     Array.from(dots).forEach((d, idx) => d.classList.toggle('active', idx === current));
+    
+    // Update arrows and nav face class
+    const arrows = document.getElementById('arrows');
+    const navEl = document.getElementById('nav');
+    if (arrows) arrows.dataset.face = current;
+    if (navEl) navEl.dataset.face = current;
+    
     renderSubArticle();
   }
 
