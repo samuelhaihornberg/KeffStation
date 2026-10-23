@@ -374,23 +374,30 @@ class KeffStation {
     }
     if (e.target?.releasePointerCapture) e.target.releasePointerCapture(e.pointerId);
   }
-
   initParticles() {
-    const container = document.getElementById('particules');
-    const colors = ['#1e6bff','#ff3d9a','#ffd23f','#27d17f','#8a4dff'];
-    for (let i = 0; i < 18; i++) {
-      const p = document.createElement('div');
-      p.className = 'particule';
-      const sx = (Math.random() - .5) * window.innerWidth * .8;
-      const sy = (Math.random() - .5) * window.innerHeight * .8;
-      const ex = (Math.random() - .5) * window.innerWidth * .8;
-      const ey = (Math.random() - .5) * window.innerHeight * .8;
-      const delay = Math.random() * 12;
-      const dur = 10 + Math.random() * 8;
-      const op = .15 + Math.random() * .25;
-      const clr = colors[Math.floor(Math.random() * colors.length)];
-      p.style.cssText = `left:50%;top:50%;--sx:${sx}px;--sy:${sy}px;--ex:${ex}px;--ey:${ey}px;--op:${.15+Math.random()*.25};background:${clr};animation-duration:${10+Math.random()*8}s;animation-delay:${Math.random()*12}s`;
-      document.getElementById('particules').appendChild(p);
+    try {
+      const container = document.getElementById('particules');
+      if (!container) {
+        console.warn('initParticles: particules container not found');
+        return;
+      }
+      const colors = ['#1e6bff','#ff3d9a','#ffd23f','#27d17f','#8a4dff'];
+      for (let i = 0; i < 18; i++) {
+        const p = document.createElement('div');
+        p.className = 'particule';
+        const sx = (Math.random() - .5) * window.innerWidth * .8;
+        const sy = (Math.random() - .5) * window.innerHeight * .8;
+        const ex = (Math.random() - .5) * window.innerWidth * .8;
+        const ey = (Math.random() - .5) * window.innerHeight * .8;
+        const delay = Math.random() * 12;
+        const dur = 10 + Math.random() * 8;
+        const op = .15 + Math.random() * .25;
+        const clr = colors[Math.floor(Math.random() * colors.length)];
+        p.style.cssText = `left:50%;top:50%;--sx:${sx}px;--sy:${sy}px;--ex:${ex}px;--ey:${ey}px;--op:${.15+Math.random()*.25};background:${clr};animation-duration:${dur}s;animation-delay:${delay}s`;
+        container.appendChild(p);
+      }
+    } catch (e) {
+      console.error('initParticles error:', e);
     }
   }
 
