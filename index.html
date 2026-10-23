@@ -388,11 +388,6 @@ function releasePointerCapture(e) { if (HAS_POINTER && e.target.releasePointerCa
   const faces = prisme.children;
   const dots = nav.children;
 
-  let current = 0;
-  let subCurrent = 0;
-  let startX = 0, currentAngle = 0;
-  let isDragging = false;
-
   function goTo(i, animate = true) {
     if (i < 0) i = faces.length - 1;
     if (i >= faces.length) i = 0;
