@@ -114,7 +114,7 @@
     -webkit-mask-image:linear-gradient(to top,black 0%,transparent 100%);
   }
 
-  /* --- Contenu rotatif (carrousel interne) --- */
+  /* --- Contenu rotatif (prisme triangulaire 3 faces) --- */
   .carousel{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     perspective:1200px;
@@ -133,16 +133,19 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     padding:clamp(16px,4vw,28px);
     text-align:center;
-    opacity:0;transform:translateZ(-200px) rotateY(90deg);
     pointer-events:none;
+    opacity:0.3;
+    transition:opacity .35s;
   }
   .face.active{
-    opacity:1;transform:translateZ(0) rotateY(0deg);
+    opacity:1;
     pointer-events:auto;
-    transition:opacity .35s,transform .35s;
   }
-  .face.prev{transform:translateZ(-200px) rotateY(-90deg)}
-  .face.next{transform:translateZ(-200px) rotateY(90deg)}
+
+  /* Position 3D des 3 faces : prisme triangulaire (120° par face) */
+  .face:nth-child(1){ transform:rotateY(0deg) translateZ(180px); }
+  .face:nth-child(2){ transform:rotateY(-120deg) translateZ(180px); }
+  .face:nth-child(3){ transform:rotateY(120deg) translateZ(180px); }
 
   .face .num{font-size:clamp(.7rem,2.5vw,.85rem);letter-spacing:.15em;text-transform:uppercase;color:#ffd23f;margin-bottom:.5em;opacity:.9}
   .face h2{
@@ -319,16 +322,14 @@
     const prev = current;
     current = i;
 
-    // Rotation 3D du prisme
-    const angle = -current * (360 / faces.length);
+    // Rotation 3D du prisme (120° par face pour 3 faces)
+    const angle = -current * 120;
     prisme.style.transition = animate ? 'transform .7s cubic-bezier(.2,.8,.2,1)' : 'none';
     prisme.style.transform = `rotateY(${angle}deg)`;
 
-    // États des faces
+    // États des faces (seule la classe active change)
     Array.from(faces).forEach((f, idx) => {
       f.classList.toggle('active', idx === current);
-      f.classList.toggle('prev', idx === (current - 1 + faces.length) % faces.length);
-      f.classList.toggle('next', idx === (current + 1) % faces.length);
     });
     Array.from(dots).forEach((d, idx) => d.classList.toggle('active', idx === current));
   }
