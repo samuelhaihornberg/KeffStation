@@ -422,8 +422,19 @@ if (document.readyState === 'loading') {
 }
 
 function initApp() {
+  const loading = document.getElementById('loading');
+  if (loading) loading.textContent = '🔄 Initialisation...';
+
+  const timeoutId = setTimeout(() => {
+    if (loading) {
+      loading.textContent = '⚠️ Initialisation lente...';
+      loading.style.color = '#ffd23f';
+    }
+  }, 5000);
+
   window.keffStation = new KeffStation();
   window.keffStation.init().then(() => {
+    clearTimeout(timeoutId);
     const loading = document.getElementById('loading');
     if (loading) {
       loading.textContent = '✅ KeffStation prêt';
@@ -431,6 +442,7 @@ function initApp() {
       setTimeout(() => loading.classList.add('hidden'), 1000);
     }
   }).catch(e => {
+    clearTimeout(timeoutId);
     console.error('App init failed:', e);
     const loading = document.getElementById('loading');
     if (loading) {
