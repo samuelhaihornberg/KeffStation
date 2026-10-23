@@ -4,44 +4,197 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070816">
-<title>KeffStation — Lecteur d'articles horizontal</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E">
+<title>KeffStation — Lecteur géométrique</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E🔮%3C/text%3E%3C/svg%3E">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
-  a{color:#1e6bff}
-  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(7,8,22,1) 0%,rgba(7,8,22,0) 100%);padding:12px 16px;text-align:center}
-  header h1{font-size:clamp(1.2rem,4vw,1.6rem);font-weight:800;background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);-webkit-background-clip:text;background-clip:text;color:transparent}
-  main{padding:16px 0 80px}
-  .carousel{position:relative;overflow:hidden}
-  .track{display:flex;gap:16px;will-change:transform;touch-action:pan-y}
-  .card{flex:0 0 calc(100% - 32px);max-width:calc(100% - 32px);min-width:280px;background:rgba(9,11,34,.68);border:1px solid rgba(255,255,255,.16);border-radius:22px;padding:24px;backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 20px 60px rgba(0,0,0,.35)}
-  .card .num{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:#b9c0e6;margin-bottom:.4em}
-  .card h2{font-size:clamp(1.35rem,5vw,1.9rem);margin:0 0 .4em;line-height:1.15;background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .card p{color:#b9c0e6;margin:.5em 0}
-  .card .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:1em}
-  .card .tag{font-size:.7rem;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#ffd23f}
-  nav.dots{display:flex;justify-content:center;gap:8px;margin-top:24px;padding-bottom:16px}
-  nav.dots button{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);cursor:pointer;transition:transform .2s,background .2s}
-  nav.dots button.active{background:#ffd23f;transform:scale(1.4);border-color:#ffd23f}
-  nav.dots button:focus-visible{outline:2px solid #ffd23f;outline-offset:2px}
-  footer{text-align:center;color:#b9c0e6;padding:24px;font-size:.85rem}
-  @media (prefers-reduced-motion:reduce){.track{transition:none!important}}
+  html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* --- Fond atmosphérique --- */
+  #bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+  #bg::before{
+    content:'';position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%,rgba(30,107,255,.08) 0%,transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%,rgba(255,61,154,.06) 0%,transparent 50%),
+      radial-gradient(ellipse 40% 40% at 50% 50%,rgba(255,210,63,.04) 0%,transparent 70%);
+  }
+
+  /* --- Lecteur principal : octogone hybride --- */
+  .reader{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:min(85vw,520px);aspect-ratio:1;
+    z-index:10;display:flex;flex-direction:column;
+  }
+
+  /* Octogone hybride : carré + triangles aux coins = 8 côtés */
+  .vitrine{
+    position:relative;width:100%;height:100%;
+    /* Octogone régulier via clip-path */
+    clip-path:polygon(
+      15% 0, 85% 0,    /* haut: 2 segments */
+      100% 15%, 100% 85%,  /* droite */
+      85% 100%, 15% 100%,  /* bas */
+      0 85%, 0 15%        /* gauche */
+    );
+    /* Verre translucide : dégradé + bruit + reflets */
+    background:
+      /* Couche 1: verre de base */
+      linear-gradient(135deg,
+        rgba(255,255,255,.03) 0%,
+        rgba(255,255,255,.015) 40%,
+        rgba(10,12,34,.12) 60%,
+        rgba(5,5,16,.18) 100%
+      ),
+      /* Couche 2: reflets diagonaux */
+      repeating-linear-gradient(
+        45deg,
+        rgba(255,255,255,.008) 0px,
+        rgba(255,255,255,.008) 1px,
+        transparent 1px,
+        transparent 24px
+      ),
+      /* Couche 3: lueur centrale */
+      radial-gradient(ellipse 60% 60% at 50% 40%,
+        rgba(30,107,255,.06) 0%,
+        transparent 70%
+      );
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:
+      /* Ombre portée */
+      0 40px 120px -20px rgba(0,0,0,.6),
+      /* Lueur interne haute */
+      inset 0 1px 0 rgba(255,255,255,.15),
+      inset 0 -1px 0 rgba(255,255,255,.03),
+      /* Reflets latéraux */
+      inset 1px 0 0 rgba(255,255,255,.08),
+      inset -1px 0 0 rgba(255,255,255,.02);
+    border-radius:0; /* clip-path gère la forme */
+    overflow:hidden;
+  }
+
+  /* Bordure lumineuse animée (contour octogone) */
+  .vitrine::before{
+    content:'';position:absolute;inset:-1px;
+    clip-path:polygon(
+      15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%
+    );
+    background:linear-gradient(90deg,
+      transparent 0%,
+      rgba(30,107,255,.4) 20%,
+      rgba(255,61,154,.4) 50%,
+      rgba(255,210,63,.4) 80%,
+      transparent 100%
+    );
+    background-size:300% 100%;
+    animation:brillance 6s linear infinite;
+    opacity:.6;
+    pointer-events:none;
+    z-index:1;
+  }
+
+  @keyframes brillance{
+    0%{background-position:0% 50%}
+    100%{background-position:300% 50%}
+  }
+
+  /* Reflet "Pepper's ghost" en bas */
+  .vitrine::after{
+    content:'';position:absolute;bottom:0;left:10%;right:10%;height:35%;
+    background:linear-gradient(to top,
+      rgba(255,255,255,.04) 0%,
+      rgba(255,255,255,.01) 40%,
+      transparent 100%
+    );
+    transform:scaleY(-1);
+    opacity:.3;
+    pointer-events:none;
+    mask-image:linear-gradient(to top,black 0%,transparent 100%);
+    -webkit-mask-image:linear-gradient(to top,black 0%,transparent 100%);
+  }
+
+  /* --- Contenu rotatif (carrousel interne) --- */
+  .carousel{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    perspective:1200px;
+  }
+
+  .prisme{
+    position:relative;width:80%;height:70%;
+    transform-style:preserve-3d;
+    transition:transform .7s cubic-bezier(.2,.8,.2,1);
+  }
+  .prisme.glisse{transition:none}
+
+  .face{
+    position:absolute;inset:0;
+    backface-visibility:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:clamp(16px,4vw,28px);
+    text-align:center;
+    opacity:0;transform:translateZ(-200px) rotateY(90deg);
+    pointer-events:none;
+  }
+  .face.active{
+    opacity:1;transform:translateZ(0) rotateY(0deg);
+    pointer-events:auto;
+    transition:opacity .35s,transform .35s;
+  }
+  .face.prev{transform:translateZ(-200px) rotateY(-90deg)}
+  .face.next{transform:translateZ(-200px) rotateY(90deg)}
+
+  .face .num{font-size:clamp(.7rem,2.5vw,.85rem);letter-spacing:.15em;text-transform:uppercase;color:#ffd23f;margin-bottom:.5em;opacity:.9}
+  .face h2{
+    font-size:clamp(1.1rem,3.5vw,1.6rem);margin:0 0 .6em;line-height:1.15;font-weight:700;
+    background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .face p{font-size:clamp(.85rem,2.2vw,.95rem);color:#b9c0e6;line-height:1.5;max-width:90%}
+  .face .tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:1.2em}
+  .face .tag{font-size:clamp(.6rem,1.8vw,.68rem);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#ffd23f;white-space:nowrap}
+
+  /* --- Navigation : points circulaires --- */
+  .nav{position:absolute;bottom:clamp(12px,3vh,20px);left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:5}
+  .nav button{
+    width:12px;height:12px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.28);
+    background:rgba(255,255,255,.08);
+    cursor:pointer;transition:transform .2s,background .2s,border-color .2s;
+  }
+  .nav button.active{background:#ffd23f;border-color:#ffd23f;transform:scale(1.35);box-shadow:0 0 12px rgba(255,210,63,.5)}
+  .nav button:focus-visible{outline:2px solid #ffd23f;outline-offset:2px}
+
+  /* --- Gestes tactiles zone --- */
+  .gesture-zone{position:absolute;inset:0;z-index:3;touch-action:none}
+
+  /* --- Particules atmosphériques --- */
+  .particules{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+  .particule{position:absolute;width:3px;height:3px;border-radius:50%;opacity:0;animation:float 12s ease-in-out infinite}
+  @keyframes float{
+    0%{transform:translate(var(--sx),var(--sy)) scale(0);opacity:0}
+    10%{opacity:var(--op)}
+    90%{opacity:var(--op)}
+    100%{transform:translate(var(--ex),var(--ey)) scale(1);opacity:0}
+  }
 </style>
 </head>
 <body>
-<header><h1>KeffStation — Lecteur d'articles</h1></header>
-<main>
-  <section class="carousel" aria-roledescription="carrousel" aria-label="Articles">
-    <div class="track" id="track" role="list"></div>
-  </section>
-  <nav class="dots" id="dots" aria-label="Navigation articles"></nav>
-</main>
-<footer>Kifftech · Tricktrocjob · ViArtificial labs — Lecteur horizontal PWA</footer>
+<div id="bg"></div>
+<div class="particules" id="particules"></div>
+
+<div class="reader" role="region" aria-roledescription="lecteur d'applications" aria-label="Kifftech, Tricktrocjob, ViArtificial labs">
+  <div class="vitrine">
+    <div class="carousel" id="carousel">
+      <div class="prisme" id="prisme"></div>
+    </div>
+    <nav class="nav" id="nav" aria-label="Navigation applications"></nav>
+    <div class="gesture-zone" id="gesture"></div>
+  </div>
+</div>
 
 <script>
 (() => {
-  const articles = [
+  const apps = [
     {
       num: "Kifftech",
       title: "Smart devices & gadgets",
@@ -62,65 +215,125 @@
     }
   ];
 
-  const track = document.getElementById('track');
-  const dotsEl = document.getElementById('dots');
+  const prisme = document.getElementById('prisme');
+  const nav = document.getElementById('nav');
+  const gesture = document.getElementById('gesture');
 
-  articles.forEach((a, i) => {
-    const card = document.createElement('article');
-    card.role = 'listitem';
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="num">${a.num}</div>
-      <h2>${a.title}</h2>
-      <p>${a.desc}</p>
-      <div class="tags">${a.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+  let current = 0;
+  let startX = 0, currentAngle = 0;
+  let isDragging = false;
+
+  // Construire les faces du prisme
+  apps.forEach((app, i) => {
+    const face = document.createElement('div');
+    face.className = 'face' + (i === 0 ? ' active' : '');
+    face.dataset.index = i;
+    face.innerHTML = `
+      <div class="num">${app.num}</div>
+      <h2>${app.title}</h2>
+      <p>${app.desc}</p>
+      <div class="tags">${app.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
     `;
-    track.appendChild(card);
+    prisme.appendChild(face);
 
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.setAttribute('aria-label', `Article ${i+1}: ${a.num}`);
+    btn.setAttribute('aria-label', `${app.num}`);
     if (i === 0) btn.classList.add('active');
     btn.addEventListener('click', () => goTo(i));
-    dotsEl.appendChild(btn);
+    nav.appendChild(btn);
   });
 
-  let current = 0;
-  const cards = track.children;
-  const dots = dotsEl.children;
+  const faces = prisme.children;
+  const dots = nav.children;
 
-  function goTo(i) {
-    if (i < 0 || i >= cards.length) return;
+  function goTo(i, animate = true) {
+    if (i < 0) i = faces.length - 1;
+    if (i >= faces.length) i = 0;
+    if (i === current) return;
+
+    const prev = current;
     current = i;
-    const cardWidth = cards[0].offsetWidth + 16; // card + gap
-    track.style.transform = `translateX(-${current * cardWidth}px)`;
+
+    // Rotation 3D du prisme
+    const angle = -current * (360 / faces.length);
+    prisme.style.transition = animate ? 'transform .7s cubic-bezier(.2,.8,.2,1)' : 'none';
+    prisme.style.transform = `rotateY(${angle}deg)`;
+
+    // États des faces
+    Array.from(faces).forEach((f, idx) => {
+      f.classList.toggle('active', idx === current);
+      f.classList.toggle('prev', idx === (current - 1 + faces.length) % faces.length);
+      f.classList.toggle('next', idx === (current + 1) % faces.length);
+    });
     Array.from(dots).forEach((d, idx) => d.classList.toggle('active', idx === current));
   }
 
-  // Touch swipe
-  let startX = 0, startScroll = 0;
-  track.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX;
-    startScroll = track.scrollLeft;
-  }, {passive: true});
-  track.addEventListener('touchmove', e => {
-    const dx = e.touches[0].clientX - startX;
-    track.scrollLeft = startScroll - dx;
-  }, {passive: true});
-  track.addEventListener('touchend', e => {
-    const cardWidth = cards[0].offsetWidth + 16;
-    const idx = Math.round(track.scrollLeft / cardWidth);
-    goTo(Math.max(0, Math.min(idx, cards.length - 1)));
-  });
+  // Navigation points
+  Array.from(dots).forEach((d, i) => d.addEventListener('click', () => goTo(i)));
 
-  // Keyboard
+  // Clavier
   document.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft') goTo(current - 1);
     else if (e.key === 'ArrowRight') goTo(current + 1);
   });
 
-  // Resize recalc
-  new ResizeObserver(() => goTo(current)).observe(track);
+  // Touch drag sur la vitrine
+  gesture.addEventListener('pointerdown', e => {
+    isDragging = true;
+    startX = e.clientX;
+    currentAngle = -current * (360 / faces.length);
+    prisme.style.transition = 'none';
+    gesture.setPointerCapture(e.pointerId);
+  });
+
+  gesture.addEventListener('pointermove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const angle = currentAngle + dx * 0.5;
+    prisme.style.transform = `rotateY(${angle}deg)`;
+  });
+
+  gesture.addEventListener('pointerup', e => {
+    if (!isDragging) return;
+    isDragging = false;
+    const dx = e.clientX - startX;
+    const threshold = 60;
+    if (Math.abs(dx) > threshold) {
+      goTo(current + (dx > 0 ? -1 : 1));
+    } else {
+      goTo(current); // snap back
+    }
+    gesture.releasePointerCapture(e.pointerId);
+  });
+  gesture.addEventListener('pointercancel', () => { isDragging = false; goTo(current); });
+
+  // Particules atmosphériques
+  const particulesEl = document.getElementById('particules');
+  const colors = ['#1e6bff','#ff3d9a','#ffd23f','#27d17f','#8a4dff'];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particule';
+    const sx = (Math.random() - .5) * window.innerWidth * .8;
+    const sy = (Math.random() - .5) * window.innerHeight * .8;
+    const ex = (Math.random() - .5) * window.innerWidth * .8;
+    const ey = (Math.random() - .5) * window.innerHeight * .8;
+    const delay = Math.random() * 12;
+    const dur = 10 + Math.random() * 8;
+    const op = .15 + Math.random() * .25;
+    const clr = colors[Math.floor(Math.random() * colors.length)];
+    p.style.cssText = `
+      left:50%;top:50%;
+      --sx:${sx}px;--sy:${sy}px;--ex:${ex}px;--ey:${ey}px;
+      --op:${op};
+      background:${clr};
+      animation-duration:${dur}s;animation-delay:${delay}s;
+    `;
+    particulesEl.appendChild(p);
+  }
+
+  // Resize handler
+  new ResizeObserver(() => goTo(current, false)).observe(document.querySelector('.vitrine'));
 })();
 </script>
 </body>
