@@ -166,8 +166,26 @@ hideLoading(){const loading=document.getElementById('loading');if(loading)loadin
 showError(msg){const loading=document.getElementById('loading');if(loading){loading.textContent='❌ '+msg;loading.style.color='#ff3d9a';}}
 }
 function sanitizeHTML(str){const div=document.createElement('div');div.textContent=str;return div.innerHTML;}
-function initApp(){const loading=document.getElementById('loading');if(loading)loading.textContent='🔄 Initialisation...';const timeoutId=setTimeout(()=>{if(loading){loading.textContent='⚠️ Initialisation lente...';loading.style.color='#ffd23f';}},5000);const runInit=()=>{try{window.keffStation=new KeffStation();console.log('KeffStation created, starting init...');window.keffStation.init().then(()=>{clearTimeout(timeoutId);const loading=document.getElementById('loading');if(loading){loading.textContent='✅ KeffStation prêt';loading.style.color='#27d17f';setTimeout(()=>loading.classList.add('hidden'),1000);}}).catch(e=>{clearTimeout(timeoutId);console.error('App init failed:',e);const loading=document.getElementById('loading');if(loading){loading.textContent='❌ Erreur: '+(e?.message||e?.toString()||'Erreur inconnue');loading.style.color='#ff3d9a';}});}catch(e){clearTimeout(timeoutId);console.error('Constructor/InitApp sync error:',e);const loading=document.getElementById('loading');if(loading){loading.textContent='❌ Erreur sync: '+(e?.message||e?.toString()||'Erreur inconnue');loading.style.color='#ff3d9a';}};};if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>{try{initApp();}catch(e){console.error('initApp sync error:',e);const loading=document.getElementById('loading');if(loading){loading.textContent='❌ Erreur: '+e.message;loading.style.color='#ff3d9a';}})}else{try{initApp();}catch(e){console.error('initApp sync error:',e);const loading=document.getElementById('loading');if(loading){loading.textContent='❌ Erreur: '+e.message;loading.style.color='#ff3d9a';}}}
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>{try{initApp();}catch(e){console.error('initApp sync error:',e);const loading=document.getElementById('loading');if(loading){loading.textContent='❌ Erreur: '+e.message;loading.style.color='#ff3d9a';}})}else{try{initApp();}catch(e){console.error('initApp sync error:',e);const loading=document.getElementById('loading');if(loading){loading.textContent='❌ Erreur: '+e.message;loading.style.color='#ff3d9a';}}}
+<script>
+// Force DOM ready before initialization
+(function(){
+  function runInit() {
+    const loading = document.getElementById('loading');
+    if (loading) loading.textContent = '🔄 Initialisation...';
+    const timeoutId = setTimeout(() => {
+      if (loading) { loading.textContent = '⚠️ Initialisation lente...'; loading.style.color = '#ffd23f'; }
+    }, 5000);
+    try {
+      window.keffStation = new KeffStation();
+      window.keffStation.init().then(() => {
+        clearTimeout(timeoutId);
+        const loading = document.getElementById('loading');
+        if (loading) { loading.textContent = '✅ KeffStation prêt'; loading.style.color = '#27d17f'; setTimeout(() => loading.classList.add('hidden'), 1000); }
+      }).catch(e => { console.error('App init failed:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur: ' + (e?.message || e?.toString() || 'Erreur inconnue'); loading.style.color = '#ff3d9a'; } });
+    } catch (e) { console.error('Constructor/InitApp sync error:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur sync: ' + (e?.message || e?.toString() || 'Erreur inconnue'); loading.style.color = '#ff3d9a'; } }
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', () => { try { runInit(); } catch (e) { console.error('runInit sync error:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur: ' + e.message; loading.style.color = '#ff3d9a'; } }); } else { runInit(); }
+})();
 </script>
 </body>
 </html>
