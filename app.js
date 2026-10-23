@@ -453,24 +453,35 @@ function initApp() {
     }
   }, 5000);
 
-  window.keffStation = new KeffStation();
-  window.keffStation.init().then(() => {
+  try {
+    window.keffStation = new KeffStation();
+    console.log('KeffStation created, starting init...');
+    window.keffStation.init().then(() => {
+      clearTimeout(timeoutId);
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.textContent = '✅ KeffStation prêt';
+        loading.style.color = '#27d17f';
+        setTimeout(() => loading.classList.add('hidden'), 1000);
+      }
+    }).catch(e => {
+      clearTimeout(timeoutId);
+      console.error('App init failed:', e);
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.textContent = '❌ Erreur: ' + (e?.message || e?.toString() || 'Erreur inconnue');
+        loading.style.color = '#ff3d9a';
+      }
+    });
+  } catch (e) {
     clearTimeout(timeoutId);
+    console.error('Constructor/InitApp sync error:', e);
     const loading = document.getElementById('loading');
     if (loading) {
-      loading.textContent = '✅ KeffStation prêt';
-      loading.style.color = '#27d17f';
-      setTimeout(() => loading.classList.add('hidden'), 1000);
-    }
-  }).catch(e => {
-    clearTimeout(timeoutId);
-    console.error('App init failed:', e);
-    const loading = document.getElementById('loading');
-    if (loading) {
-      loading.textContent = '❌ Erreur: ' + (e?.message || e?.toString() || 'Erreur inconnue');
+      loading.textContent = '❌ Erreur sync: ' + (e?.message || e?.toString() || 'Erreur inconnue');
       loading.style.color = '#ff3d9a';
     }
-  });
+  }
 }
 
 // Expose for debugging
