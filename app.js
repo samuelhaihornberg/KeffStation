@@ -393,10 +393,16 @@ function sanitizeHTML(str) {
 }
 
 // Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+
+function initApp() {
   window.keffStation = new KeffStation();
   window.keffStation.init().catch(e => console.error('App init failed:', e));
-});
+}
 
 // Expose for debugging
 window.KeffStation = KeffStation;
