@@ -114,6 +114,15 @@ class KeffStation {
     this.navEl = document.getElementById('nav');
     this.loading = document.getElementById('loading');
 
+    // Debug: check if elements are found
+    console.log('KeffStation constructor - Elements found:', {
+      prisme: !!this.prisme,
+      nav: !!this.nav,
+      gesture: !!this.gesture,
+      arrows: !!this.arrows,
+      loading: !!this.loading
+    });
+
     this.faces = null;
     this.dots = null;
     this.current = 0;
