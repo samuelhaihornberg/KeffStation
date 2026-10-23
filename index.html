@@ -139,8 +139,8 @@
   <nav class="nav" id="nav" aria-label="Navigation applications" data-face="0"></nav>
 </div>
 
-<!-- Non-critical JS loaded as module with async -->
-<script type="module" src="app.js"></script>
+<!-- App JS loaded as regular script (ES module features not used) -->
+<script src="app.js"></script>
 <script>
 /* ===== Polyfills pour compatibilité ===== */
 if (typeof ResizeObserver === 'undefined') {
