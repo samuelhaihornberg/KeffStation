@@ -126,26 +126,39 @@ class KeffStation {
 
   async init() {
     try {
+      console.log('KeffStation: Starting initialization...');
+      
       // Validate endpoints first
+      console.log('KeffStation: Validating endpoints...');
       await this.validateEndpoints();
+      console.log('KeffStation: Endpoints validated');
 
       // Build UI
+      console.log('KeffStation: Building UI...');
       this.buildUI();
+      console.log('KeffStation: UI built');
 
       // Setup event listeners
+      console.log('KeffStation: Setting up event listeners...');
       this.setupEventListeners();
+      console.log('KeffStation: Event listeners set up');
 
       // Initialize particles
+      console.log('KeffStation: Initializing particles...');
       this.initParticles();
+      console.log('KeffStation: Particles initialized');
 
       // Hide loading
+      console.log('KeffStation: Hiding loading...');
       this.hideLoading();
+      console.log('KeffStation: Loading hidden');
 
       this.initialized = true;
       console.log('KeffStation initialized successfully');
     } catch (error) {
       console.error('Initialization failed:', error);
-      this.showError(error.message);
+      this.showError(error?.message || error?.toString() || 'Erreur inconnue');
+      throw error;
     }
   }
 
