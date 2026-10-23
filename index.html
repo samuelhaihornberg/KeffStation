@@ -32,96 +32,150 @@
   /* Octogone hybride : carré + triangles aux coins = 8 côtés */
   .vitrine{
     position:relative;width:100%;height:100%;
-    /* Octogone régulier via clip-path */
+    /* Octogone régulier via clip-path - plus précis */
     -webkit-clip-path:polygon(
-      15% 0, 85% 0,    /* haut: 2 segments */
-      100% 15%, 100% 85%,  /* droite */
-      85% 100%, 15% 100%,  /* bas */
-      0 85%, 0 15%        /* gauche */
+      12% 0, 88% 0,    /* haut */
+      100% 12%, 100% 88%,  /* droite */
+      88% 100%, 12% 100%,  /* bas */
+      0 88%, 0 12%        /* gauche */
     );
     clip-path:polygon(
-      15% 0, 85% 0,    /* haut: 2 segments */
-      100% 15%, 100% 85%,  /* droite */
-      85% 100%, 15% 100%,  /* bas */
-      0 85%, 0 15%        /* gauche */
+      12% 0, 88% 0,    /* haut */
+      100% 12%, 100% 88%,  /* droite */
+      88% 100%, 12% 100%,  /* bas */
+      0 88%, 0 12%        /* gauche */
     );
-    /* Verre translucide : dégradé + bruit + reflets */
+    /* Verre multicouche 3D - facettes colorées */
     background:
-      /* Couche 1: verre de base */
-      linear-gradient(135deg,
-        rgba(255,255,255,.03) 0%,
-        rgba(255,255,255,.015) 40%,
-        rgba(10,12,34,.12) 60%,
-        rgba(5,5,16,.18) 100%
+      /* Facettes colorées par côté - effet prisme */
+      /* Haut - bleu */
+      linear-gradient(180deg,
+        rgba(30,107,255,.18) 0%,
+        rgba(30,107,255,.08) 15%,
+        transparent 15%
       ),
-      /* Couche 2: reflets diagonaux */
+      /* Bas - or */
+      linear-gradient(0deg,
+        rgba(255,210,63,.18) 0%,
+        rgba(255,210,63,.08) 15%,
+        transparent 15%
+      ),
+      /* Gauche - rose */
+      linear-gradient(90deg,
+        rgba(255,61,154,.16) 0%,
+        rgba(255,61,154,.06) 15%,
+        transparent 15%
+      ),
+      /* Droite - vert */
+      linear-gradient(-90deg,
+        rgba(39,209,127,.16) 0%,
+        rgba(39,209,127,.06) 15%,
+        transparent 15%
+      ),
+      /* Coins - violet/magenta */
+      radial-gradient(ellipse at 0% 0%,
+        rgba(138,77,255,.12) 0%,
+        transparent 25%
+      ),
+      radial-gradient(ellipse at 100% 0%,
+        rgba(138,77,255,.12) 0%,
+        transparent 25%
+      ),
+      radial-gradient(ellipse at 0% 100%,
+        rgba(255,61,154,.12) 0%,
+        transparent 25%
+      ),
+      radial-gradient(ellipse at 100% 100%,
+        rgba(39,209,127,.12) 0%,
+        transparent 25%
+      ),
+      /* Verre de base */
+      linear-gradient(135deg,
+        rgba(255,255,255,.04) 0%,
+        rgba(255,255,255,.015) 35%,
+        rgba(10,12,34,.1) 55%,
+        rgba(5,5,16,.15) 100%
+      ),
+      /* Reflets diagonaux subtils */
       repeating-linear-gradient(
         45deg,
-        rgba(255,255,255,.008) 0px,
-        rgba(255,255,255,.008) 1px,
+        rgba(255,255,255,.006) 0px,
+        rgba(255,255,255,.006) 1px,
         transparent 1px,
-        transparent 24px
+        transparent 20px
       ),
-      /* Couche 3: lueur centrale */
-      radial-gradient(ellipse 60% 60% at 50% 40%,
-        rgba(30,107,255,.06) 0%,
-        transparent 70%
+      /* Lueur centrale prismatique */
+      radial-gradient(ellipse 70% 70% at 50% 45%,
+        rgba(30,107,255,.08) 0%,
+        rgba(255,61,154,.05) 40%,
+        rgba(255,210,63,.04) 70%,
+        transparent 100%
       );
-    border:1px solid rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.14);
     box-shadow:
-      /* Ombre portée */
-      0 40px 120px -20px rgba(0,0,0,.6),
+      /* Ombre portée profonde */
+      0 50px 150px -25px rgba(0,0,0,.7),
       /* Lueur interne haute */
-      inset 0 1px 0 rgba(255,255,255,.15),
-      inset 0 -1px 0 rgba(255,255,255,.03),
-      /* Reflets latéraux */
-      inset 1px 0 0 rgba(255,255,255,.08),
-      inset -1px 0 0 rgba(255,255,255,.02);
-    border-radius:0; /* clip-path gère la forme */
+      inset 0 2px 0 rgba(255,255,255,.18),
+      inset 0 -2px 0 rgba(255,255,255,.04),
+      /* Reflets latéraux colorés */
+      inset 2px 0 0 rgba(30,107,255,.1),
+      inset -2px 0 0 rgba(255,61,154,.08),
+      /* Profondeur 3D */
+      inset 0 0 40px rgba(30,107,255,.05),
+      inset 0 0 40px rgba(255,61,154,.03);
+    border-radius:0;
     overflow:hidden;
   }
 
-  /* Bordure lumineuse animée (contour octogone) */
+  /* Bordure lumineuse animée 3D - spectrale */
   .vitrine::before{
-    content:'';position:absolute;inset:-1px;
+    content:'';position:absolute;inset:-2px;
     -webkit-clip-path:polygon(
-      15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%
+      12% 0, 88% 0, 100% 12%, 100% 88%, 88% 100%, 12% 100%, 0 88%, 0 12%
     );
     clip-path:polygon(
-      15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%
+      12% 0, 88% 0, 100% 12%, 100% 88%, 88% 100%, 12% 100%, 0 88%, 0 12%
     );
     background:linear-gradient(90deg,
       transparent 0%,
-      rgba(30,107,255,.4) 20%,
-      rgba(255,61,154,.4) 50%,
-      rgba(255,210,63,.4) 80%,
+      rgba(30,107,255,.6) 10%,
+      rgba(138,77,255,.7) 25%,
+      rgba(255,61,154,.7) 45%,
+      rgba(255,210,63,.7) 65%,
+      rgba(39,209,127,.6) 85%,
       transparent 100%
     );
-    background-size:300% 100%;
-    animation:brillance 6s linear infinite;
-    opacity:.6;
+    background-size:400% 100%;
+    animation:brillance 8s linear infinite;
+    opacity:.8;
     pointer-events:none;
     z-index:1;
+    filter:blur(0.5px);
   }
 
   @keyframes brillance{
     0%{background-position:0% 50%}
-    100%{background-position:300% 50%}
+    50%{background-position:200% 50%}
+    100%{background-position:400% 50%}
   }
 
-  /* Reflet "Pepper's ghost" en bas */
+  /* Reflet "Pepper's ghost" 3D coloré */
   .vitrine::after{
-    content:'';position:absolute;bottom:0;left:10%;right:10%;height:35%;
+    content:'';position:absolute;bottom:0;left:5%;right:5%;height:40%;
     background:linear-gradient(to top,
-      rgba(255,255,255,.04) 0%,
-      rgba(255,255,255,.01) 40%,
+      rgba(30,107,255,.12) 0%,
+      rgba(138,77,255,.08) 25%,
+      rgba(255,61,154,.06) 50%,
+      rgba(255,210,63,.05) 75%,
       transparent 100%
     );
-    transform:scaleY(-1);
-    opacity:.3;
+    transform:scaleY(-1) perspective(200px) rotateX(15deg);
+    opacity:.4;
     pointer-events:none;
-    -webkit-mask-image:linear-gradient(to top,black 0%,transparent 100%);
-    mask-image:linear-gradient(to top,black 0%,transparent 100%);
+    -webkit-mask-image:linear-gradient(to top,black 0%,rgba(0,0,0,.3) 60%,transparent 100%);
+    mask-image:linear-gradient(to top,black 0%,rgba(0,0,0,.3) 60%,transparent 100%);
+    filter:blur(1px);
   }
 
   /* --- Contenu rotatif (prisme triangulaire 3 faces) --- */
@@ -154,10 +208,44 @@
     pointer-events:auto;
   }
 
-  /* Position 3D des 3 faces : prisme triangulaire (120° par face) */
+  /* Position 3D des 3 faces : prisme triangulaire (120° par face) + facettes colorées */
   .face:nth-child(1){ transform:rotateY(0deg) translateZ(180px); }
   .face:nth-child(2){ transform:rotateY(-120deg) translateZ(180px); }
   .face:nth-child(3){ transform:rotateY(120deg) translateZ(180px); }
+
+  /* Facettes colorées par face - lueurs 3D */
+  .face:nth-child(1)::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(135deg,
+      rgba(30,107,255,.15) 0%,
+      rgba(138,77,255,.08) 50%,
+      transparent 100%
+    );
+    pointer-events:none;opacity:.6;
+  }
+  .face:nth-child(2)::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(135deg,
+      rgba(255,61,154,.15) 0%,
+      rgba(255,210,63,.08) 50%,
+      transparent 100%
+    );
+    pointer-events:none;opacity:.6;
+  }
+  .face:nth-child(3)::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(135deg,
+      rgba(39,209,127,.15) 0%,
+      rgba(138,77,255,.08) 50%,
+      transparent 100%
+    );
+    pointer-events:none;opacity:.6;
+  }
+
+  /* Lueurs de bord par face */
+  .face:nth-child(1){ box-shadow:inset 0 0 30px rgba(30,107,255,.15), inset 0 0 60px rgba(138,77,255,.08); }
+  .face:nth-child(2){ box-shadow:inset 0 0 30px rgba(255,61,154,.15), inset 0 0 60px rgba(255,210,63,.08); }
+  .face:nth-child(3){ box-shadow:inset 0 0 30px rgba(39,209,127,.15), inset 0 0 60px rgba(138,77,255,.08); }
 
   .face .num{font-size:clamp(.7rem,2.5vw,.85rem);letter-spacing:.15em;text-transform:uppercase;color:#ffd23f;margin-bottom:.5em;opacity:.9}
   .face h2{font-size:clamp(1.1rem,3.5vw,1.6rem);margin:0 0 .6em;line-height:1.15;font-weight:700;
@@ -173,6 +261,33 @@
   .face .tag{font-size:clamp(.6rem,1.8vw,.68rem);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#ffd23f;white-space:nowrap}
   .face .app-link{color:#ffd23f;text-decoration:none;transition:opacity .2s}
   .face .app-link:hover{opacity:.7;text-decoration:underline}
+
+  /* Sub-article 3D card */
+  .face .sub-article{
+    background:rgba(10,12,34,.5);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:12px;
+    padding:clamp(10px,2.5vw,16px);
+    margin-top:.8em;
+    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(8px);
+    box-shadow:inset 0 0 20px rgba(0,0,0,.3);
+  }
+  .face .sub-nav{
+    margin-top:.8em;
+    padding-top:.6em;
+    border-top:1px solid rgba(255,255,255,.1);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .face .sub-indicator{
+    font-size:clamp(.6rem,1.5vw,.7rem);
+    color:#ffd23f;
+    opacity:.8;
+    background:rgba(255,210,63,.15);
+    padding:2px 8px;
+    border-radius:999px;
+    border:1px solid rgba(255,210,63,.3);
+  }
 
   /* --- Roadmap carrée (navigation articles) --- */
   .nav{
