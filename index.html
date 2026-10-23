@@ -32,6 +32,12 @@
   .vitrine{
     position:relative;width:100%;height:100%;
     /* Octogone régulier via clip-path */
+    -webkit-clip-path:polygon(
+      15% 0, 85% 0,    /* haut: 2 segments */
+      100% 15%, 100% 85%,  /* droite */
+      85% 100%, 15% 100%,  /* bas */
+      0 85%, 0 15%        /* gauche */
+    );
     clip-path:polygon(
       15% 0, 85% 0,    /* haut: 2 segments */
       100% 15%, 100% 85%,  /* droite */
@@ -77,6 +83,9 @@
   /* Bordure lumineuse animée (contour octogone) */
   .vitrine::before{
     content:'';position:absolute;inset:-1px;
+    -webkit-clip-path:polygon(
+      15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%
+    );
     clip-path:polygon(
       15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%
     );
@@ -110,8 +119,8 @@
     transform:scaleY(-1);
     opacity:.3;
     pointer-events:none;
-    mask-image:linear-gradient(to top,black 0%,transparent 100%);
     -webkit-mask-image:linear-gradient(to top,black 0%,transparent 100%);
+    mask-image:linear-gradient(to top,black 0%,transparent 100%);
   }
 
   /* --- Contenu rotatif (prisme triangulaire 3 faces) --- */
@@ -122,6 +131,7 @@
 
   .prisme{
     position:relative;width:80%;height:70%;
+    -webkit-transform-style:preserve-3d;
     transform-style:preserve-3d;
     transition:transform .7s cubic-bezier(.2,.8,.2,1);
   }
@@ -129,6 +139,7 @@
 
   .face{
     position:absolute;inset:0;
+    -webkit-backface-visibility:hidden;
     backface-visibility:hidden;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     padding:clamp(16px,4vw,28px);
@@ -167,6 +178,7 @@
     background:rgba(10,12,34,.7);
     border:1px solid rgba(255,255,255,.14);
     border-radius:14px;
+    -webkit-backdrop-filter:blur(10px);
     backdrop-filter:blur(10px);
     box-shadow:0 8px 32px rgba(0,0,0,.4);
   }
@@ -212,6 +224,7 @@
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;
     transition:transform .15s,background .15s,border-color .15s,box-shadow .15s;
+    -webkit-backdrop-filter:blur(8px);
     backdrop-filter:blur(8px);
     box-shadow:0 4px 20px rgba(0,0,0,.4);
   }
@@ -259,6 +272,29 @@
 </div>
 
 <script>
+/* ===== Polyfills pour compatibilité ===== */
+/* ResizeObserver polyfill (Safari < 13, iOS < 13) */
+if (typeof ResizeObserver === 'undefined') {
+  window.ResizeObserver = class {
+    constructor(cb) { this.cb = cb; this.obs = []; }
+    observe(el) { this.obs.push(el); }
+    unobserve(el) { this.obs = this.obs.filter(o => o !== el); }
+    disconnect() { this.obs = []; }
+  };
+}
+
+/* Touch events fallback pour Pointer Events (Safari < 13, iOS < 13) */
+const HAS_POINTER = 'PointerEvent' in window;
+const DOWN = HAS_POINTER ? 'pointerdown' : 'touchstart';
+const MOVE = HAS_POINTER ? 'pointermove' : 'touchmove';
+const UP = HAS_POINTER ? 'pointerup' : 'touchend';
+const CANCEL = HAS_POINTER ? 'pointercancel' : 'touchcancel';
+
+function getClientX(e) { return HAS_POINTER ? e.clientX : e.touches[0].clientX; }
+function getClientY(e) { return HAS_POINTER ? e.clientY : e.touches[0].clientY; }
+function setPointerCapture(e) { if (HAS_POINTER && e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId); }
+function releasePointerCapture(e) { if (HAS_POINTER && e.target.releasePointerCapture) e.target.releasePointerCapture(e.pointerId); }
+
 (() => {
   const apps = [
     {
@@ -355,34 +391,34 @@
   }
 
   // Touch drag sur la vitrine
-  gesture.addEventListener('pointerdown', e => {
+  gesture.addEventListener(DOWN, e => {
     isDragging = true;
-    startX = e.clientX;
-    currentAngle = -current * (360 / faces.length);
+    startX = getClientX(e);
+    currentAngle = -current * 120;
     prisme.style.transition = 'none';
-    gesture.setPointerCapture(e.pointerId);
+    setPointerCapture(e);
   });
 
-  gesture.addEventListener('pointermove', e => {
+  gesture.addEventListener(MOVE, e => {
     if (!isDragging) return;
-    const dx = e.clientX - startX;
+    const dx = getClientX(e) - startX;
     const angle = currentAngle + dx * 0.5;
     prisme.style.transform = `rotateY(${angle}deg)`;
   });
 
-  gesture.addEventListener('pointerup', e => {
+  gesture.addEventListener(UP, e => {
     if (!isDragging) return;
     isDragging = false;
-    const dx = e.clientX - startX;
+    const dx = getClientX(e) - startX;
     const threshold = 60;
     if (Math.abs(dx) > threshold) {
       goTo(current + (dx > 0 ? -1 : 1));
     } else {
-      goTo(current); // snap back
+      goTo(current);
     }
-    gesture.releasePointerCapture(e.pointerId);
+    releasePointerCapture(e);
   });
-  gesture.addEventListener('pointercancel', () => { isDragging = false; goTo(current); });
+  gesture.addEventListener(CANCEL, () => { isDragging = false; goTo(current); });
 
   // Particules atmosphériques
   const particulesEl = document.getElementById('particules');
