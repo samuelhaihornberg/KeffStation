@@ -6,417 +6,83 @@
 <meta name="theme-color" content="#070816">
 <title>KeffStation — Lecteur géométrique</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E🔮%3C/text%3E%3C/svg%3E">
+<!-- Critical CSS inline for immediate render -->
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-
   /* --- Fond atmosphérique --- */
   #bg{position:fixed;inset:0;z-index:0;pointer-events:none}
-  #bg::before{
-    content:'';position:absolute;inset:0;
-    background:
-      radial-gradient(ellipse 80% 60% at 20% 10%,rgba(30,107,255,.08) 0%,transparent 60%),
-      radial-gradient(ellipse 60% 80% at 80% 90%,rgba(255,61,154,.06) 0%,transparent 50%),
-      radial-gradient(ellipse 40% 40% at 50% 50%,rgba(255,210,63,.04) 0%,transparent 70%);
-  }
-
+  #bg::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(30,107,255,.08) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 80% 90%,rgba(255,61,154,.06) 0%,transparent 50%),radial-gradient(ellipse 40% 40% at 50% 50%,rgba(255,210,63,.04) 0%,transparent 70%);}
   /* --- Lecteur principal : octogone hybride --- */
-  .reader{
-    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-    width:min(85vw,520px);
-    aspect-ratio:1;
-    z-index:10;display:flex;flex-direction:column;align-items:center;gap:0;
-  }
-
-  /* Octogone hybride : carré + triangles aux coins = 8 côtés */
-  .vitrine{
-    position:relative;width:100%;height:100%;
-    /* Octogone régulier via clip-path - plus précis */
-    -webkit-clip-path:polygon(
-      12% 0, 88% 0,    /* haut */
-      100% 12%, 100% 88%,  /* droite */
-      88% 100%, 12% 100%,  /* bas */
-      0 88%, 0 12%        /* gauche */
-    );
-    clip-path:polygon(
-      12% 0, 88% 0,    /* haut */
-      100% 12%, 100% 88%,  /* droite */
-      88% 100%, 12% 100%,  /* bas */
-      0 88%, 0 12%        /* gauche */
-    );
-    /* Verre multicouche 3D - facettes colorées */
-    background:
-      /* Facettes colorées par côté - effet prisme */
-      /* Haut - bleu */
-      linear-gradient(180deg,
-        rgba(30,107,255,.18) 0%,
-        rgba(30,107,255,.08) 15%,
-        transparent 15%
-      ),
-      /* Bas - or */
-      linear-gradient(0deg,
-        rgba(255,210,63,.18) 0%,
-        rgba(255,210,63,.08) 15%,
-        transparent 15%
-      ),
-      /* Gauche - rose */
-      linear-gradient(90deg,
-        rgba(255,61,154,.16) 0%,
-        rgba(255,61,154,.06) 15%,
-        transparent 15%
-      ),
-      /* Droite - vert */
-      linear-gradient(-90deg,
-        rgba(39,209,127,.16) 0%,
-        rgba(39,209,127,.06) 15%,
-        transparent 15%
-      ),
-      /* Coins - violet/magenta */
-      radial-gradient(ellipse at 0% 0%,
-        rgba(138,77,255,.12) 0%,
-        transparent 25%
-      ),
-      radial-gradient(ellipse at 100% 0%,
-        rgba(138,77,255,.12) 0%,
-        transparent 25%
-      ),
-      radial-gradient(ellipse at 0% 100%,
-        rgba(255,61,154,.12) 0%,
-        transparent 25%
-      ),
-      radial-gradient(ellipse at 100% 100%,
-        rgba(39,209,127,.12) 0%,
-        transparent 25%
-      ),
-      /* Verre de base */
-      linear-gradient(135deg,
-        rgba(255,255,255,.04) 0%,
-        rgba(255,255,255,.015) 35%,
-        rgba(10,12,34,.1) 55%,
-        rgba(5,5,16,.15) 100%
-      ),
-      /* Reflets diagonaux subtils */
-      repeating-linear-gradient(
-        45deg,
-        rgba(255,255,255,.006) 0px,
-        rgba(255,255,255,.006) 1px,
-        transparent 1px,
-        transparent 20px
-      ),
-      /* Lueur centrale prismatique */
-      radial-gradient(ellipse 70% 70% at 50% 45%,
-        rgba(30,107,255,.08) 0%,
-        rgba(255,61,154,.05) 40%,
-        rgba(255,210,63,.04) 70%,
-        transparent 100%
-      );
-    border:1px solid rgba(255,255,255,.14);
-    box-shadow:
-      /* Ombre portée profonde */
-      0 50px 150px -25px rgba(0,0,0,.7),
-      /* Lueur interne haute */
-      inset 0 2px 0 rgba(255,255,255,.18),
-      inset 0 -2px 0 rgba(255,255,255,.04),
-      /* Reflets latéraux colorés */
-      inset 2px 0 0 rgba(30,107,255,.1),
-      inset -2px 0 0 rgba(255,61,154,.08),
-      /* Profondeur 3D */
-      inset 0 0 40px rgba(30,107,255,.05),
-      inset 0 0 40px rgba(255,61,154,.03);
-    border-radius:0;
-    overflow:hidden;
-  }
-
-  /* Bordure lumineuse animée 3D - spectrale */
-  .vitrine::before{
-    content:'';position:absolute;inset:-2px;
-    -webkit-clip-path:polygon(
-      12% 0, 88% 0, 100% 12%, 100% 88%, 88% 100%, 12% 100%, 0 88%, 0 12%
-    );
-    clip-path:polygon(
-      12% 0, 88% 0, 100% 12%, 100% 88%, 88% 100%, 12% 100%, 0 88%, 0 12%
-    );
-    background:linear-gradient(90deg,
-      transparent 0%,
-      rgba(30,107,255,.6) 10%,
-      rgba(138,77,255,.7) 25%,
-      rgba(255,61,154,.7) 45%,
-      rgba(255,210,63,.7) 65%,
-      rgba(39,209,127,.6) 85%,
-      transparent 100%
-    );
-    background-size:400% 100%;
-    animation:brillance 8s linear infinite;
-    opacity:.8;
-    pointer-events:none;
-    z-index:1;
-    filter:blur(0.5px);
-  }
-
-  @keyframes brillance{
-    0%{background-position:0% 50%}
-    50%{background-position:200% 50%}
-    100%{background-position:400% 50%}
-  }
-
-  /* Reflet "Pepper's ghost" 3D coloré */
-  .vitrine::after{
-    content:'';position:absolute;bottom:0;left:5%;right:5%;height:40%;
-    background:linear-gradient(to top,
-      rgba(30,107,255,.12) 0%,
-      rgba(138,77,255,.08) 25%,
-      rgba(255,61,154,.06) 50%,
-      rgba(255,210,63,.05) 75%,
-      transparent 100%
-    );
-    transform:scaleY(-1) perspective(200px) rotateX(15deg);
-    opacity:.4;
-    pointer-events:none;
-    -webkit-mask-image:linear-gradient(to top,black 0%,rgba(0,0,0,.3) 60%,transparent 100%);
-    mask-image:linear-gradient(to top,black 0%,rgba(0,0,0,.3) 60%,transparent 100%);
-    filter:blur(1px);
-  }
-
-  /* --- Contenu rotatif (prisme triangulaire 3 faces) --- */
-  .carousel{
-    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    perspective:1200px;
-  }
-
-  .prisme{
-    position:relative;width:80%;height:70%;
-    -webkit-transform-style:preserve-3d;
-    transform-style:preserve-3d;
-    transition:transform .7s cubic-bezier(.2,.8,.2,1);
-  }
+  .reader{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(85vw,520px);aspect-ratio:1;z-index:10;display:flex;flex-direction:column;align-items:center;gap:0}
+  .vitrine{position:relative;width:100%;height:100%;-webkit-clip-path:polygon(12% 0,88% 0,100% 12%,100% 88%,88% 100%,12% 100%,0 88%,0 12%);clip-path:polygon(12% 0,88% 0,100% 12%,100% 88%,88% 100%,12% 100%,0 88%,0 12%);background:linear-gradient(180deg,rgba(30,107,255,.18) 0%,rgba(30,107,255,.08) 15%,transparent 15%),linear-gradient(0deg,rgba(255,210,63,.18) 0%,rgba(255,210,63,.08) 15%,transparent 15%),linear-gradient(90deg,rgba(255,61,154,.16) 0%,rgba(255,61,154,.06) 15%,transparent 15%),linear-gradient(-90deg,rgba(39,209,127,.16) 0%,rgba(39,209,127,.06) 15%,transparent 15%),radial-gradient(ellipse at 0% 0%,rgba(138,77,255,.12) 0%,transparent 25%),radial-gradient(ellipse at 100% 0%,rgba(138,77,255,.12) 0%,transparent 25%),radial-gradient(ellipse at 0% 100%,rgba(255,61,154,.12) 0%,transparent 25%),radial-gradient(ellipse at 100% 100%,rgba(39,209,127,.12) 0%,transparent 25%),linear-gradient(135deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.015) 35%,rgba(10,12,34,.1) 55%,rgba(5,5,16,.15) 100%),repeating-linear-gradient(45deg,rgba(255,255,255,.006) 0px,rgba(255,255,255,.006) 1px,transparent 1px,transparent 20px),radial-gradient(ellipse 70% 70% at 50% 45%,rgba(30,107,255,.08) 0%,rgba(255,61,154,.05) 40%,rgba(255,210,63,.04) 70%,transparent 100%);border:1px solid rgba(255,255,255,.14);box-shadow:0 50px 150px -25px rgba(0,0,0,.7),inset 0 2px 0 rgba(255,255,255,.18),inset 0 -2px 0 rgba(255,255,255,.04),inset 2px 0 0 rgba(30,107,255,.1),inset -2px 0 0 rgba(255,61,154,.08),inset 0 0 40px rgba(30,107,255,.05),inset 0 0 40px rgba(255,61,154,.03);border-radius:0;overflow:hidden}
+  .vitrine::before{content:'';position:absolute;inset:-2px;-webkit-clip-path:polygon(12% 0,88% 0,100% 12%,100% 88%,88% 100%,12% 100%,0 88%,0 12%);clip-path:polygon(12% 0,88% 0,100% 12%,100% 88%,88% 100%,12% 100%,0 88%,0 12%);background:linear-gradient(90deg,transparent 0%,rgba(30,107,255,.6) 10%,rgba(138,77,255,.7) 25%,rgba(255,61,154,.7) 45%,rgba(255,210,63,.7) 65%,rgba(39,209,127,.6) 85%,transparent 100%);background-size:400% 100%;animation:brillance 8s linear infinite;opacity:.8;pointer-events:none;z-index:1;filter:blur(0.5px)}
+  @keyframes brillance{0%{background-position:0% 50%}50%{background-position:200% 50%}100%{background-position:400% 50%}}
+  .vitrine::after{content:'';position:absolute;bottom:0;left:5%;right:5%;height:40%;background:linear-gradient(to top,rgba(30,107,255,.12) 0%,rgba(138,77,255,.08) 25%,rgba(255,61,154,.06) 50%,rgba(255,210,63,.05) 75%,transparent 100%);transform:scaleY(-1) perspective(200px) rotateX(15deg);opacity:.4;pointer-events:none;-webkit-mask-image:linear-gradient(to top,black 0%,rgba(0,0,0,.3) 60%,transparent 100%);mask-image:linear-gradient(to top,black 0%,rgba(0,0,0,.3) 60%,transparent 100%);filter:blur(1px)}
+  .carousel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;perspective:1200px}
+  .prisme{position:relative;width:80%;height:70%;-webkit-transform-style:preserve-3d;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
   .prisme.glisse{transition:none}
-
-  .face{
-    position:absolute;inset:0;
-    -webkit-backface-visibility:hidden;
-    backface-visibility:hidden;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:clamp(16px,4vw,28px);
-    text-align:center;
-    pointer-events:none;
-    opacity:0.3;
-    transition:opacity .35s;
-  }
-  .face.active{
-    opacity:1;
-    pointer-events:auto;
-  }
-
-  /* Position 3D des 3 faces : prisme triangulaire (120° par face) + facettes colorées */
-  .face:nth-child(1){ transform:rotateY(0deg) translateZ(180px); }
-  .face:nth-child(2){ transform:rotateY(-120deg) translateZ(180px); }
-  .face:nth-child(3){ transform:rotateY(120deg) translateZ(180px); }
-
-  /* Facettes colorées par face - lueurs 3D */
-  .face:nth-child(1)::before{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(135deg,
-      rgba(30,107,255,.15) 0%,
-      rgba(138,77,255,.08) 50%,
-      transparent 100%
-    );
-    pointer-events:none;opacity:.6;
-  }
-  .face:nth-child(2)::before{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(135deg,
-      rgba(255,61,154,.15) 0%,
-      rgba(255,210,63,.08) 50%,
-      transparent 100%
-    );
-    pointer-events:none;opacity:.6;
-  }
-  .face:nth-child(3)::before{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(135deg,
-      rgba(39,209,127,.15) 0%,
-      rgba(138,77,255,.08) 50%,
-      transparent 100%
-    );
-    pointer-events:none;opacity:.6;
-  }
-
-  /* Lueurs de bord par face */
-  .face:nth-child(1){ box-shadow:inset 0 0 30px rgba(30,107,255,.15), inset 0 0 60px rgba(138,77,255,.08); }
-  .face:nth-child(2){ box-shadow:inset 0 0 30px rgba(255,61,154,.15), inset 0 0 60px rgba(255,210,63,.08); }
-  .face:nth-child(3){ box-shadow:inset 0 0 30px rgba(39,209,127,.15), inset 0 0 60px rgba(138,77,255,.08); }
-
+  .face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(16px,4vw,28px);text-align:center;pointer-events:none;opacity:0.3;transition:opacity .35s}
+  .face.active{opacity:1;pointer-events:auto}
+  .face:nth-child(1){transform:rotateY(0deg) translateZ(180px)}
+  .face:nth-child(2){transform:rotateY(-120deg) translateZ(180px)}
+  .face:nth-child(3){transform:rotateY(120deg) translateZ(180px)}
+  .face:nth-child(1)::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(30,107,255,.15) 0%,rgba(138,77,255,.08) 50%,transparent 100%);pointer-events:none;opacity:.6}
+  .face:nth-child(2)::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,61,154,.15) 0%,rgba(255,210,63,.08) 50%,transparent 100%);pointer-events:none;opacity:.6}
+  .face:nth-child(3)::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(39,209,127,.15) 0%,rgba(138,77,255,.08) 50%,transparent 100%);pointer-events:none;opacity:.6}
+  .face:nth-child(1){box-shadow:inset 0 0 30px rgba(30,107,255,.15),inset 0 0 60px rgba(138,77,255,.08)}
+  .face:nth-child(2){box-shadow:inset 0 0 30px rgba(255,61,154,.15),inset 0 0 60px rgba(255,210,63,.08)}
+  .face:nth-child(3){box-shadow:inset 0 0 30px rgba(39,209,127,.15),inset 0 0 60px rgba(138,77,255,.08)}
   .face .num{font-size:clamp(.7rem,2.5vw,.85rem);letter-spacing:.15em;text-transform:uppercase;color:#ffd23f;margin-bottom:.5em;opacity:.9}
-  .face h2{font-size:clamp(1.1rem,3.5vw,1.6rem);margin:0 0 .6em;line-height:1.15;font-weight:700;
-    background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);-webkit-background-clip:text;background-clip:text;color:transparent;
-  }
+  .face h2{font-size:clamp(1.1rem,3.5vw,1.6rem);margin:0 0 .6em;line-height:1.15;font-weight:700;background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);-webkit-background-clip:text;background-clip:text;color:transparent}
   .face p{font-size:clamp(.85rem,2.2vw,.95rem);color:#b9c0e6;line-height:1.5;max-width:90%}
   .face .sub-article h3{font-size:clamp(.9rem,2.5vw,1.1rem);margin:0 0 .4em;color:#ffd23f}
   .face .sub-article p{font-size:clamp(.8rem,2vw,.9rem);color:#b9c0e6;line-height:1.5;max-width:90%}
   .face .sub-article .tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:.8em}
+  .face .sub-nav{margin-top:.8em;opacity:.7}
+  .face .sub-indicator{font-size:clamp(.6rem,1.5vw,.7rem);color:#ffd23f;opacity:.8}
+  .face .tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:1.2em}
+  .face .tag{font-size:clamp(.6rem,1.8vw,.68rem);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#ffd23f;white-space:nowrap}
+  .face .app-link{color:#ffd23f;text-decoration:none;transition:opacity .2s}
+  .face .app-link:hover{opacity:.7;text-decoration:underline}
+
   /* Sub-article 3D card - Face 1 (Kifftech: Bleu/Violet) */
-  .face:nth-child(1) .sub-article{
-    background:rgba(30,107,255,.15);
-    border:1px solid rgba(30,107,255,.3);
-    border-radius:12px;
-    padding:clamp(10px,2.5vw,16px);
-    margin-top:.8em;
-    -webkit-backdrop-filter:blur(8px);
-    backdrop-filter:blur(8px);
-    box-shadow:inset 0 0 20px rgba(30,107,255,.2);
-  }
-  .face:nth-child(1) .sub-nav{
-    margin-top:.8em;
-    padding-top:.6em;
-    border-top:1px solid rgba(30,107,255,.2);
-    display:flex;align-items:center;justify-content:space-between;
-  }
-  .face:nth-child(1) .sub-indicator{
-    font-size:clamp(.6rem,1.5vw,.7rem);
-    color:#fff;
-    opacity:.9;
-    background:rgba(30,107,255,.4);
-    padding:2px 8px;
-    border-radius:999px;
-    border:1px solid rgba(30,107,255,.5);
-  }
+  .face:nth-child(1) .sub-article{background:rgba(30,107,255,.15);border:1px solid rgba(30,107,255,.3);border-radius:12px;padding:clamp(10px,2.5vw,16px);margin-top:.8em;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 0 20px rgba(30,107,255,.2)}
+  .face:nth-child(1) .sub-nav{margin-top:.8em;padding-top:.6em;border-top:1px solid rgba(30,107,255,.2);display:flex;align-items:center;justify-content:space-between}
+  .face:nth-child(1) .sub-indicator{font-size:clamp(.6rem,1.5vw,.7rem);color:#fff;opacity:.9;background:rgba(30,107,255,.4);padding:2px 8px;border-radius:999px;border:1px solid rgba(30,107,255,.5)}
 
   /* Sub-article 3D card - Face 2 (Tricktrocjob: Rose/Or) */
-  .face:nth-child(2) .sub-article{
-    background:rgba(255,61,154,.15);
-    border:1px solid rgba(255,61,154,.3);
-    border-radius:12px;
-    padding:clamp(10px,2.5vw,16px);
-    margin-top:.8em;
-    -webkit-backdrop-filter:blur(8px);
-    backdrop-filter:blur(8px);
-    box-shadow:inset 0 0 20px rgba(255,61,154,.2);
-  }
-  .face:nth-child(2) .sub-nav{
-    margin-top:.8em;
-    padding-top:.6em;
-    border-top:1px solid rgba(255,61,154,.2);
-    display:flex;align-items:center;justify-content:space-between;
-  }
-  .face:nth-child(2) .sub-indicator{
-    font-size:clamp(.6rem,1.5vw,.7rem);
-    color:#fff;
-    opacity:.9;
-    background:rgba(255,61,154,.4);
-    padding:2px 8px;
-    border-radius:999px;
-    border:1px solid rgba(255,61,154,.5);
-  }
+  .face:nth-child(2) .sub-article{background:rgba(255,61,154,.15);border:1px solid rgba(255,61,154,.3);border-radius:12px;padding:clamp(10px,2.5vw,16px);margin-top:.8em;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 0 20px rgba(255,61,154,.2)}
+  .face:nth-child(2) .sub-nav{margin-top:.8em;padding-top:.6em;border-top:1px solid rgba(255,61,154,.2);display:flex;align-items:center;justify-content:space-between}
+  .face:nth-child(2) .sub-indicator{font-size:clamp(.6rem,1.5vw,.7rem);color:#fff;opacity:.9;background:rgba(255,61,154,.4);padding:2px 8px;border-radius:999px;border:1px solid rgba(255,61,154,.5)}
 
   /* Sub-article 3D card - Face 3 (ViArtificial: Vert/Violet) */
-  .face:nth-child(3) .sub-article{
-    background:rgba(39,209,127,.15);
-    border:1px solid rgba(39,209,127,.3);
-    border-radius:12px;
-    padding:clamp(10px,2.5vw,16px);
-    margin-top:.8em;
-    -webkit-backdrop-filter:blur(8px);
-    backdrop-filter:blur(8px);
-    box-shadow:inset 0 0 20px rgba(39,209,127,.2);
-  }
-  .face:nth-child(3) .sub-nav{
-    margin-top:.8em;
-    padding-top:.6em;
-    border-top:1px solid rgba(39,209,127,.2);
-    display:flex;align-items:center;justify-content:space-between;
-  }
-  .face:nth-child(3) .sub-indicator{
-    font-size:clamp(.6rem,1.5vw,.7rem);
-    color:#fff;
-    opacity:.9;
-    background:rgba(39,209,127,.4);
-    padding:2px 8px;
-    border-radius:999px;
-    border:1px solid rgba(39,209,127,.5);
-  }
+  .face:nth-child(3) .sub-article{background:rgba(39,209,127,.15);border:1px solid rgba(39,209,127,.3);border-radius:12px;padding:clamp(10px,2.5vw,16px);margin-top:.8em;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 0 20px rgba(39,209,127,.2)}
+  .face:nth-child(3) .sub-nav{margin-top:.8em;padding-top:.6em;border-top:1px solid rgba(39,209,127,.2);display:flex;align-items:center;justify-content:space-between}
+  .face:nth-child(3) .sub-indicator{font-size:clamp(.6rem,1.5vw,.7rem);color:#fff;opacity:.9;background:rgba(39,209,127,.4);padding:2px 8px;border-radius:999px;border:1px solid rgba(39,209,127,.5)}
 
   /* Tags par face */
-  .face:nth-child(1) .tag{
-    background:rgba(30,107,255,.2);
-    border:1px solid rgba(30,107,255,.4);
-    color:#8ab4ff;
-  }
-  .face:nth-child(2) .tag{
-    background:rgba(255,61,154,.2);
-    border:1px solid rgba(255,61,154,.4);
-    color:#ffb3d1;
-  }
-  .face:nth-child(3) .tag{
-    background:rgba(39,209,127,.2);
-    border:1px solid rgba(39,209,127,.4);
-    color:#a3f5c7;
-  }
+  .face:nth-child(1) .tag{background:rgba(30,107,255,.2);border:1px solid rgba(30,107,255,.4);color:#8ab4ff}
+  .face:nth-child(2) .tag{background:rgba(255,61,154,.2);border:1px solid rgba(255,61,154,.4);color:#ffb3d1}
+  .face:nth-child(3) .tag{background:rgba(39,209,127,.2);border:1px solid rgba(39,209,127,.4);color:#a3f5c7}
 
   .face .app-link{color:#ffd23f;text-decoration:none;transition:opacity .2s}
   .face .app-link:hover{opacity:.7;text-decoration:underline}
 
   /* --- Roadmap carrée (navigation articles) --- */
-  .nav{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:clamp(6px,1.5vw,10px);
-    width:clamp(120px,30vw,200px);
-    margin:clamp(10px,2vh,16px) auto 0;
-    padding:clamp(8px,2vh,12px);
-    background:rgba(10,12,34,.7);
-    border:1px solid rgba(255,255,255,.14);
-    border-radius:14px;
-    -webkit-backdrop-filter:blur(10px);
-    backdrop-filter:blur(10px);
-    box-shadow:0 8px 32px rgba(0,0,0,.4);
-  }
-  .nav button{
-    width:100%;aspect-ratio:1;
-    border-radius:6px;
-    border:1px solid rgba(255,255,255,.18);
-    background:rgba(255,255,255,.05);
-    color:#b9c0e6;
-    font-size:clamp(.6rem,1.5vw,.75rem);
-    font-weight:600;
-    text-transform:uppercase;
-    letter-spacing:.08em;
-    cursor:pointer;
-    transition:transform .15s,background .15s,border-color .15s,color .15s,box-shadow .15s;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .nav button:hover{
-    background:rgba(30,107,255,.2);
-    border-color:#1e6bff;
-    color:#ffd23f;
-  }
-  .nav button.active{
-    background:#ffd23f;
-    border-color:#ffd23f;
-    color:#070816;
-    box-shadow:0 0 16px rgba(255,210,63,.6),inset 0 0 0 1px rgba(255,210,63,.3);
-    transform:scale(1.05);
-  }
+  .nav{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(6px,1.5vw,10px);width:clamp(120px,30vw,200px);margin:clamp(10px,2vh,16px) auto 0;padding:clamp(8px,2vh,12px);background:rgba(10,12,34,.7);border:1px solid rgba(255,255,255,.14);border-radius:14px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+  .nav button{width:100%;aspect-ratio:1;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#b9c0e6;font-size:clamp(.6rem,1.5vw,.75rem);font-weight:600;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;transition:transform .15s,background .15s,border-color .15s,color .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center}
+  .nav button:hover{background:rgba(30,107,255,.2);border-color:#1e6bff;color:#ffd23f}
+  .nav button.active{background:#ffd23f;border-color:#ffd23f;color:#070816;box-shadow:0 0 16px rgba(255,210,63,.6),inset 0 0 0 1px rgba(255,210,63,.3);transform:scale(1.05)}
   .nav button:focus-visible{outline:2px solid #ffd23f;outline-offset:2px}
+  .nav[data-face="0"] button.active{background:#1e6bff;border-color:#1e6bff;color:#fff;box-shadow:0 0 16px rgba(30,107,255,.6),inset 0 0 0 1px rgba(30,107,255,.3)}
+  .nav[data-face="1"] button.active{background:#ff3d9a;border-color:#ff3d9a;color:#fff;box-shadow:0 0 16px rgba(255,61,154,.6),inset 0 0 0 1px rgba(255,61,154,.3)}
+  .nav[data-face="2"] button.active{background:#27d17f;border-color:#27d17f;color:#070816;box-shadow:0 0 16px rgba(39,209,127,.6),inset 0 0 0 1px rgba(39,209,127,.3)}
 
   /* --- Flèches de navigation (4 directions) --- */
   .arrows{position:absolute;inset:0;z-index:4;pointer-events:none}
-  .arrows button{
-    pointer-events:auto;
-    position:absolute;
-    width:clamp(40px,6vw,56px);height:clamp(40px,6vw,56px);
-    border-radius:50%;
-    border:1px solid rgba(255,255,255,.2);
-    background:rgba(10,12,34,.7);
-    color:#ffd23f;
-    font-size:clamp(18px,3vw,24px);
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;
-    transition:transform .15s,background .15s,border-color .15s,box-shadow .15s;
-    -webkit-backdrop-filter:blur(8px);
-    backdrop-filter:blur(8px);
-    box-shadow:0 4px 20px rgba(0,0,0,.4);
-  }
+  .arrows button{pointer-events:auto;position:absolute;width:clamp(40px,6vw,56px);height:clamp(40px,6vw,56px);border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(10,12,34,.7);color:#ffd23f;font-size:clamp(18px,3vw,24px);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s,background .15s,border-color .15s,box-shadow .15s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 20px rgba(0,0,0,.4)}
   .arrows button:hover{background:rgba(30,107,255,.3);border-color:#1e6bff;transform:scale(1.1);box-shadow:0 0 20px rgba(30,107,255,.4)}
   .arrows button:active{transform:scale(.95)}
   .arrows button:focus-visible{outline:2px solid #ffd23f;outline-offset:2px}
@@ -437,23 +103,24 @@
   .nav[data-face="1"] button.active{background:#ff3d9a;border-color:#ff3d9a;color:#fff;box-shadow:0 0 16px rgba(255,61,154,.6),inset 0 0 0 1px rgba(255,61,154,.3)}
   .nav[data-face="2"] button.active{background:#27d17f;border-color:#27d17f;color:#070816;box-shadow:0 0 16px rgba(39,209,127,.6),inset 0 0 0 1px rgba(39,209,127,.3)}
 
+  .nav button:focus-visible{outline:2px solid #ffd23f;outline-offset:2px}
+
   /* --- Gestes tactiles zone --- */
   .gesture-zone{position:absolute;inset:0;z-index:3;touch-action:none}
 
   /* --- Particules atmosphériques --- */
   .particules{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
   .particule{position:absolute;width:3px;height:3px;border-radius:50%;opacity:0;animation:float 12s ease-in-out infinite}
-  @keyframes float{
-    0%{transform:translate(var(--sx),var(--sy)) scale(0);opacity:0}
-    10%{opacity:var(--op)}
-    90%{opacity:var(--op)}
-    100%{transform:translate(var(--ex),var(--ey)) scale(1);opacity:0}
-  }
+  @keyframes float{0%{transform:translate(var(--sx),var(--sy)) scale(0);opacity:0}10%{opacity:var(--op)}90%{opacity:var(--op)}100%{transform:translate(var(--ex),var(--ey)) scale(1);opacity:0}}
+  /* Loading state */
+  .loading{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:#070816;color:#ffd23f;font:16px/1.55 system-ui}
+  .loading.hidden{display:none}
 </style>
 </head>
 <body>
 <div id="bg"></div>
 <div class="particules" id="particules"></div>
+<div class="loading" id="loading">⏳ Chargement KeffStation…</div>
 
 <div class="reader" role="region" aria-roledescription="lecteur d'applications" aria-label="Kifftech, Tricktrocjob, ViArtificial labs">
   <div class="vitrine">
@@ -461,7 +128,7 @@
       <div class="prisme" id="prisme"></div>
     </div>
     <div class="gesture-zone" id="gesture"></div>
-    <div class="arrows" id="arrows" aria-label="Navigation directionnelle">
+    <div class="arrows" id="arrows" aria-label="Navigation directionnelle" data-face="0">
       <button class="arrow-up" type="button" aria-label="Article secondaire précédent" title="Secondaire précédent">▲</button>
       <button class="arrow-down" type="button" aria-label="Article secondaire suivant" title="Secondaire suivant">▼</button>
       <button class="arrow-left" type="button" aria-label="PWA précédente" title="PWA précédente">◀</button>
@@ -469,12 +136,13 @@
     </div>
   </div>
   <!-- Roadmap OUTSIDE vitrine to avoid clip-path clipping -->
-  <nav class="nav" id="nav" aria-label="Navigation applications"></nav>
+  <nav class="nav" id="nav" aria-label="Navigation applications" data-face="0"></nav>
 </div>
 
+<!-- Non-critical JS loaded as module with async -->
+<script type="module" src="app.js"></script>
 <script>
 /* ===== Polyfills pour compatibilité ===== */
-/* ResizeObserver polyfill (Safari < 13, iOS < 13) */
 if (typeof ResizeObserver === 'undefined') {
   window.ResizeObserver = class {
     constructor(cb) { this.cb = cb; this.obs = []; }
@@ -484,257 +152,25 @@ if (typeof ResizeObserver === 'undefined') {
   };
 }
 
-/* Touch events fallback pour Pointer Events (Safari < 13, iOS < 13) */
+if (typeof crypto.randomUUID === 'undefined') {
+  crypto.randomUUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
 const HAS_POINTER = 'PointerEvent' in window;
 const DOWN = HAS_POINTER ? 'pointerdown' : 'touchstart';
 const MOVE = HAS_POINTER ? 'pointermove' : 'touchmove';
 const UP = HAS_POINTER ? 'pointerup' : 'touchend';
 const CANCEL = HAS_POINTER ? 'pointercancel' : 'touchcancel';
 
-function getClientX(e) { return HAS_POINTER ? e.clientX : e.touches[0].clientX; }
-function getClientY(e) { return HAS_POINTER ? e.clientY : e.touches[0].clientY; }
-function setPointerCapture(e) { if (HAS_POINTER && e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId); }
-function releasePointerCapture(e) { if (HAS_POINTER && e.target.releasePointerCapture) e.target.releasePointerCapture(e.pointerId); }
+function getClientX(e) { return HAS_POINTER ? e.clientX : e.touches?.[0]?.clientX ?? 0; }
+function getClientY(e) { return HAS_POINTER ? e.clientY : e.touches?.[0]?.clientY ?? 0; }
+function setPointerCapture(e) { if (HAS_POINTER && e.target?.setPointerCapture) e.target.setPointerCapture(e.pointerId); }
+function releasePointerCapture(e) { if (HAS_POINTER && e.target?.releasePointerCapture) e.target.releasePointerCapture(e.pointerId); }
 
-(() => {
-  const apps = [
-    {
-      num: "Kifftech",
-      title: "Smart devices & gadgets",
-      desc: "Boutique PWA : Samsung, Xiaomi, prix sous officiels, livraison mondiale. Backend Node unique, zéro dépendance, données JSON.",
-      tags: ["PWA", "Node", "E-commerce", "Smart tech"],
-      appUrl: "https://samuelhaihornberg.github.io/Kiff-Tech/",
-      subArticles: [
-        { title: "Catalogue Samsung", desc: "Galaxy Buds, SmartTag, chargeurs rapides — fiches complètes.", tags: ["Samsung", "Audio", "Accessoires"] },
-        { title: "Catalogue Xiaomi", desc: "Redmi Buds, Smart Band, caméras Wi-Fi — specs et prix.", tags: ["Xiaomi", "Fitness", "Maison"] },
-        { title: "Guide d'achat", desc: "Comment choisir vos écouteurs, bracelets, gadgets selon votre usage.", tags: ["Guide", "Conseil", "Achat"] },
-        { title: "Offres VIP", desc: "Accès anticipé, remises exclusives, abonnements mensuels.", tags: ["VIP", "Promo", "Abonnement"] },
-        { title: "Galaxy Buds 3 Pro : ANC adaptatif", desc: "Nouveaux écouteurs Samsung avec réduction de bruit IA, 30h autonomie, boîtier sans fil. Prix compétitif vs AirPods Pro 2.", tags: ["Samsung", "Audio", "ANC", "Nouveauté"] },
-        { title: "Xiaomi Smart Band 9 Pro : AMOLED 1.74\"", desc: "Écran AMOLED 1.74\", GPS intégré, 21 jours autonomie, 150+ modes sport. Meilleur rapport qualité/prix fitness 2024.", tags: ["Xiaomi", "Fitness", "AMOLED", "GPS"] },
-        { title: "Samsung Galaxy SmartTag 3 : UWB + Thread", desc: "Tracker nouvelle génération avec Ultra Wideband précis, compatibilité Matter/Thread, 1 an autonomie. Trouvez tout instantanément.", tags: ["Samsung", "Tracker", "UWB", "Matter"] },
-        { title: "Chargeur 65W GaN 3 ports : ultra-compact", desc: "Charge rapide 65W (2x USB-C + 1x USB-A), nitrure de gallium, taille carte crédit. Idéal voyage multi-appareils.", tags: ["Chargeur", "GaN", "Voyage", "Multi-port"] },
-        { title: "Xiaomi Redmi Buds 6 Pro : LDAC + ANC 55dB", desc: "Écouteurs Hi-Res LDAC, ANC hybride 55dB, 38h autonomie, 3 micros IA. Qualité audiophile sous 100€.", tags: ["Xiaomi", "Audio", "LDAC", "ANC"] },
-        { title: "Samsung Galaxy Watch 7 : BioActive + IA", desc: "Capteur BioActive 2.0, analyse sommeil IA, ECG/TA, 40h autonomie, Wear OS 5. Santé complète au poignet.", tags: ["Samsung", "Montre", "Santé", "IA"] },
-        { title: "Robot aspirateur Xiaomi X20 Pro : LDS + IA", desc: "Navigation LDS 360°, reconnaissance objets IA, serpillière auto-lift, station vidage 60 jours. Maison propre sans effort.", tags: ["Xiaomi", "Robot", "IA", "Maison"] },
-        { title: "Chargeur sans fil 50W MagSafe compatible", desc: "Charge magnétique 50W (iPhone 15+), ventilation active, indicateur LED, 30 min pour 50%. Bureau ou voiture.", tags: ["Chargeur", "MagSafe", "Sans-fil", "Rapide"] }
-      ]
-    },
-    {
-      num: "Tricktrocjob",
-      title: "Plateforme Trix / Trox / Services",
-      desc: "Échange d'astuces pas à pas, troc d'objets, services entre particuliers. Frais dégressifs 17%→5%, double porte-monnaie (solde + crédits).",
-      tags: ["Marketplace", "Troc", "Crédits", "Communauté"],
-      appUrl: "https://samuelhaihornberg.github.io/keffjobtrictrocc/",
-      subArticles: [
-        { title: "Comment créer un Trix", desc: "Tutoriel pas à pas pour publier votre astuce ou tutoriel.", tags: ["Tutoriel", "Publication", "Trix"] },
-        { title: "Échanger un Trox", desc: "Mettre en ligne un objet, gérer les propositions, finaliser l'échange.", tags: ["Trox", "Échange", "Objet"] },
-        { title: "Proposer un Service", desc: "Créer une offre de service, fixer le prix, gérer les clients.", tags: ["Service", "Freelance", "Compétence"] },
-        { title: "Gagner des crédits", desc: "Système de récompenses, parrainage, bonus de validation.", tags: ["Crédits", "Récompense", "Économie"] },
-        { title: "Créer un Trix viral : structure gagnante", desc: "Titre accrocheur, étapes numérotées, photos qualité, prix en crédits. Exemples de Trix à 10k+ vues.", tags: ["Trix", "Viral", "Rédaction", "Visibilité"] },
-        { title: "Négocier un Trox : techniques gagnantes", desc: "Évaluer la valeur, proposer contre-offre, photos sous angles, description honnête. Évitez les arnaques.", tags: ["Trox", "Négociation", "Sécurité", "Évaluation"] },
-        { title: "Service récurrent : revenus passifs", desc: "Abonnement mensuel, facturation auto, fidélisation clients. Ex: maintenance PC, cours hebdo, livraison courses.", tags: ["Service", "Récurrent", "Revenus", "Automatisation"] },
-        { title: "Parrainage : 500 crédits par filleul", desc: "Partagez votre lien, filleul valide son 1er échange = 500 crédits chacun. Illimité, cumulable avec promos.", tags: ["Parrainage", "Crédits", "Récompense", "Viral"] },
-        { title: "Trix vidéo : format court engageant", desc: "60-90 sec, hook 3 sec, démo claire, CTA crédits. Format vertical, sous-titres, musique libre. +300% engagement.", tags: ["Trix", "Vidéo", "Format", "Engagement"] },
-        { title: "Objets rares : authentification pro", desc: "Service expertise gratuite pour objets >500€. Certificat authenticité, estimation marché, assurance transport incluse.", tags: ["Expertise", "Authentique", "Luxe", "Sécurité"] },
-        { title: "Communauté locale : rencontres mensuelles", desc: "Événements ville par ville, échanges en main propre, ateliers réparation. Zéro frais port, confiance directe.", tags: ["Communauté", "Local", "Rencontre", "Échange"] },
-        { title: "Dashboard vendeur : stats temps réel", desc: "Vues, favoris, conversions, revenus crédits/€. Alertes prix, relance paniers, export CSV. Pilotage pro.", tags: ["Dashboard", "Stats", "Vente", "Pro"] }
-      ]
-    },
-    {
-      num: "ViArtificial labs",
-      title: "cos, SuperBots, BLM, BLSM",
-      desc: "Syntaxe cos (connexions), famille SuperBots (ViA, BTB+Golem, Geeko, Guideoplan), blocs logiques BLM/BLSM, motor.s injection.",
-      tags: ["cos", "SuperBots", "BLM", "motor.s"],
-      appUrl: "https://samuelhaihornberg.github.io/ViArtificial/",
-      subArticles: [
-        { title: "Syntaxe cos", desc: "Référence complète : connexions, sandwich, adresses, CSM.", tags: ["cos", "Syntax", "Référence"] },
-        { title: "SuperBots", desc: "ViA, BTB+Golem, Geeko, Guideoplan — personnalités et rôles.", tags: ["SuperBots", "IA", "Personnalité"] },
-        { title: "BLM & BLSM", desc: "Blocs de logique matricielle et bloc de création médias.", tags: ["BLM", "BLSM", "Logique", "Création"] },
-        { title: "motor.s", desc: "Bibliothèque emojis, COS, EMOJI, MS, FENETRE, RECYCLOR, BOOST, SUPERSTREAM.", tags: ["motor.s", "Moteurs", "Injection"] },
-        { title: "Guide cos : connexions & adresses", desc: "Syntaxe A1 ➡️ B2, adresses alphanum, sandwich miroir. Exemples prêts à l'emploi pour devs.", tags: ["cos", "Tutoriel", "Connexions", "Dev"] },
-        { title: "ViA : configurer votre miroir IA", desc: "Personnalité, ton, limites, mémoire. Exemples prompts système pour assistant personnel, coach, analyste.", tags: ["ViA", "Config", "Prompt", "IA"] },
-        { title: "BTB + Golem : sécurité & moteur", desc: "BTB valide, Golem exécute. Pipeline CI/CD, tests auto, rollback auto. Architecture zero-trust.", tags: ["BTB", "Golem", "Sécurité", "CI/CD"] },
-        { title: "Geeko Geekette : dev companion", desc: "Revues code, debug, doc auto, tests unitaires. Intégration VS Code, GitHub, GitLab. Pair programming IA.", tags: ["Geeko", "Dev", "Code", "IDE"] },
-        { title: "Guideoplan : plan perso → pro", desc: "Matrice 15/28, budget, timeline, risques. Export PDF/Notion. Sync bidirectionnel vie pro/perso.", tags: ["Guideoplan", "Planification", "Budget", "Sync"] },
-        { title: "BLM : blocs logiques réutilisables", desc: "Créer, versionner, composer blocs. Marketplace communautaire, tests auto, rollback 1-clic. Gouvernance code.", tags: ["BLM", "Blocs", "Réutilisable", "Gouvernance"] },
-        { title: "BLSM : générer images/sons/3D", desc: "Prompts structurés, seeds reproductibles, variations contrôlées. Export assets jeu/web/app. Pipeline créatif.", tags: ["BLSM", "Génératif", "Assets", "Pipeline"] },
-        { title: "motor.s injection : noyau partiel", desc: "MOTOR.noyau(['COS','FENETRE']) — 50KB gzippé. CDN global, cache éternel, versioning sémantique. Zéro config.", tags: ["motor.s", "Injection", "CDN", "Performance"] }
-      ]
-    }
-  ];
-
-  const prisme = document.getElementById('prisme');
-  const nav = document.getElementById('nav');
-  const gesture = document.getElementById('gesture');
-
-  let current = 0;
-  let subCurrent = 0;
-  let startX = 0, currentAngle = 0;
-  let isDragging = false;
-
-  // Construire les faces du prisme
-  apps.forEach((app, i) => {
-    const face = document.createElement('div');
-    face.className = 'face' + (i === 0 ? ' active' : '');
-    face.dataset.index = i;
-    const sub = app.subArticles[0];
-    face.innerHTML = `
-      <div class="num">${app.num}</div>
-      <h2><a href="${app.appUrl}" target="_blank" rel="noopener noreferrer" class="app-link">${app.title}</a></h2>
-      <p>${app.desc}</p>
-      <div class="sub-article">
-        <h3>${sub.title}</h3>
-        <p>${sub.desc}</p>
-        <div class="tags">${sub.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-      </div>
-      <div class="sub-nav">
-        <span class="sub-indicator">${1}/${app.subArticles.length}</span>
-      </div>
-      <div class="tags">${app.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-    `;
-    prisme.appendChild(face);
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.textContent = app.num;
-    btn.setAttribute('aria-label', `${app.num}`);
-    if (i === 0) btn.classList.add('active');
-    btn.addEventListener('click', () => goTo(i));
-    nav.appendChild(btn);
-  });
-
-  const faces = prisme.children;
-  const dots = nav.children;
-
-  function goTo(i, animate = true) {
-    if (i < 0) i = faces.length - 1;
-    if (i >= faces.length) i = 0;
-    if (i === current) return;
-
-    current = i;
-    subCurrent = 0;
-
-    const angle = -current * 120;
-    prisme.style.transition = animate ? 'transform .7s cubic-bezier(.2,.8,.2,1)' : 'none';
-    prisme.style.transform = `rotateY(${angle}deg)`;
-
-    Array.from(faces).forEach((f, idx) => {
-      f.classList.toggle('active', idx === current);
-    });
-    Array.from(dots).forEach((d, idx) => d.classList.toggle('active', idx === current));
-    
-    // Update arrows and nav face class
-    const arrows = document.getElementById('arrows');
-    const navEl = document.getElementById('nav');
-    if (arrows) arrows.dataset.face = current;
-    if (navEl) navEl.dataset.face = current;
-    
-    renderSubArticle();
-  }
-
-  function renderSubArticle() {
-    const app = apps[current];
-    const sub = app.subArticles[subCurrent];
-    const face = faces[current];
-    const subEl = face.querySelector('.sub-article');
-    const indicator = face.querySelector('.sub-indicator');
-    if (subEl && sub) {
-      subEl.innerHTML = `
-        <h3>${sub.title}</h3>
-        <p>${sub.desc}</p>
-        <div class="tags">${sub.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-      `;
-    }
-    if (indicator) {
-      indicator.textContent = `${subCurrent + 1}/${app.subArticles.length}`;
-    }
-    Array.from(dots).forEach((d, idx) => d.classList.toggle('active', idx === current));
-  }
-
-  function goSub(delta) {
-    const app = apps[current];
-    const max = app.subArticles.length - 1;
-    subCurrent = Math.max(0, Math.min(max, subCurrent + delta));
-    renderSubArticle();
-  }
-
-  // Navigation points
-  Array.from(dots).forEach((d, i) => d.addEventListener('click', () => goTo(i)));
-
-  // Clavier
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft') goTo(current - 1);
-    else if (e.key === 'ArrowRight') goTo(current + 1);
-    else if (e.key === 'ArrowUp') goSub(-1);
-    else if (e.key === 'ArrowDown') goSub(1);
-  });
-
-  // Flèches UI (4 directions)
-  const arrowsEl = document.getElementById('arrows');
-  if (arrowsEl) {
-    arrowsEl.querySelector('.arrow-left').addEventListener('click', () => goTo(current - 1));
-    arrowsEl.querySelector('.arrow-right').addEventListener('click', () => goTo(current + 1));
-    arrowsEl.querySelector('.arrow-up').addEventListener('click', () => goSub(-1));
-    arrowsEl.querySelector('.arrow-down').addEventListener('click', () => goSub(1));
-  }
-
-  // Touch drag sur la vitrine
-  gesture.addEventListener(DOWN, e => {
-    isDragging = true;
-    startX = getClientX(e);
-    currentAngle = -current * 120;
-    prisme.style.transition = 'none';
-    setPointerCapture(e);
-  });
-
-  gesture.addEventListener(MOVE, e => {
-    if (!isDragging) return;
-    const dx = getClientX(e) - startX;
-    const angle = currentAngle + dx * 0.5;
-    prisme.style.transform = `rotateY(${angle}deg)`;
-  });
-
-  gesture.addEventListener(UP, e => {
-    if (!isDragging) return;
-    isDragging = false;
-    const dx = getClientX(e) - startX;
-    const threshold = 60;
-    if (Math.abs(dx) > threshold) {
-      goTo(current + (dx > 0 ? -1 : 1));
-    } else {
-      goTo(current);
-    }
-    releasePointerCapture(e);
-  });
-  gesture.addEventListener(CANCEL, () => { isDragging = false; goTo(current); });
-
-  // Particules atmosphériques
-  const particulesEl = document.getElementById('particules');
-  const colors = ['#1e6bff','#ff3d9a','#ffd23f','#27d17f','#8a4dff'];
-  for (let i = 0; i < 18; i++) {
-    const p = document.createElement('div');
-    p.className = 'particule';
-    const sx = (Math.random() - .5) * window.innerWidth * .8;
-    const sy = (Math.random() - .5) * window.innerHeight * .8;
-    const ex = (Math.random() - .5) * window.innerWidth * .8;
-    const ey = (Math.random() - .5) * window.innerHeight * .8;
-    const delay = Math.random() * 12;
-    const dur = 10 + Math.random() * 8;
-    const op = .15 + Math.random() * .25;
-    const clr = colors[Math.floor(Math.random() * colors.length)];
-    p.style.cssText = `
-      left:50%;top:50%;
-      --sx:${sx}px;--sy:${sy}px;--ex:${ex}px;--ey:${ey}px;
-      --op:${op};
-      background:${clr};
-      animation-duration:${dur}s;animation-delay:${delay}s;
-    `;
-    particulesEl.appendChild(p);
-  }
-
-  // Resize handler
-  new ResizeObserver(() => goTo(current, false)).observe(document.querySelector('.vitrine'));
-})();
+document.addEventListener('DOMContentLoaded', () => import('./app.js').catch(e => console.error('Failed to load app.js:', e)));
 </script>
 </body>
 </html>
