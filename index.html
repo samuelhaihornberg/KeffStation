@@ -184,8 +184,20 @@ function sanitizeHTML(str){const div=document.createElement('div');div.textConte
       }).catch(e => { console.error('App init failed:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur: ' + (e?.message || e?.toString() || 'Erreur inconnue'); loading.style.color = '#ff3d9a'; } });
     } catch (e) { console.error('Constructor/InitApp sync error:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur sync: ' + (e?.message || e?.toString() || 'Erreur inconnue'); loading.style.color = '#ff3d9a'; } }
   }
-  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', () => { try { runInit(); } catch (e) { console.error('runInit sync error:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur: ' + e.message; loading.style.color = '#ff3d9a'; } }); } else { runInit(); }
+  // Ensure DOM is fully ready before initialization
+  function runWhenReady() {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => { try { runInit(); } catch (e) { console.error('runInit sync error:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur: ' + e.message; loading.style.color = '#ff3d9a'; } });
+    } else if (document.readyState === 'interactive' || document.readyState === 'complete') {
+      runInit();
+    } else {
+      document.addEventListener('DOMContentLoaded', () => { try { runInit(); } catch (e) { console.error('runInit sync error:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur: ' + e.message; loading.style.color = '#ff3d9a'; } });
+    }
+  }
+  runWhenReady();
 })();
 </script>
+</body>
+</html>
 </body>
 </html>
