@@ -412,7 +412,7 @@ function initApp() {
     console.error('App init failed:', e);
     const loading = document.getElementById('loading');
     if (loading) {
-      loading.textContent = '❌ Erreur: ' + e.message;
+      loading.textContent = '❌ Erreur: ' + (e?.message || e?.toString() || 'Erreur inconnue');
       loading.style.color = '#ff3d9a';
     }
   });
