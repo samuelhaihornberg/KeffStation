@@ -170,7 +170,7 @@ function getClientY(e) { return HAS_POINTER ? e.clientY : e.touches?.[0]?.client
 function setPointerCapture(e) { if (HAS_POINTER && e.target?.setPointerCapture) e.target.setPointerCapture(e.pointerId); }
 function releasePointerCapture(e) { if (HAS_POINTER && e.target?.releasePointerCapture) e.target.releasePointerCapture(e.pointerId); }
 
-document.addEventListener('DOMContentLoaded', () => import('./app.js').catch(e => console.error('Failed to load app.js:', e)));
+document.addEventListener('DOMContentLoaded', () => import('./app.js').catch(e => { console.error('Failed to load app.js:', e); document.getElementById('loading').textContent = '❌ Erreur: ' + e.message; document.getElementById('loading').style.color = '#ff3d9a'; }));
 </script>
 </body>
 </html>
