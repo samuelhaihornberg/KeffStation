@@ -115,13 +115,27 @@ class KeffStation {
     this.loading = document.getElementById('loading');
 
     // Debug: check if elements are found
-    console.log('KeffStation constructor - Elements found:', {
+    const elementsFound = {
       prisme: !!this.prisme,
       nav: !!this.nav,
       gesture: !!this.gesture,
       arrows: !!this.arrows,
       loading: !!this.loading
-    });
+    };
+    console.log('KeffStation constructor - Elements found:', elementsFound);
+    
+    // Check for missing elements
+    const missing = Object.entries(elementsFound).filter(([_, found]) => !found).map(([name]) => name);
+    if (missing.length > 0) {
+      const msg = 'Missing DOM elements: ' + missing.join(', ');
+      console.error('KeffStation constructor - Missing elements:', missing);
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.textContent = '❌ Erreur: ' + msg;
+        loading.style.color = '#ff3d9a';
+      }
+      throw new Error(msg);
+    }
 
     this.faces = null;
     this.dots = null;
