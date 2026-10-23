@@ -160,13 +160,19 @@
   .face:nth-child(3){ transform:rotateY(120deg) translateZ(180px); }
 
   .face .num{font-size:clamp(.7rem,2.5vw,.85rem);letter-spacing:.15em;text-transform:uppercase;color:#ffd23f;margin-bottom:.5em;opacity:.9}
-  .face h2{
-    font-size:clamp(1.1rem,3.5vw,1.6rem);margin:0 0 .6em;line-height:1.15;font-weight:700;
+  .face h2{font-size:clamp(1.1rem,3.5vw,1.6rem);margin:0 0 .6em;line-height:1.15;font-weight:700;
     background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);-webkit-background-clip:text;background-clip:text;color:transparent;
   }
   .face p{font-size:clamp(.85rem,2.2vw,.95rem);color:#b9c0e6;line-height:1.5;max-width:90%}
+  .face .sub-article h3{font-size:clamp(.9rem,2.5vw,1.1rem);margin:0 0 .4em;color:#ffd23f}
+  .face .sub-article p{font-size:clamp(.8rem,2vw,.9rem);color:#b9c0e6;line-height:1.5;max-width:90%}
+  .face .sub-article .tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:.8em}
+  .face .sub-nav{margin-top:.8em;opacity:.7}
+  .face .sub-indicator{font-size:clamp(.6rem,1.5vw,.7rem);color:#ffd23f;opacity:.8}
   .face .tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:1.2em}
   .face .tag{font-size:clamp(.6rem,1.8vw,.68rem);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#ffd23f;white-space:nowrap}
+  .face .app-link{color:#ffd23f;text-decoration:none;transition:opacity .2s}
+  .face .app-link:hover{opacity:.7;text-decoration:underline}
 
   /* --- Roadmap carrée (navigation articles) --- */
   .nav{
@@ -262,10 +268,10 @@
     </div>
     <div class="gesture-zone" id="gesture"></div>
     <div class="arrows" id="arrows" aria-label="Navigation directionnelle">
-      <button class="arrow-up" type="button" aria-label="Article précédent" title="Précédent">▲</button>
-      <button class="arrow-down" type="button" aria-label="Article suivant" title="Suivant">▼</button>
-      <button class="arrow-left" type="button" aria-label="Article précédent" title="Précédent">◀</button>
-      <button class="arrow-right" type="button" aria-label="Article suivant" title="Suivant">▶</button>
+      <button class="arrow-up" type="button" aria-label="Article secondaire précédent" title="Secondaire précédent">▲</button>
+      <button class="arrow-down" type="button" aria-label="Article secondaire suivant" title="Secondaire suivant">▼</button>
+      <button class="arrow-left" type="button" aria-label="PWA précédente" title="PWA précédente">◀</button>
+      <button class="arrow-right" type="button" aria-label="PWA suivante" title="PWA suivante">▶</button>
     </div>
   </div>
   <!-- Roadmap OUTSIDE vitrine to avoid clip-path clipping -->
@@ -302,19 +308,40 @@ function releasePointerCapture(e) { if (HAS_POINTER && e.target.releasePointerCa
       num: "Kifftech",
       title: "Smart devices & gadgets",
       desc: "Boutique PWA : Samsung, Xiaomi, prix sous officiels, livraison mondiale. Backend Node unique, zéro dépendance, données JSON.",
-      tags: ["PWA", "Node", "E-commerce", "Smart tech"]
+      tags: ["PWA", "Node", "E-commerce", "Smart tech"],
+      appUrl: "https://samuelhaihornberg.github.io/Kiff-Tech/",
+      subArticles: [
+        { title: "Catalogue Samsung", desc: "Galaxy Buds, SmartTag, chargeurs rapides — fiches complètes.", tags: ["Samsung", "Audio", "Accessoires"] },
+        { title: "Catalogue Xiaomi", desc: "Redmi Buds, Smart Band, caméras Wi-Fi — specs et prix.", tags: ["Xiaomi", "Fitness", "Maison"] },
+        { title: "Guide d'achat", desc: "Comment choisir vos écouteurs, bracelets, gadgets selon votre usage.", tags: ["Guide", "Conseil", "Achat"] },
+        { title: "Offres VIP", desc: "Accès anticipé, remises exclusives, abonnements mensuels.", tags: ["VIP", "Promo", "Abonnement"] }
+      ]
     },
     {
       num: "Tricktrocjob",
       title: "Plateforme Trix / Trox / Services",
       desc: "Échange d'astuces pas à pas, troc d'objets, services entre particuliers. Frais dégressifs 17%→5%, double porte-monnaie (solde + crédits).",
-      tags: ["Marketplace", "Troc", "Crédits", "Communauté"]
+      tags: ["Marketplace", "Troc", "Crédits", "Communauté"],
+      appUrl: "https://samuelhaihornberg.github.io/keffjobtrictrocc/",
+      subArticles: [
+        { title: "Comment créer un Trix", desc: "Tutoriel pas à pas pour publier votre astuce ou tutoriel.", tags: ["Tutoriel", "Publication", "Trix"] },
+        { title: "Échanger un Trox", desc: "Mettre en ligne un objet, gérer les propositions, finaliser l'échange.", tags: ["Trox", "Échange", "Objet"] },
+        { title: "Proposer un Service", desc: "Créer une offre de service, fixer le prix, gérer les clients.", tags: ["Service", "Freelance", "Compétence"] },
+        { title: "Gagner des crédits", desc: "Système de récompenses, parrainage, bonus de validation.", tags: ["Crédits", "Récompense", "Économie"] }
+      ]
     },
     {
       num: "ViArtificial labs",
       title: "cos, SuperBots, BLM, BLSM",
       desc: "Syntaxe cos (connexions), famille SuperBots (ViA, BTB+Golem, Geeko, Guideoplan), blocs logiques BLM/BLSM, motor.s injection.",
-      tags: ["cos", "SuperBots", "BLM", "motor.s"]
+      tags: ["cos", "SuperBots", "BLM", "motor.s"],
+      appUrl: "https://samuelhaihornberg.github.io/ViArtificial/",
+      subArticles: [
+        { title: "Syntaxe cos", desc: "Référence complète : connexions, sandwich, adresses, CSM.", tags: ["cos", "Syntax", "Référence"] },
+        { title: "SuperBots", desc: "ViA, BTB+Golem, Geeko, Guideoplan — personnalités et rôles.", tags: ["SuperBots", "IA", "Personnalité"] },
+        { title: "BLM & BLSM", desc: "Blocs de logique matricielle et bloc de création médias.", tags: ["BLM", "BLSM", "Logique", "Création"] },
+        { title: "motor.s", desc: "Bibliothèque emojis, COS, EMOJI, MS, FENETRE, RECYCLOR, BOOST, SUPERSTREAM.", tags: ["motor.s", "Moteurs", "Injection"] }
+      ]
     }
   ];
 
@@ -323,6 +350,7 @@ function releasePointerCapture(e) { if (HAS_POINTER && e.target.releasePointerCa
   const gesture = document.getElementById('gesture');
 
   let current = 0;
+  let subCurrent = 0;
   let startX = 0, currentAngle = 0;
   let isDragging = false;
 
@@ -331,10 +359,19 @@ function releasePointerCapture(e) { if (HAS_POINTER && e.target.releasePointerCa
     const face = document.createElement('div');
     face.className = 'face' + (i === 0 ? ' active' : '');
     face.dataset.index = i;
+    const sub = app.subArticles[0];
     face.innerHTML = `
       <div class="num">${app.num}</div>
-      <h2>${app.title}</h2>
+      <h2><a href="${app.appUrl}" target="_blank" rel="noopener noreferrer" class="app-link">${app.title}</a></h2>
       <p>${app.desc}</p>
+      <div class="sub-article">
+        <h3>${sub.title}</h3>
+        <p>${sub.desc}</p>
+        <div class="tags">${sub.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="sub-nav">
+        <span class="sub-indicator">${1}/${app.subArticles.length}</span>
+      </div>
       <div class="tags">${app.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
     `;
     prisme.appendChild(face);
@@ -351,24 +388,54 @@ function releasePointerCapture(e) { if (HAS_POINTER && e.target.releasePointerCa
   const faces = prisme.children;
   const dots = nav.children;
 
+  let current = 0;
+  let subCurrent = 0;
+  let startX = 0, currentAngle = 0;
+  let isDragging = false;
+
   function goTo(i, animate = true) {
     if (i < 0) i = faces.length - 1;
     if (i >= faces.length) i = 0;
     if (i === current) return;
 
-    const prev = current;
     current = i;
+    subCurrent = 0;
 
-    // Rotation 3D du prisme (120° par face pour 3 faces)
     const angle = -current * 120;
     prisme.style.transition = animate ? 'transform .7s cubic-bezier(.2,.8,.2,1)' : 'none';
     prisme.style.transform = `rotateY(${angle}deg)`;
 
-    // États des faces (seule la classe active change)
     Array.from(faces).forEach((f, idx) => {
       f.classList.toggle('active', idx === current);
     });
     Array.from(dots).forEach((d, idx) => d.classList.toggle('active', idx === current));
+    renderSubArticle();
+  }
+
+  function renderSubArticle() {
+    const app = apps[current];
+    const sub = app.subArticles[subCurrent];
+    const face = faces[current];
+    const subEl = face.querySelector('.sub-article');
+    const indicator = face.querySelector('.sub-indicator');
+    if (subEl && sub) {
+      subEl.innerHTML = `
+        <h3>${sub.title}</h3>
+        <p>${sub.desc}</p>
+        <div class="tags">${sub.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      `;
+    }
+    if (indicator) {
+      indicator.textContent = `${subCurrent + 1}/${app.subArticles.length}`;
+    }
+    Array.from(dots).forEach((d, idx) => d.classList.toggle('active', idx === current));
+  }
+
+  function goSub(delta) {
+    const app = apps[current];
+    const max = app.subArticles.length - 1;
+    subCurrent = Math.max(0, Math.min(max, subCurrent + delta));
+    renderSubArticle();
   }
 
   // Navigation points
@@ -378,8 +445,8 @@ function releasePointerCapture(e) { if (HAS_POINTER && e.target.releasePointerCa
   document.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft') goTo(current - 1);
     else if (e.key === 'ArrowRight') goTo(current + 1);
-    else if (e.key === 'ArrowUp') goTo(current - 1);
-    else if (e.key === 'ArrowDown') goTo(current + 1);
+    else if (e.key === 'ArrowUp') goSub(-1);
+    else if (e.key === 'ArrowDown') goSub(1);
   });
 
   // Flèches UI (4 directions)
@@ -387,8 +454,8 @@ function releasePointerCapture(e) { if (HAS_POINTER && e.target.releasePointerCa
   if (arrowsEl) {
     arrowsEl.querySelector('.arrow-left').addEventListener('click', () => goTo(current - 1));
     arrowsEl.querySelector('.arrow-right').addEventListener('click', () => goTo(current + 1));
-    arrowsEl.querySelector('.arrow-up').addEventListener('click', () => goTo(current - 1));
-    arrowsEl.querySelector('.arrow-down').addEventListener('click', () => goTo(current + 1));
+    arrowsEl.querySelector('.arrow-up').addEventListener('click', () => goSub(-1));
+    arrowsEl.querySelector('.arrow-down').addEventListener('click', () => goSub(1));
   }
 
   // Touch drag sur la vitrine
