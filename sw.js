@@ -1,4 +1,4 @@
-const CACHE = 'keffstation-v30';
+const CACHE = 'keffstation-v31';
 const ASSETS = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', e => {
