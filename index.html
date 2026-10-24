@@ -388,16 +388,16 @@ class KeffStation {
 
 (function() {
   function runInit() {
+    const loading = document.getElementById('loading');
     try {
       window.keffStation = new KeffStation();
-      window.keffStation.init();
-    } catch (e) { console.error('KeffStation init error:', e); }
+      window.keffStation.init().then(() => {
+        const loading = document.getElementById('loading');
+        if (loading) { loading.textContent = '✅ KeffStation prêt'; loading.style.color = '#27d17f'; setTimeout(() => loading.classList.add('hidden'), 1000); }
+      }).catch(e => { console.error('App init failed:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur: ' + (e?.message || e?.toString() || 'Erreur inconnue'); loading.style.color = '#ff3d9a'; } });
+    } catch (e) { console.error('Constructor/InitApp sync error:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur sync: ' + (e?.message || e?.toString() || 'Erreur inconnue'); loading.style.color = '#ff3d9a'; } }
   }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', runInit);
-  } else {
-    runInit();
-  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', runInit); } else { runInit(); }
 })();
 </script>
 </body>
