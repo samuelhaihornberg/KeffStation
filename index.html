@@ -187,17 +187,6 @@ function sanitizeHTML(str) {
   return div.innerHTML;
 }
 
-function generateCirclePolygon(sides = 1000) {
-  let points = [];
-  for (let i = 0; i < sides; i++) {
-    const angle = (i / sides) * 2 * Math.PI;
-    const x = 50 + 50 * Math.cos(angle);
-    const y = 50 + 50 * Math.sin(angle);
-    points.push(`${x}% ${y}%`);
-  }
-  return `polygon(${points.join(',')})`;
-}
-
 class KeffStation {
   constructor() {
     this.apps = APPS;
@@ -248,16 +237,7 @@ class KeffStation {
     this.setupEventListeners();
     this.initParticles();
     this.registerSW();
-    this.applyCircleClip();
     console.log('KeffStation initialized');
-  }
-
-  applyCircleClip() {
-    const style = document.createElement('style');
-    style.textContent = `
-      .vitrine,.vitrine::before,.vitrine-glass,.face{ -webkit-clip-path:${this.circlePolygon}; clip-path:${this.circlePolygon}; }
-    `;
-    document.head.appendChild(style);
   }
 
   buildUI() {
