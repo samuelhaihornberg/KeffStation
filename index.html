@@ -18,10 +18,8 @@ html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,
 .reader{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(90vw,520px);aspect-ratio:1;z-index:10;display:flex;flex-direction:column;align-items:center}
 
 .vitrine{position:relative;width:100%;height:100%;perspective:1200px}
-.vitrine-main{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotateY(0deg);width:70%;height:80%;transform-origin:center;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.23,1,.32,1),opacity .6s ease;z-index:5}
-.vitrine-main.flip{transform:translate(-50%,-50%) rotateY(-180deg);opacity:0}
-.vitrine-diag{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) translateX(110%) rotateZ(20deg) rotateY(90deg);width:55%;height:70%;transform-origin:center;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.23,1,.32,1) .1s,opacity .6s ease .1s;z-index:4;opacity:0.7}
-.vitrine-diag.flip{transform:translate(-50%,-50%) translateX(-110%) rotateZ(-20deg) rotateY(-90deg);opacity:0}
+.vitrine-main{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotateY(0deg);width:70%;height:80%;transform-origin:center;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.23,1,.32,1),opacity .6s ease;z-index:5}
+.vitrine-diag{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotateY(90deg) rotateZ(20deg);width:55%;height:70%;transform-origin:center;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.23,1,.32,1) .05s,opacity .6s ease .1s;z-index:4;opacity:0.7}
 .glass{position:absolute;inset:0;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,.03) 0%,rgba(255,255,255,.005) 50%,rgba(0,0,0,.02) 100%);border:1px solid rgba(255,255,255,.06);box-shadow:inset 0 1px 0 rgba(255,255,255,.04),inset 0 -1px 0 rgba(0,0,0,.1),0 30px 80px -15px rgba(0,0,0,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
 .glass::before{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.05) 0%,transparent 100%);border-radius:12px 12px 0 0;pointer-events:none}
 .glass-diag{position:absolute;inset:0;border-radius:8px;background:linear-gradient(135deg,rgba(30,107,255,.04) 0%,rgba(138,77,255,.02) 50%,rgba(255,61,154,.02) 100%);border:1px solid rgba(255,255,255,.04);box-shadow:inset 0 1px 0 rgba(255,255,255,.02),inset 0 -1px 0 rgba(0,0,0,.08),0 20px 60px -10px rgba(0,0,0,.6);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
@@ -436,15 +434,15 @@ class KeffStation {
     this.prisme.style.transform = `rotateY(${angle}deg)`;
 
     if (animate && this.vitrineMain && this.vitrineDiag) {
-      // Dynamic flip: doors open as prism rotates, close after
+      // Doors open/close with pure rotation around center (no translateX shift)
       this.vitrineMain.style.transition = 'transform .6s cubic-bezier(.23,1,.32,1)';
       this.vitrineDiag.style.transition = 'transform .6s cubic-bezier(.23,1,.32,1) .05s';
       this.vitrineMain.style.transform = 'translate(-50%,-50%) rotateY(-90deg)';
-      this.vitrineDiag.style.transform = 'translate(-50%,-50%) translateX(-110%) rotateZ(-20deg) rotateY(-90deg)';
+      this.vitrineDiag.style.transform = 'translate(-50%,-50%) rotateY(-90deg) rotateZ(20deg)';
       
       setTimeout(() => {
         this.vitrineMain.style.transform = 'translate(-50%,-50%) rotateY(0deg)';
-        this.vitrineDiag.style.transform = 'translate(-50%,-50%) translateX(110%) rotateZ(20deg) rotateY(90deg)';
+        this.vitrineDiag.style.transform = 'translate(-50%,-50%) rotateY(90deg) rotateZ(20deg)';
       }, 600);
     }
 
@@ -512,13 +510,13 @@ class KeffStation {
     const prismAngle = this.currentAngle + dx * 0.5;
     this.prisme.style.transform = `rotateY(${prismAngle}deg)`;
     
-    // Dynamic vitrine doors: open progressively with drag
+    // Dynamic vitrine doors: open progressively with drag (pure rotation, no translateX shift)
     const dragProgress = Math.min(Math.abs(dx) / 120, 1); // 0 to 1
     if (this.vitrineMain && this.vitrineDiag) {
       this.vitrineMain.style.transition = 'none';
       this.vitrineDiag.style.transition = 'none';
       this.vitrineMain.style.transform = `translate(-50%,-50%) rotateY(${-90 * dragProgress}deg)`;
-      this.vitrineDiag.style.transform = `translate(-50%,-50%) translateX(${-110 * dragProgress}%) rotateZ(${-20 * dragProgress}deg) rotateY(${-90 * dragProgress}deg)`;
+      this.vitrineDiag.style.transform = `translate(-50%,-50%) rotateY(${-90 * dragProgress}deg) rotateZ(${-20 * dragProgress}deg)`;
     }
     
     this.dragDeltaY = dy;
@@ -541,12 +539,12 @@ class KeffStation {
       this.prisme.style.transition = 'transform .5s cubic-bezier(.23,1,.32,1)';
       this.prisme.style.transform = `rotateY(${this.currentAngle}deg)`;
       
-      // Close doors smoothly on spring back
+      // Close doors smoothly on spring back (pure rotation, no translateX shift)
       if (this.vitrineMain && this.vitrineDiag) {
         this.vitrineMain.style.transition = 'transform .5s cubic-bezier(.23,1,.32,1)';
         this.vitrineDiag.style.transition = 'transform .5s cubic-bezier(.23,1,.32,1) .05s';
         this.vitrineMain.style.transform = 'translate(-50%,-50%) rotateY(0deg)';
-        this.vitrineDiag.style.transform = 'translate(-50%,-50%) translateX(110%) rotateZ(20deg) rotateY(90deg)';
+        this.vitrineDiag.style.transform = 'translate(-50%,-50%) rotateY(90deg) rotateZ(20deg)';
       }
     }
     this.dragDeltaY = 0;
