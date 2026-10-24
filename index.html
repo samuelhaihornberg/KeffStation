@@ -313,12 +313,16 @@ class KeffStation {
     this.prisme.style.transform = `rotateY(${angle}deg)`;
 
     if (animate && this.vitrineMain && this.vitrineDiag) {
-      this.vitrineMain.classList.add('flip');
-      this.vitrineDiag.classList.add('flip');
+      // Dynamic flip: doors open as prism rotates, close after
+      this.vitrineMain.style.transition = 'transform .6s cubic-bezier(.23,1,.32,1)';
+      this.vitrineDiag.style.transition = 'transform .6s cubic-bezier(.23,1,.32,1) .05s';
+      this.vitrineMain.style.transform = 'translate(-50%,-50%) rotateY(-90deg)';
+      this.vitrineDiag.style.transform = 'translate(-50%,-50%) translateX(-110%) rotateZ(-20deg) rotateY(-90deg)';
+      
       setTimeout(() => {
-        this.vitrineMain.classList.remove('flip');
-        this.vitrineDiag.classList.remove('flip');
-      }, 900);
+        this.vitrineMain.style.transform = 'translate(-50%,-50%) rotateY(0deg)';
+        this.vitrineDiag.style.transform = 'translate(-50%,-50%) translateX(110%) rotateZ(20deg) rotateY(90deg)';
+      }, 600);
     }
 
     Array.from(this.faces).forEach((f, idx) => f.classList.toggle('active', idx === this.current));
@@ -334,6 +338,19 @@ class KeffStation {
     if (!app) return;
     const max = app.subArticles.length - 1;
     this.subCurrent = Math.max(0, Math.min(max, this.subCurrent + delta));
+    
+    // Quick vitrine blink for article change
+    if (this.vitrineMain && this.vitrineDiag) {
+      this.vitrineMain.style.transition = 'transform .2s ease, opacity .2s ease';
+      this.vitrineDiag.style.transition = 'transform .2s ease, opacity .2s ease';
+      this.vitrineMain.style.opacity = '0.5';
+      this.vitrineDiag.style.opacity = '0.35';
+      setTimeout(() => {
+        this.vitrineMain.style.opacity = '1';
+        this.vitrineDiag.style.opacity = '0.7';
+      }, 200);
+    }
+    
     this.renderSubArticle();
   }
 
@@ -371,6 +388,16 @@ class KeffStation {
     const dy = (e.clientY ?? e.touches?.[0]?.clientY ?? 0) - this.startY;
     const prismAngle = this.currentAngle + dx * 0.5;
     this.prisme.style.transform = `rotateY(${prismAngle}deg)`;
+    
+    // Dynamic vitrine doors: open progressively with drag
+    const dragProgress = Math.min(Math.abs(dx) / 120, 1); // 0 to 1
+    if (this.vitrineMain && this.vitrineDiag) {
+      this.vitrineMain.style.transition = 'none';
+      this.vitrineDiag.style.transition = 'none';
+      this.vitrineMain.style.transform = `translate(-50%,-50%) rotateY(${-90 * dragProgress}deg)`;
+      this.vitrineDiag.style.transform = `translate(-50%,-50%) translateX(${-110 * dragProgress}%) rotateZ(${-20 * dragProgress}deg) rotateY(${-90 * dragProgress}deg)`;
+    }
+    
     this.dragDeltaY = dy;
   }
 
@@ -390,6 +417,14 @@ class KeffStation {
     } else {
       this.prisme.style.transition = 'transform .5s cubic-bezier(.23,1,.32,1)';
       this.prisme.style.transform = `rotateY(${this.currentAngle}deg)`;
+      
+      // Close doors smoothly on spring back
+      if (this.vitrineMain && this.vitrineDiag) {
+        this.vitrineMain.style.transition = 'transform .5s cubic-bezier(.23,1,.32,1)';
+        this.vitrineDiag.style.transition = 'transform .5s cubic-bezier(.23,1,.32,1) .05s';
+        this.vitrineMain.style.transform = 'translate(-50%,-50%) rotateY(0deg)';
+        this.vitrineDiag.style.transform = 'translate(-50%,-50%) translateX(110%) rotateZ(20deg) rotateY(90deg)';
+      }
     }
     this.dragDeltaY = 0;
     if (e.target?.releasePointerCapture) e.target.releasePointerCapture(e.pointerId);
