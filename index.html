@@ -402,11 +402,17 @@ class KeffStation {
     const dx = (e.clientX ?? e.changedTouches?.[0]?.clientX ?? 0) - this.startX;
     const dy = this.dragDeltaY ?? 0;
     const threshold = 24;
-    if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
-      if (Math.abs(dx) > Math.abs(dy)) this.goTo(this.current + (dx > 0 ? -1 : 1));
-      else this.goSub(dy > 0 ? -1 : 1);
+    const adx = Math.abs(dx), ady = Math.abs(dy);
+    if (adx > threshold || ady > threshold) {
+      if (adx > ady) {
+        // Horizontal dominant → PWA navigation
+        this.goTo(this.current + (dx > 0 ? -1 : 1));
+      } else {
+        // Vertical dominant → Article navigation
+        this.goSub(dy > 0 ? -1 : 1);
+      }
     } else {
-      this.goTo(this.current);
+      this.goTo(this.current); // spring back
     }
     this.dragDeltaY = 0;
     if (e.target?.releasePointerCapture) e.target.releasePointerCapture(e.pointerId);
