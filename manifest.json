@@ -1,0 +1,47 @@
+{
+  "name": "KeffStation",
+  "short_name": "KeffStation",
+  "description": "Portail géométrique Kifftech, Tricktrocjob, ViArtificial labs",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#070816",
+  "theme_color": "#070816",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E🔮%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity", "education"],
+  "lang": "fr",
+  "dir": "ltr",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "shortcuts": [
+    {
+      "name": "Kifftech",
+      "short_name": "Kifftech",
+      "description": "Smart devices & gadgets",
+      "url": "https://samuelhaihornberg.github.io/Kiff-Tech/",
+      "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E📱%3C/text%3E%3C/svg%3E" }]
+    },
+    {
+      "name": "Tricktrocjob",
+      "short_name": "Tricktroc",
+      "description": "Plateforme Trix / Trox / Services",
+      "url": "https://samuelhaihornberg.github.io/keffjobtrictrocc/",
+      "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E🔄%3C/text%3E%3C/svg%3E" }]
+    },
+    {
+      "name": "ViArtificial labs",
+      "short_name": "ViArtificial",
+      "description": "cos, SuperBots, BLM, BLSM",
+      "url": "https://samuelhaihornberg.github.io/ViArtificial/",
+      "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E🤖%3C/text%3E%3C/svg%3E" }]
+    }
+  ]
+}
