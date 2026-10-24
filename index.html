@@ -24,6 +24,16 @@ html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,
 .vitrine-glass{position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse at 30% 30%,rgba(255,255,255,.02) 0%,transparent 50%),radial-gradient(ellipse at 70% 70%,rgba(255,255,255,.01) 0%,transparent 50%);box-shadow:inset 0 2px 0 rgba(255,255,255,.03),inset 0 -2px 0 rgba(0,0,0,.2),0 40px 120px -20px rgba(0,0,0,.9);z-index:2}
 
 .vitrine-shards{position:absolute;inset:0;border-radius:50%;z-index:3;pointer-events:none}
+
+.concentric-bg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;z-index:0}
+.concentric-bg--secondary{width:100%;height:100%;background:radial-gradient(ellipse at center,rgba(30,107,255,.04) 0%,rgba(138,77,255,.02) 30%,rgba(255,61,154,.02) 60%,transparent 100%);opacity:0;transition:opacity .6s ease}
+.concentric-bg--secondary.visible{opacity:1}
+
+.concentric-article{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;z-index:4}
+.concentric-article__ring{width:85%;height:85%;border:1px solid rgba(255,255,255,.04);box-shadow:inset 0 0 40px rgba(255,255,255,.01),0 0 60px rgba(0,0,0,.3);opacity:0;transition:opacity .5s ease,transform .5s ease;transform:scale(.95)}
+.concentric-article__ring.visible{opacity:1;transform:scale(1)}
+.concentric-article__ring.active{border-color:rgba(255,210,63,.15);box-shadow:inset 0 0 60px rgba(255,210,63,.05),0 0 80px rgba(255,210,63,.03);animation:pulseRing 3s ease-in-out infinite}
+@keyframes pulseRing{0%,100%{box-shadow:inset 0 0 60px rgba(255,210,63,.05),0 0 80px rgba(255,210,63,.03)}50%{box-shadow:inset 0 0 80px rgba(255,210,63,.08),0 0 100px rgba(255,210,63,.05)}}
 .shard{position:absolute;border-radius:2px;opacity:.1299;animation:shardFloat 20s ease-in-out infinite}
 .shard:nth-child(1){top:8%;left:12%;width:28%;height:4%;background:linear-gradient(90deg,transparent,#1e6bff,transparent);transform:rotate(-15deg);animation-delay:0s}
 .shard:nth-child(2){top:18%;right:10%;width:4%;height:32%;background:linear-gradient(180deg,transparent,#8a4dff,transparent);transform:rotate(12deg);animation-delay:1.7s}
@@ -115,8 +125,12 @@ html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,
 
 <div class="reader" role="region" aria-roledescription="lecteur d'applications" aria-label="Kifftech, Tricktrockjob, ViArtificial labs">
   <div class="vitrine">
+    <div class="concentric-bg concentric-bg--secondary" id="concentricBg"></div>
     <div class="vitrine-glass"></div>
     <div class="vitrine-shards" id="vitrineShards"></div>
+    <div class="concentric-article" id="concentricArticle">
+      <div class="concentric-article__ring" id="concentricRing"></div>
+    </div>
     <div class="carousel" id="carousel">
       <div class="prisme" id="prisme"></div>
     </div>
@@ -218,13 +232,16 @@ class KeffStation {
     this.arrows = document.getElementById('arrows');
     this.installBtn = document.getElementById('installBtn');
     this.vitrineShards = document.getElementById('vitrineShards');
+    this.concentricBg = document.getElementById('concentricBg');
+    this.concentricRing = document.getElementById('concentricRing');
 
-    const missing = ['prisme','nav','gesture','arrows','vitrineShards'].filter(id => !document.getElementById(id));
+    const missing = ['prisme','nav','gesture','arrows','vitrineShards','concentricBg','concentricRing'].filter(id => !document.getElementById(id));
     if (missing.length) throw new Error('Missing DOM elements: ' + missing.join(', '));
 
     this.faces = null;
     this.circlePolygon = generateCirclePolygon(1000);
     this.setupShards();
+    this.setupConcentricObserver();
     this.setupInstallPrompt();
   }
 
@@ -236,6 +253,31 @@ class KeffStation {
       shard.style.setProperty('--r', `${Math.random() * 360}deg`);
       this.vitrineShards.appendChild(shard);
     }
+  }
+
+  setupConcentricObserver() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.target === this.concentricBg) {
+          entry.target.classList.toggle('visible', entry.isIntersecting);
+        } else if (entry.target === this.concentricRing) {
+          entry.target.classList.toggle('visible', entry.isIntersecting);
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+          } else {
+            entry.target.classList.remove('active');
+          }
+        }
+      });
+    }, {
+      root: this.vitrineShards?.parentElement || null,
+      rootMargin: '0px',
+      threshold: [0, 0.1, 0.5, 1]
+    });
+
+    if (this.concentricBg) observer.observe(this.concentricBg);
+    if (this.concentricRing) observer.observe(this.concentricRing);
+    this.concentricObserver = observer;
   }
 
   setupInstallPrompt() {
@@ -349,6 +391,7 @@ class KeffStation {
     Array.from(this.nav.children).forEach((d, idx) => d.classList.toggle('active', idx === this.current));
     this.arrows.setAttribute('data-face', this.current);
     this.nav.setAttribute('data-face', this.current);
+    this.updateConcentricRing();
     this.renderSubArticle();
   }
 
@@ -358,6 +401,18 @@ class KeffStation {
     const max = app.subArticles.length - 1;
     this.subCurrent = Math.max(0, Math.min(max, this.subCurrent + delta));
     this.renderSubArticle();
+  }
+
+  updateConcentricRing() {
+    if (!this.concentricRing) return;
+    const colors = [
+      {border: 'rgba(30,107,255,.25)', glow: 'rgba(30,107,255,.08)'},
+      {border: 'rgba(255,61,154,.25)', glow: 'rgba(255,61,154,.08)'},
+      {border: 'rgba(39,209,127,.25)', glow: 'rgba(39,209,127,.08)'}
+    ];
+    const c = colors[this.current] || colors[0];
+    this.concentricRing.style.borderColor = c.border;
+    this.concentricRing.style.boxShadow = `inset 0 0 60px ${c.glow},0 0 80px ${c.glow}`;
   }
 
   renderSubArticle() {
