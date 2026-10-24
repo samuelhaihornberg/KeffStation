@@ -275,28 +275,151 @@ class KeffStation {
   }
 
   setupEventListeners() {
-    Array.from(this.nav.children).forEach((btn, i) => btn.addEventListener('click', () => this.goTo(i)));
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') this.goTo(this.current - 1);
-      else if (e.key === 'ArrowRight') this.goTo(this.current + 1);
-      else if (e.key === 'ArrowUp') this.goSub(-1);
-      else if (e.key === 'ArrowDown') this.goSub(1);
+    // ===== NAV BUTTONS (PWA) =====
+    Array.from(this.nav.children).forEach((btn, i) => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); this.goTo(i); }, { passive: false });
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.goTo(i); }
+      });
     });
 
-    this.arrows.querySelector('.arrow-left')?.addEventListener('click', (e) => { e.stopPropagation(); this.goTo(this.current - 1); });
-    this.arrows.querySelector('.arrow-right')?.addEventListener('click', (e) => { e.stopPropagation(); this.goTo(this.current + 1); });
-    this.arrows.querySelector('.arrow-up')?.addEventListener('click', (e) => { e.stopPropagation(); this.goSub(-1); });
-    this.arrows.querySelector('.arrow-down')?.addEventListener('click', (e) => { e.stopPropagation(); this.goSub(1); });
+    // ===== ARROW BUTTONS (Article navigation) =====
+    const arrowMap = {
+      'arrow-left': () => this.goTo(this.current - 1),
+      'arrow-right': () => this.goTo(this.current + 1),
+      'arrow-up': () => this.goSub(-1),
+      'arrow-down': () => this.goSub(1)
+    };
+    Object.entries(arrowMap).forEach(([cls, fn]) => {
+      const btn = this.arrows.querySelector(`.${cls}`);
+      if (btn) {
+        btn.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); fn(); }, { passive: false });
+        btn.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); }
+        });
+        // Pointer/touch for better touch support
+        btn.addEventListener('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+      }
+    });
 
-    this.gesture.addEventListener('pointerdown', (e) => this.onDragStart(e));
-    this.gesture.addEventListener('pointermove', (e) => this.onDragMove(e));
-    this.gesture.addEventListener('pointerup', (e) => this.onDragEnd(e));
-    this.gesture.addEventListener('pointercancel', () => this.onDragEnd(null));
+    // ===== KEYBOARD (Global) =====
+    document.addEventListener('keydown', (e) => {
+      // Ignore if typing in input
+      if (e.target.isContentEditable || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      
+      const keyMap = {
+        'ArrowLeft': () => this.goTo(this.current - 1),
+        'ArrowRight': () => this.goTo(this.current + 1),
+        'ArrowUp': () => this.goSub(-1),
+        'ArrowDown': () => this.goSub(1),
+        'Home': () => this.goTo(0),
+        'End': () => this.goTo(this.faces.length - 1),
+        'PageUp': () => this.goTo((this.current - 1 + this.faces.length) % this.faces.length),
+        'PageDown': () => this.goTo((this.current + 1) % this.faces.length),
+        ' ': () => { e.preventDefault(); this.goTo((this.current + 1) % this.faces.length); }, // Space = next PWA
+        'Enter': () => { e.preventDefault(); this.goSub(1); } // Enter = next article
+      };
+      if (keyMap[e.key]) { e.preventDefault(); keyMap[e.key](); }
+    }, { passive: false });
+
+    // ===== MOUSE WHEEL (Horizontal = PWA, Vertical = Article) =====
+    this.gesture.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        this.goTo(this.current + (e.deltaX > 0 ? 1 : -1));
+      } else {
+        this.goSub(e.deltaY > 0 ? 1 : -1);
+      }
+    }, { passive: false });
+
+    // ===== POINTER EVENTS (Unified mouse/touch/pen) =====
+    this.gesture.addEventListener('pointerdown', (e) => this.onDragStart(e), { passive: false });
+    this.gesture.addEventListener('pointermove', (e) => this.onDragMove(e), { passive: false });
+    this.gesture.addEventListener('pointerup', (e) => this.onDragEnd(e), { passive: false });
+    this.gesture.addEventListener('pointercancel', () => this.onDragEnd(null), { passive: false });
+    this.gesture.addEventListener('pointerleave', () => this.onDragEnd(null), { passive: false });
+
+    // ===== TOUCH EVENTS (Explicit for iOS Safari) =====
     this.gesture.addEventListener('touchstart', (e) => this.onDragStart(e), { passive: true });
-    this.gesture.addEventListener('touchmove', (e) => this.onDragMove(e), { passive: true });
-    this.gesture.addEventListener('touchend', (e) => this.onDragEnd(e));
-    this.gesture.addEventListener('touchcancel', () => this.onDragEnd(null));
+    this.gesture.addEventListener('touchmove', (e) => this.onDragMove(e), { passive: false });
+    this.gesture.addEventListener('touchend', (e) => this.onDragEnd(e), { passive: true });
+    this.gesture.addEventListener('touchcancel', () => this.onDragEnd(null), { passive: true });
+
+    // ===== GAMEPAD / JOYSTICK =====
+    this.setupGamepad();
+
+    // ===== CONTEXT MENU PREVENTION =====
+    this.gesture.addEventListener('contextmenu', (e) => e.preventDefault(), { passive: false });
+
+    // ===== DRAG PREVENTION ON UI ELEMENTS =====
+    ['nav', 'arrows', 'installBtn'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('pointerdown', (e) => e.stopPropagation(), { passive: true });
+    });
+  }
+
+  setupGamepad() {
+    let lastPoll = 0;
+    const deadzone = 0.3;
+    const pollGamepad = () => {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      const gp = gamepads[0];
+      if (!gp) { requestAnimationFrame(pollGamepad); return; }
+      
+      const now = performance.now();
+      if (now - lastPoll < 100) { requestAnimationFrame(pollGamepad); return; }
+      
+      // Left stick / D-pad horizontal = PWA nav
+      const hAxis = gp.axes[0]; // Left stick X
+      const hBtn = gp.buttons[14].pressed || gp.buttons[15].pressed; // D-pad left/right
+      if (Math.abs(hAxis) > deadzone || hBtn) {
+        if ((hAxis > deadzone || gp.buttons[15].pressed) && !this._gpHorizLock) {
+          this.goTo(this.current + 1); this._gpHorizLock = true;
+        } else if ((hAxis < -deadzone || gp.buttons[14].pressed) && !this._gpHorizLock) {
+          this.goTo(this.current - 1); this._gpHorizLock = true;
+        } else if (Math.abs(hAxis) <= deadzone && !hBtn) {
+          this._gpHorizLock = false;
+        }
+      }
+      
+      // Left stick / D-pad vertical = Article nav
+      const vAxis = gp.axes[1]; // Left stick Y
+      const vBtn = gp.buttons[12].pressed || gp.buttons[13].pressed; // D-pad up/down
+      if (Math.abs(vAxis) > deadzone || vBtn) {
+        if ((vAxis > deadzone || gp.buttons[13].pressed) && !this._gpVertLock) {
+          this.goSub(1); this._gpVertLock = true;
+        } else if ((vAxis < -deadzone || gp.buttons[12].pressed) && !this._gpVertLock) {
+          this.goSub(-1); this._gpVertLock = true;
+        } else if (Math.abs(vAxis) <= deadzone && !vBtn) {
+          this._gpVertLock = false;
+        }
+      }
+      
+      // Face buttons: A = next article, B = prev article, X = next PWA, Y = prev PWA
+      if (gp.buttons[0].pressed && !this._gpBtnALock) { this.goSub(1); this._gpBtnALock = true; }
+      else if (!gp.buttons[0].pressed) this._gpBtnALock = false;
+      if (gp.buttons[1].pressed && !this._gpBtnBLock) { this.goSub(-1); this._gpBtnBLock = true; }
+      else if (!gp.buttons[1].pressed) this._gpBtnBLock = false;
+      if (gp.buttons[2].pressed && !this._gpBtnXLock) { this.goTo(this.current + 1); this._gpBtnXLock = true; }
+      else if (!gp.buttons[2].pressed) this._gpBtnXLock = false;
+      if (gp.buttons[3].pressed && !this._gpBtnYLock) { this.goTo(this.current - 1); this._gpBtnYLock = true; }
+      else if (!gp.buttons[3].pressed) this._gpBtnYLock = false;
+      
+      // Shoulders: LB = prev PWA, RB = next PWA
+      if (gp.buttons[4].pressed && !this._gpBtnLBLock) { this.goTo(this.current - 1); this._gpBtnLBLock = true; }
+      else if (!gp.buttons[4].pressed) this._gpBtnLBLock = false;
+      if (gp.buttons[5].pressed && !this._gpBtnRBLock) { this.goTo(this.current + 1); this._gpBtnRBLock = true; }
+      else if (!gp.buttons[5].pressed) this._gpBtnRBLock = false;
+      
+      lastPoll = now;
+      requestAnimationFrame(pollGamepad);
+    };
+    if (navigator.getGamepads) {
+      window.addEventListener('gamepadconnected', pollGamepad);
+      window.addEventListener('gamepaddisconnected', () => {});
+      // Start polling if already connected
+      if (navigator.getGamepads()[0]) pollGamepad();
+    }
   }
 
   goTo(i, animate = true) {
