@@ -64,7 +64,7 @@ html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,
 .nav[data-face="0"] button.active{background:linear-gradient(135deg,#1e6bff,#0d4fd8);border-color:#1e6bff;color:#fff;box-shadow:0 0 20px rgba(30,107,255,.7),inset 0 0 0 1px rgba(30,107,255,.4)}
 .nav[data-face="1"] button.active{background:linear-gradient(135deg,#ff3d9a,#d81e7a);border-color:#ff3d9a;color:#fff;box-shadow:0 0 20px rgba(255,61,154,.7),inset 0 0 0 1px rgba(255,61,154,.4)}
 .nav[data-face="2"] button.active{background:linear-gradient(135deg,#27d17f,#1ab86a);border-color:#27d17f;color:#070816;box-shadow:0 0 20px rgba(39,209,127,.7),inset 0 0 0 1px rgba(39,209,127,.4)}
-.arrows{position:absolute;inset:0;z-index:10;pointer-events:none}
+.arrows{position:absolute;inset:0;z-index:20;pointer-events:none}
 .arrows button{pointer-events:auto;position:absolute;width:clamp(44px,6vw,56px);height:clamp(44px,6vw,56px);border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(10,12,34,.9);color:#ffd23f;font-size:clamp(20px,3vw,26px);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s,background .12s,border-color .12s,box-shadow .12s;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 6px 24px rgba(0,0,0,.5)}
 .arrows button:hover{background:rgba(30,107,255,.4);border-color:#1e6bff;transform:scale(1.12);box-shadow:0 0 28px rgba(30,107,255,.5)}
 .arrows button:active{transform:scale(.92)}
@@ -263,10 +263,10 @@ class KeffStation {
       else if (e.key === 'ArrowDown') this.goSub(1);
     });
 
-    this.arrows.querySelector('.arrow-left')?.addEventListener('click', () => this.goTo(this.current - 1));
-    this.arrows.querySelector('.arrow-right')?.addEventListener('click', () => this.goTo(this.current + 1));
-    this.arrows.querySelector('.arrow-up')?.addEventListener('click', () => this.goSub(-1));
-    this.arrows.querySelector('.arrow-down')?.addEventListener('click', () => this.goSub(1));
+    this.arrows.querySelector('.arrow-left')?.addEventListener('click', (e) => { e.stopPropagation(); this.goTo(this.current - 1); });
+    this.arrows.querySelector('.arrow-right')?.addEventListener('click', (e) => { e.stopPropagation(); this.goTo(this.current + 1); });
+    this.arrows.querySelector('.arrow-up')?.addEventListener('click', (e) => { e.stopPropagation(); this.goSub(-1); });
+    this.arrows.querySelector('.arrow-down')?.addEventListener('click', (e) => { e.stopPropagation(); this.goSub(1); });
 
     this.gesture.addEventListener('pointerdown', (e) => this.onDragStart(e));
     this.gesture.addEventListener('pointermove', (e) => this.onDragMove(e));
