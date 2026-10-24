@@ -179,6 +179,8 @@ class KeffStation {
     this.currentAngle = 0;
     this.isDragging = false;
     this.dragDeltaY = 0;
+    this.deadZone = 20;
+    this.deadZonePct = 0.10;
     this.deferredPrompt = null;
 
     this.prisme = document.getElementById('prisme');
@@ -346,11 +348,17 @@ class KeffStation {
     this.isDragging = false;
     const dx = (e.clientX ?? e.changedTouches?.[0]?.clientX ?? 0) - this.startX;
     const dy = this.dragDeltaY ?? 0;
-    const threshold = 60;
-    if (Math.abs(dx) > threshold) {
-      this.goTo(this.current + (dx > 0 ? -1 : 1));
-    } else if (Math.abs(dy) > threshold) {
-      this.goSub(dy > 0 ? -1 : 1);
+    const w = window.innerWidth, h = window.innerHeight;
+    const dz = Math.max(this.deadZone, Math.min(w, h) * this.deadZonePct);
+    const inDeadZone = Math.abs(dx) < dz && Math.abs(dy) < dz;
+    if (!inDeadZone) {
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (Math.abs(dx) > dz) this.goTo(this.current + (dx > 0 ? -1 : 1));
+        else this.goTo(this.current);
+      } else {
+        if (Math.abs(dy) > dz) this.goSub(dy > 0 ? -1 : 1);
+        else this.goTo(this.current);
+      }
     } else {
       this.goTo(this.current);
     }
