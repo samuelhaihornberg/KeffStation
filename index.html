@@ -389,6 +389,10 @@ class KeffStation {
 (function() {
   function runInit() {
     const loading = document.getElementById('loading');
+    function showError(msg) {
+      const loading = document.getElementById('loading');
+      if (loading) { loading.textContent = '❌ Erreur: ' + msg; loading.style.color = '#ff3d9a'; }
+    }
     try {
       window.keffStation = new KeffStation();
       window.keffStation.init().then(() => {
@@ -397,7 +401,17 @@ class KeffStation {
       }).catch(e => { console.error('App init failed:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur: ' + (e?.message || e?.toString() || 'Erreur inconnue'); loading.style.color = '#ff3d9a'; } });
     } catch (e) { console.error('Constructor/InitApp sync error:', e); const loading = document.getElementById('loading'); if (loading) { loading.textContent = '❌ Erreur sync: ' + (e?.message || e?.toString() || 'Erreur inconnue'); loading.style.color = '#ff3d9a'; } }
   }
-  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', runInit); } else { runInit(); }
+  // Ensure DOM is fully ready before initialization
+  function runWhenReady() {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', runInit);
+    } else if (document.readyState === 'interactive' || document.readyState === 'complete') {
+      runInit();
+    } else {
+      document.addEventListener('DOMContentLoaded', runInit);
+    }
+  }
+  runWhenReady();
 })();
 </script>
 </body>
