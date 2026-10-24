@@ -33,13 +33,13 @@ html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,
 .prisme{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70%;height:80%;-webkit-transform-style:preserve-3d;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.23,1,.32,1);z-index:10}
 .prisme.glisse{transition:none}
 
-.face{position:absolute;inset:0;border-radius:8px;-webkit-backface-visibility:hidden;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(16px,4vw,32px);text-align:center;pointer-events:none;opacity:0.25;transition:opacity .35s;background:linear-gradient(135deg,rgba(255,255,255,.01) 0%,rgba(0,0,0,.1) 50%,rgba(0,0,0,.2) 100%);border:1px solid rgba(255,255,255,.03);box-shadow:inset 0 0 40px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.01)}
+.face{position:absolute;inset:0;border-radius:8px;-webkit-backface-visibility:hidden;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(16px,4vw,32px);text-align:center;pointer-events:none;opacity:0.25;transition:opacity .35s;background:linear-gradient(135deg,rgba(255,255,255,.01) 0%,rgba(0,0,0,.1) 50%,rgba(0,0,0,.2) 100%);border:1px solid rgba(255,255,255,.03);box-shadow:inset 0 0 40px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.01);transform-style:preserve-3d}
 .face.active{opacity:1;pointer-events:auto;background:linear-gradient(135deg,rgba(255,255,255,.02) 0%,rgba(0,0,0,.08) 50%,rgba(0,0,0,.15) 100%);border-color:rgba(255,255,255,.05);box-shadow:inset 0 0 60px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.03),0 0 30px rgba(255,255,255,.005)}
 .face:nth-child(1){transform:rotateY(0deg) translateZ(150px)}
 .face:nth-child(2){transform:rotateY(120deg) translateZ(150px)}
 .face:nth-child(3){transform:rotateY(240deg) translateZ(150px)}
 
-.face-content{position:relative;z-index:10;width:100%}
+.face-content{position:relative;z-index:10;width:100%;transform-style:preserve-3d}
 .face .num{font-size:clamp(.6rem,2vw,.75rem);letter-spacing:.15em;text-transform:uppercase;color:#fff;margin-bottom:.5em;opacity:.95;text-shadow:0 0 10px rgba(255,255,255,.7)}
 .face h2{font-size:clamp(1.1rem,3.5vw,1.5rem);margin:0 0 .7em;line-height:1.15;font-weight:700;color:#fff;text-shadow:0 0 16px rgba(255,255,255,.6),0 2px 4px rgba(0,0,0,.4)}
 .face p{font-size:clamp(.85rem,2.2vw,.95rem);color:#fff;line-height:1.6;max-width:95%;text-shadow:0 0 8px rgba(255,255,255,.5)}
@@ -237,7 +237,16 @@ class KeffStation {
     this.setupEventListeners();
     this.initParticles();
     this.registerSW();
+    this.initFaceContent();
     console.log('KeffStation initialized');
+  }
+
+  initFaceContent() {
+    const angle = -this.current * 120;
+    Array.from(this.faces).forEach(f => {
+      const content = f.querySelector('.face-content');
+      if (content) content.style.transform = `rotateY(${-angle}deg)`;
+    });
   }
 
   buildUI() {
@@ -321,7 +330,12 @@ class KeffStation {
       }, 900);
     }
 
-    Array.from(this.faces).forEach((f, idx) => f.classList.toggle('active', idx === this.current));
+    Array.from(this.faces).forEach((f, idx) => {
+      f.classList.toggle('active', idx === this.current);
+      const content = f.querySelector('.face-content');
+      if (content) content.style.transform = `rotateY(${this.current * 120}deg)`;
+    });
+
     Array.from(this.nav.children).forEach((d, idx) => d.classList.toggle('active', idx === this.current));
     this.arrows.setAttribute('data-face', this.current);
     this.nav.setAttribute('data-face', this.current);
@@ -368,7 +382,14 @@ class KeffStation {
     if (!this.isDragging) return;
     const dx = (e.clientX ?? e.touches?.[0]?.clientX ?? 0) - this.startX;
     const dy = (e.clientY ?? e.touches?.[0]?.clientY ?? 0) - this.startY;
-    this.prisme.style.transform = `rotateY(${this.currentAngle + dx * 0.5}deg)`;
+    const prismAngle = this.currentAngle + dx * 0.5;
+    this.prisme.style.transform = `rotateY(${prismAngle}deg)`;
+    
+    Array.from(this.faces).forEach(f => {
+      const content = f.querySelector('.face-content');
+      if (content) content.style.transform = `rotateY(${-prismAngle}deg)`;
+    });
+    
     this.dragDeltaY = dy;
   }
 
@@ -381,14 +402,17 @@ class KeffStation {
     const adx = Math.abs(dx), ady = Math.abs(dy);
     if (adx > threshold || ady > threshold) {
       if (adx > ady) {
-        // Horizontal dominant → PWA navigation
         this.goTo(this.current + (dx > 0 ? -1 : 1));
       } else {
-        // Vertical dominant → Article navigation
         this.goSub(dy > 0 ? -1 : 1);
       }
     } else {
-      this.goTo(this.current); // spring back
+      this.prisme.style.transition = 'transform .5s cubic-bezier(.23,1,.32,1)';
+      this.prisme.style.transform = `rotateY(${this.currentAngle}deg)`;
+      Array.from(this.faces).forEach(f => {
+        const content = f.querySelector('.face-content');
+        if (content) content.style.transform = `rotateY(${-this.currentAngle}deg)`;
+      });
     }
     this.dragDeltaY = 0;
     if (e.target?.releasePointerCapture) e.target.releasePointerCapture(e.pointerId);
