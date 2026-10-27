@@ -180,6 +180,9 @@ class KeffStation {
 
       this.initialized = true;
       console.log('KeffStation initialized successfully');
+      
+      // Preload embedded PWAs in background
+      setTimeout(() => this.preloadAllEmbedded(), 1000);
     } catch (error) {
       console.error('Initialization failed:', error);
       this.showError(error?.message || error?.toString() || 'Erreur inconnue');
@@ -437,7 +440,25 @@ class KeffStation {
     }
   }
 
-  // ============ EMBEDDED PWA ============
+  // ============ PWA PRELOADING ============
+  preloadPWA(app) {
+    if (!app.embedUrl || this.pwaCache?.has(app.embedUrl)) return Promise.resolve();
+    console.log('Preloading PWA:', app.num);
+    this.pwaCache = this.pwaCache || new Map();
+    
+    return fetch(app.embedUrl, { method: 'GET', mode: 'no-cors', credentials: 'omit' })
+      .then(() => {
+        this.pwaCache.set(app.embedUrl, true);
+        console.log('PWA preloaded:', app.num);
+      })
+      .catch(err => console.warn('PWA preload failed (CORS expected):', app.num, err));
+  }
+
+  preloadAllEmbedded() {
+    this.apps.filter(a => a.embedded && a.embedUrl).forEach(app => this.preloadPWA(app));
+  }
+
+  // ============ EMBEDDED PWA (iframe) ============
   openEmbedded(app) {
     if (!app.embedded || !app.embedUrl) return;
     console.log('Opening embedded PWA:', app.num);
@@ -478,19 +499,50 @@ class KeffStation {
               <div style="font-size:clamp(11px,2vw,13px);color:#b9c0e6;">${sanitizeHTML(app.num)}</div>
             </div>
           </div>
-          <button id="embed-refresh" type="button" aria-label="Actualiser" style="
-            width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.2);
-            background:rgba(255,255,255,.05);color:#ffd23f;font-size:18px;
-            display:flex;align-items:center;justify-content:center;cursor:pointer;
-            transition:transform .15s,background .15s,border-color .15s;
-            -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);">↻</button>
+          <div style="display:flex;gap:8px;">
+            <button id="embed-newtab" type="button" aria-label="Ouvrir dans un nouvel onglet" style="
+              width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.2);
+              background:rgba(255,255,255,.05);color:#27d17f;font-size:18px;
+              display:flex;align-items:center;justify-content:center;cursor:pointer;
+              transition:transform .15s,background .15s,border-color .15s;
+              -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);" title="Ouvrir dans un nouvel onglet">⧉</button>
+            <button id="embed-refresh" type="button" aria-label="Actualiser" style="
+              width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.2);
+              background:rgba(255,255,255,.05);color:#ffd23f;font-size:18px;
+              display:flex;align-items:center;justify-content:center;cursor:pointer;
+              transition:transform .15s,background .15s,border-color .15s;
+              -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);">↻</button>
+          </div>
+        </div>
+        <div id="embed-loading" style="
+          flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+          gap:16px;padding:20px;color:#ffd23f;background:#070816;">
+          <div style="font-size:clamp(14px,3vw,18px);">Chargement de ${sanitizeHTML(app.title)}…</div>
+          <div style="width:min(240px,80vw);height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;">
+            <div style="width:0%;height:100%;background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);border-radius:2px;animation:embed-progress 3s ease-in-out infinite;"></div>
+          </div>
         </div>
         <iframe id="embed-iframe" src="${sanitizeHTML(app.embedUrl)}" style="
-          flex:1;width:100%;border:none;background:#070816;" 
-          allow="camera; microphone; geolocation; payment; clipboard-read; clipboard-write"
-          loading="eager"></iframe>
+          flex:1;width:100%;border:none;background:#070816;display:none;" 
+          allow="camera; microphone; geolocation; payment; clipboard-read; clipboard-write; fullscreen"
+          loading="eager"
+          onload="this.style.display='block'; document.getElementById('embed-loading')?.remove();"></iframe>
       `;
       document.body.appendChild(embedContainer);
+      
+      // Add keyframes for embed progress animation
+      if (!document.getElementById('embed-style')) {
+        const style = document.createElement('style');
+        style.id = 'embed-style';
+        style.textContent = `
+          @keyframes embed-progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+          }
+        `;
+        document.head.appendChild(style);
+      }
     }
     
     this.embeddedIframe = document.getElementById('embed-iframe');
@@ -499,6 +551,9 @@ class KeffStation {
     document.getElementById('embed-back')?.addEventListener('click', () => this.closeEmbedded());
     document.getElementById('embed-refresh')?.addEventListener('click', () => {
       if (this.embeddedIframe) this.embeddedIframe.src = this.embeddedIframe.src;
+    });
+    document.getElementById('embed-newtab')?.addEventListener('click', () => {
+      window.open(app.embedUrl, '_blank', 'noopener,noreferrer');
     });
     
     // Keyboard: Escape to close
