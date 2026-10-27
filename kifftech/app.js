@@ -1,129 +1,173 @@
-/* ===== KiffTech Agent IA - Veille Tech 2020-2026 + Prix KiffTech ===== */
+// ============ STATE ============
+let products = [...LOCAL_DB];
+let filteredProducts = [...LOCAL_DB];
+let activeCategory = 'all', activeYear = 'all', activeBrand = 'all';
+let activeSources = {official:true, social:true, reviews:true, community:true};
+let searchQuery = '', isFetching = false;
 
-// ============ CONFIG ============
-const CLICKWISE_API_KEY = 'cwa_9wUuDrUfYJoCaJJRhdja194cdBuRhIQyh2nxLAeexzY';
-const CLICKWISE_API_BASE = 'https://api.clickwise.ai/v1';
+let userContext = { isSubscriber: false, tenureDays: 0, cartItems: [], get isPromoEligible() { return this.cartItems.length >= 10; } };
 
-// ============ PRIX KIFFTECH SYSTEM ============
-const KIFFTECH_SUB_PRICE_DAILY = 1;
-const KIFFTECH_SUB_MONTHLY = 30;
-const SUB_DISCOUNT_MIN = 10;
-const SUB_DISCOUNT_MAX = 21;
-const SUB_FREE_DELIVERY = true;
-const PROMO_NO_SUB_THRESHOLD = 10;
-const PROMO_NO_SUB_DISCOUNT = 20;
+// ============ UTILITIES ============
+function $(sel, ctx=document){return ctx.querySelector(sel)}
+function $$(sel, ctx=document){return Array.from(ctx.querySelectorAll(sel))}
+function fmtPrice(price, currency='EUR'){return new Intl.NumberFormat('fr-FR',{style:'currency',currency,minimumFractionDigits:0}).format(price)}
+function fmtPriceCrossed(price, currency='EUR'){return `<span class="price-crossed">${fmtPrice(price,currency)}</span>`}
+function toast(msg,type='info'){const t=$('#toast');t.textContent=msg;t.className='toast '+type+' visible';setTimeout(()=>t.classList.remove('visible'),3000)}
+function calcKiffTechPrice(officialPrice, context={}){const {isSubscriber=false,cartItems=[],isPromoEligible=false}=context;let discount=0,freeDelivery=false,reason='';if(isSubscriber){discount=Math.min(10+Math.floor(context.tenureDays/30),21);freeDelivery=true;reason=`Abonne KiffTech (${discount}% + livraison offerte)`;}else if(context.isPromoEligible||context.cartItems.length>=10){discount=20;reason=`Promo 20% (10+ articles)`;}const final=discount>0?Math.round(officialPrice*(100-discount)/100):officialPrice;return{official:officialPrice,kifftech:finalPrice,discount,savings:officialPrice-finalPrice,freeDelivery,reason,currency:'EUR'};}
+function refreshKiffTechPrices(){products.forEach(p=>p.kifftech=calcKiffTechPrice(p.price.official,{isSubscriber:userContext.isSubscriber,cartItems:userContext.cartItems,tenureDays:userContext.tenureDays}));filteredProducts.forEach(p=>{const o=products.find(x=>x.id===p.id);if(o)p.kifftech=o.kifftech;});}
 
-function calcKiffTechPrice(officialPrice, context = {}) {
-  const { isSubscriber = false, cartItems = [], isPromoEligible = false } = context;
-  let discount = 0, freeDelivery = false, reason = '';
-  if (isSubscriber) {
-    const tenureDays = context.tenureDays || 0;
-    discount = Math.min(SUB_DISCOUNT_MIN + Math.floor(tenureDays / 30), SUB_DISCOUNT_MAX);
-    freeDelivery = SUB_FREE_DELIVERY;
-    reason = `Abonne KiffTech (${discount}% + livraison offerte)`;
-  } else if (isPromoEligible || cartItems.length >= PROMO_NO_SUB_THRESHOLD) {
-    discount = PROMO_NO_SUB_DISCOUNT;
-    reason = `Promo ${PROMO_NO_SUB_DISCOUNT}% (${PROMO_NO_SUB_THRESHOLD}+ articles differents)`;
+// ============ CLICKWISE API ============
+async function fetchFromClickwise() {
+  try {
+    toast('Connexion a ClickWise API...','info');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(`${CLICKWISE_API_BASE}/products`, {
+      headers: { 'Authorization': `Bearer ${CLICKWISE_API_KEY}`, 'Content-Type': 'application/json' },
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) throw new Error('Non-JSON response');
+    const data = await res.json();
+    if (!data || (!Array.isArray(data) && !data.products)) throw new Error('Invalid data format');
+    return data.products || data;
+  } catch (e) {
+    console.warn('ClickWise API failed, using local DB:', e.message);
+    toast('API indisponible, base locale utilisee','warning');
+    return LOCAL_DB;
   }
-  const finalPrice = discount > 0 ? Math.round(officialPrice * (100 - discount) / 100) : officialPrice;
-  return { official: officialPrice, kifftech: finalPrice, discount, savings: officialPrice - finalPrice, freeDelivery, reason, currency: 'EUR' };
 }
 
-// ============ LOCAL FALLBACK DATABASE - 10 per category (8 categories = 80 products) ============
-const LOCAL_DB = [
-  // ============ VIDEOGAMES & CONSOLES & ACCESSORIES GADGETS (10) ============
-  {id:"ps5-slim",brand:"Sony",model:"PlayStation 5 Slim",year:2023,category:"VideoGames & Consoles & Accessories Gadgets",price:{official:449,currency:"EUR"},specs:{cpu:"AMD Zen 2 8-cores",gpu:"RDNA 2 10.28 TFLOPS",ssd:"1TB NVMe",raytracing:"Oui",disc:"UHD Blu-ray"},images:["https://gmedia.playstation.com/is/image/SIEPDC/ps5-slim-hero"],videos:[""],sources:{official:"https://www.playstation.com/fr-fr/ps5/"},tags:["Console","Slim","4K"]},
-  {id:"ps5-pro",brand:"Sony",model:"PlayStation 5 Pro",year:2024,category:"VideoGames & Consoles & Accessories Gadgets",price:{official:799,currency:"EUR"},specs:{cpu:"AMD Zen 2",gpu:"RDNA 3 16.7 TFLOPS",ssd:"2TB",ai:"PSSR Upscaling",disc:"Optionnel"},images:["https://gmedia.playstation.com/is/image/SIEPDC/ps5-pro-hero"],videos:[""],sources:{official:"https://www.playstation.com/fr-fr/ps5-pro/"},tags:["Pro","AI Upscaling","4K/8K"]},
-  {id:"xbox-series-x",brand:"Microsoft",model:"Xbox Series X",year:2020,category:"VideoGames & Consoles & Accessories Gadgets",price:{official:499,currency:"EUR"},specs:{cpu:"AMD Zen 2 8-cores",gpu:"RDNA 2 12 TFLOPS",ssd:"1TB NVMe",raytracing:"Oui",disc:"UHD Blu-ray"},images:["https://assets.xboxservices.com/assets/xbox-series-x-hero"],videos:[""],sources:{official:"https://www.xbox.com/fr-FR/consoles/xbox-series-x"},tags:["Console","12TFLOPS","QuickResume"]},
-  {id:"xbox-series-s",brand:"Microsoft",model:"Xbox Series S",year:2020,category:"VideoGames & Consoles & Accessories Gadgets",price:{official:299,currency:"EUR"},specs:{cpu:"AMD Zen 2",gpu:"RDNA 2 4 TFLOPS",ssd:"512GB",raytracing:"Non",disc:"Non"},images:["https://assets.xboxservices.com/assets/xbox-series-s-hero"],videos:[""],sources:{official:"https://www.xbox.com/fr-FR/consoles/xbox-series-s"},tags:["Digital","Compact","1440p"]},
-  {id:"nintendo-switch-oled",brand:"Nintendo",model:"Switch OLED",year:2021,category:"VideoGames & Consoles & Accessories Gadgets",price:{official:349,currency:"EUR"},specs:{screen:"OLED 7\"",cpu:"Nvidia Tegra X1",storage:"64GB",battery:"9h",dock:"TV Mode"},images:["https://www.nintendo.com/eu/media/images/10_share_images/games_15/nintendo_switch_games_35/HW_Nintendo_Switch_OLED_16x9"],videos:[""],sources:{official:"https://www.nintendo.com/fr-FR/Nintendo-Switch-OLED-Model/"},tags:["OLED","Portable","Hybrid"]},
-  {id:"steam-deck-oled",brand:"Valve",model:"Steam Deck OLED",year:2023,category:"VideoGames & Consoles & Accessories Gadgets",price:{official:569,currency:"EUR"},specs:{screen:"OLED 7.4\" 90Hz",cpu:"AMD Zen 2",gpu:"RDNA 2",ssd:"512GB/1TB",battery:"12h"},images:["https://cdn.cloudflare.steamstatic.com/steamdeck/assets/hero_oled"],videos:[""],sources:{official:"https://www.steamdeck.com/en/"},tags:["PC Portable","SteamOS","OLED"]},
-  {id:"rog-ally-x",brand:"ASUS",model:"ROG Ally X",year:2024,category:"VideoGames & Consoles & Accessories Gadgets",price:{official:799,currency:"EUR"},specs:{screen:"IPS 7\" 120Hz",cpu:"AMD Z1 Extreme",ram:"24GB LPDDR5X",ssd:"1TB",battery:"80Wh"},images:["https://rog.asus.com/media/rog-ally-x-hero"],videos:[""],sources:{official:"https://rog.asus.com/fr/gaming-handhelds/rog-ally/rog-ally-x/"},tags:["Windows","Handheld","X"]},
-  {id:"dualsense-edge",brand:"Sony",model:"DualSense Edge",year:2023,category:"VideoGames & Consoles & Accessories Gadgets",price:{official:239,currency:"EUR"},specs:{sticks:"Hall Effect",back:"4 paddles",fn:"Function buttons",battery:"6h",profile:"4 profils"},images:["https://gmedia.playstation.com/is/image/SIEPDC/dualsense-edge-hero"],videos:[""],sources:{official:"https://www.playstation.com/fr-fr/accessories/dualsense-edge-wireless-controller/"},tags:["Pro","Customizable","PS5"]},
-  {id:"xbox-elite-v2",brand:"Microsoft",model:"Xbox Elite Wireless Controller V2",year:2019,category:"VideoGames & Consoles & Accessories Gadgets",price:{official:179,currency:"EUR"},specs:{sticks:"Tension adjustable",back:"4 paddles",hair:"Trigger locks",profile:"3 profils",battery:"40h"},images:["https://assets.xboxservices.com/assets/elite-controller-v2-hero"],videos:[""],sources:{official:"https://www.xbox.com/fr-FR/accessories/controllers/xbox-elite-wireless-controller-series-2"},tags:["Pro","Customizable","Xbox/PC"]},
-  {id:"razer-kishi-v2",brand:"Razer",model:"Kishi V2",year:2022,category:"VideoGames & Consoles & Accessories Gadgets",price:{official:119,currency:"EUR"},specs:{type:"Mobile Controller",connect:"USB-C / Lightning",latency:"<1ms",pass:"Pass-through charging"},images:["https://assets.razerzone.com/images/kishi-v2-hero"],videos:[""],sources:{official:"https://www.razer.com/gaming-controllers/razer-kishi-v2"},tags:["Mobile","LowLatency","CloudGaming"]},
+// ============ RENDER ============
+function generateMedia(p){const m={badges:[]};if(p.videos?.length)m.badges.push({class:'badge-video',label:'Video'});m.badges.push({class:'badge-official',label:'Officiel'});return m;}
 
-  // ============ SMARTPHONES & GADGETS (10) ============
-  {id:"galaxy-s24-ultra",brand:"Samsung",model:"Galaxy S24 Ultra",year:2024,category:"smartphones & gadgets",price:{official:1469,currency:"EUR"},specs:{screen:"Dynamic AMOLED 6.8\" 120Hz",cpu:"Snapdragon 8 Gen 3",camera:"200MP + 3x 50MP",ai:"Galaxy AI",battery:"5000mAh"},images:["https://images.samsung.com/is/image/samsung/p6pim/fr/sm-s928bzaeft/galaxy-s24-ultra-539008888?$684_547_PNG$"],videos:[""],sources:{official:"https://www.samsung.com/fr/galaxy-s24-ultra/"},tags:["200MP","GalaxyAI","S-Pen"]},
-  {id:"galaxy-s24",brand:"Samsung",model:"Galaxy S24",year:2024,category:"smartphones & gadgets",price:{official:909,currency:"EUR"},specs:{screen:"Dynamic AMOLED 6.2\" 120Hz",cpu:"Exynos 2400",camera:"50MP + 12MP + 10MP",ai:"Galaxy AI"},images:["https://images.samsung.com/is/image/samsung/p6pim/fr/sm-s921bzaeft/galaxy-s24-539009999?$684_547_PNG$"],videos:[""],sources:{official:"https://www.samsung.com/fr/galaxy-s24/"},tags:["Compact","GalaxyAI"]},
-  {id:"galaxy-z-fold-6",brand:"Samsung",model:"Galaxy Z Fold 6",year:2024,category:"smartphones & gadgets",price:{official:1899,currency:"EUR"},specs:{screen:"7.6\" + 6.3\"",cpu:"Snapdragon 8 Gen 3",camera:"50MP + 12MP + 10MP",ai:"Galaxy AI"},images:["https://images.samsung.com/is/image/samsung/p6pim/fr/sm-f956bzaeft/galaxy-z-fold-6-539008888?$684_547_PNG$"],videos:[""],sources:{official:"https://www.samsung.com/fr/galaxy-z-fold-6/"},tags:["Foldable","AI","S-Pen"]},
-  {id:"galaxy-z-flip-6",brand:"Samsung",model:"Galaxy Z Flip 6",year:2024,category:"smartphones & gadgets",price:{official:1199,currency:"EUR"},specs:{screen:"6.7\" + 3.4\"",cpu:"Snapdragon 8 Gen 3",camera:"50MP + 12MP",ai:"Galaxy AI"},images:["https://images.samsung.com/is/image/samsung/p6pim/fr/sm-f741bzaeft/galaxy-z-flip-6-539008888?$684_547_PNG$"],videos:[""],sources:{official:"https://www.samsung.com/fr/galaxy-z-flip-6/"},tags:["Flip","Compact","AI"]},
-  {id:"iphone-15-pro-max",brand:"Apple",model:"iPhone 15 Pro Max",year:2023,category:"smartphones & gadgets",price:{official:1479,currency:"EUR"},specs:{screen:"Super Retina XDR 6.7\"",cpu:"A17 Pro",camera:"48MP + 12MP + 12MP",ti:"Titane",usb:"USB-C 3.0"},images:["https://www.apple.com/v/iphone-15-pro/b/images/overview/hero.png"],videos:[""],sources:{official:"https://www.apple.com/fr/iphone-15-pro/"},tags:["Pro","Titane","48MP"]},
-  {id:"iphone-15-pro",brand:"Apple",model:"iPhone 15 Pro",year:2023,category:"smartphones & gadgets",price:{official:1229,currency:"EUR"},specs:{screen:"Super Retina XDR 6.1\"",cpu:"A17 Pro",camera:"48MP + 12MP + 12MP",ti:"Titane"},images:["https://www.apple.com/v/iphone-15-pro/b/images/overview/hero.png"],videos:[""],sources:{official:"https://www.apple.com/fr/iphone-15-pro/"},tags:["Pro","Compact","Titane"]},
-  {id:"xiaomi-14-ultra",brand:"Xiaomi",model:"Xiaomi 14 Ultra",year:2024,category:"smartphones & gadgets",price:{official:1499,currency:"EUR"},specs:{screen:"AMOLED 6.73\" 120Hz",cpu:"Snapdragon 8 Gen 3",camera:"1\" IMX989 + Leica Summilux",video:"8K"},images:["https://i01.appmifile.com/webfile/globalimg/products/pc/xiaomi-14-ultra/hero.png"],videos:[""],sources:{official:"https://www.mi.com/global/product/xiaomi-14-ultra/"},tags:["1inch","Leica","Flagship"]},
-  {id:"xiaomi-14",brand:"Xiaomi",model:"Xiaomi 14",year:2024,category:"smartphones & gadgets",price:{official:999,currency:"EUR"},specs:{screen:"AMOLED 6.36\"",cpu:"Snapdragon 8 Gen 3",camera:"50MP Leica"},images:["https://i01.appmifile.com/webfile/globalimg/products/pc/xiaomi-14/hero.png"],videos:[""],sources:{official:"https://www.mi.com/global/product/xiaomi-14/"},tags:["Compact","Leica"]},
-  {id:"google-pixel-9-pro",brand:"Google",model:"Pixel 9 Pro",year:2024,category:"smartphones & gadgets",price:{official:1099,currency:"EUR"},specs:{screen:"Super Actua 6.3\"",cpu:"Tensor G4",camera:"50MP + 48MP + 48MP",ai:"Gemini Nano"},images:["https://www.gstatic.com/pixel/hero/pixel-9-pro"],videos:[""],sources:{official:"https://store.google.com/fr/product/pixel_9_pro"},tags:["AI","Tensor","Camera"]},
-  {id:"oneplus-12",brand:"OnePlus",model:"OnePlus 12",year:2024,category:"smartphones & gadgets",price:{official:949,currency:"EUR"},specs:{screen:"AMOLED 6.82\" 120Hz",cpu:"Snapdragon 8 Gen 3",camera:"50MP + 64MP + 48MP",charge:"100W"},images:["https://image01.oneplus.net/hero/12"],videos:[""],sources:{official:"https://www.oneplus.com/fr/12"},tags:["FastCharge","Hasselblad","Flagship"]},
+function renderProducts(){
+  const grid=$('#products-grid');
+  if(!grid){console.warn('products-grid not found');return;}
+  if(filteredProducts.length===0){grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1;padding:40px;text-align:center"><span style="font-size:48px">🔍</span><p>Aucun produit</p></div>`;return;}
+  grid.innerHTML=filteredProducts.map(p=>{
+    const kt=p.kifftech;const has=kt.discount>0;const med=generateMedia(p);
+    return `<article class="product-card" data-id="${p.id}"><div class="product-media"><img src="${p.images[0]}" alt="${p.brand} ${p.model}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 400%22%3E%3Crect fill=%22%231a1d3a%22 width=%22400%22 height=%22400%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2224%22 fill=%22%23444%22 text-anchor=%22middle%22%3E${p.brand} ${p.model}%3C/text%3E%3C/svg%3E'"><div class="media-badge">${med.badges.map(b=>`<span class="badge ${b.class}">${b.label}</span>`).join('')}${has?`<span class="badge badge-promo">-${kt.discount}%</span>`:''}</div></div><div class="product-info"><span class="product-brand">${p.brand}</span><h3 class="product-name">${p.model}</h3><div class="product-meta"><span class="meta-item meta-year">${p.year}</span><div class="meta-item meta-price-wrap">${has?fmtPriceCrossed(kt.official):''}<span class="price-kifftech ${has?'has-discount':''}">${fmtPrice(kt.kifftech)}</span></div></div>${has?`<div class="discount-badge">${kt.reason} • Economisez ${fmtPrice(kt.savings)}${kt.freeDelivery?' • Livraison offerte':''}</div>`:''}<div class="product-specs">${Object.entries(p.specs||{}).slice(0,3).map(([k,v])=>`<div class="spec-row"><span class="spec-label">${k}</span><span class="spec-value">${v}</span></div>`).join('')}</div><div class="product-actions"><button class="btn-sm primary" onclick="openModal('${p.id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Details</button><button class="btn-sm" onclick="event.stopPropagation();addToCart('${p.id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg>Ajouter</button></div></div></article>`;
+  }).join('');
+  $('#results-count').textContent=`${filteredProducts.length} produit${filteredProducts.length>1?'s':''}`;
+  updateStats();updateCartBadge();
+}
 
-  // ============ COMPUTERS & GADGETS (10) ============
-  {id:"macbook-pro-m3",brand:"Apple",model:"MacBook Pro 16 M3 Max",year:2023,category:"computers & gadgets",price:{official:3999,currency:"EUR"},specs:{cpu:"M3 Max 16C",gpu:"40C GPU",ram:"128GB",ssd:"4TB",screen:"Liquid Retina XDR 16\""},images:["https://www.apple.com/v/macbook-pro-14-and-16/b/images/overview/hero.png"],videos:[""],sources:{official:"https://www.apple.com/fr/macbook-pro-14-and-16/"},tags:["M3 Max","Pro","Creator"]},
-  {id:"macbook-air-m3",brand:"Apple",model:"MacBook Air 15 M3",year:2024,category:"computers & gadgets",price:{official:1599,currency:"EUR"},specs:{cpu:"M3 8C/10C",ram:"24GB",ssd:"512GB",screen:"Liquid Retina 15.3\""},images:["https://www.apple.com/v/macbook-air-13-and-15-m3/b/images/overview/hero.png"],videos:[""],sources:{official:"https://www.apple.com/fr/macbook-air/"},tags:["Air","Fanless","M3"]},
-  {id:"asus-rog-zephyrus-g16",brand:"ASUS",model:"ROG Zephyrus G16 2024",year:2024,category:"computers & gadgets",price:{official:2499,currency:"EUR"},specs:{cpu:"Intel Core Ultra 9 185H",gpu:"RTX 4090 16GB",ram:"32GB LPDDR5X",ssd:"2TB",screen:"OLED 16\" 240Hz"},images:["https://rog.asus.com/media/rog-zephyrus-g16-2024-hero"],videos:[""],sources:{official:"https://rog.asus.com/fr/laptops/rog-zephyrus/rog-zephyrus-g16-2024/"},tags:["AI","OLED","Gaming"]},
-  {id:"lenovo-legion-9i",brand:"Lenovo",model:"Legion 9i Gen 9",year:2024,category:"computers & gadgets",price:{official:3299,currency:"EUR"},specs:{cpu:"Intel Core i9-14900HX",gpu:"RTX 4090 16GB",ram:"64GB DDR5",ssd:"2TB",cooling:"Liquid Metal"},images:["https://www.lenovo.com/hero/legion-9i-gen9"],videos:[""],sources:{official:"https://www.lenovo.com/fr/fr/p/laptops/legion-laptops/legion-9i-gen-9/82w1"},tags:["LiquidCool","RTX4090","Pro"]},
-  {id:"razer-blade-16",brand:"Razer",model:"Blade 16 2024",year:2024,category:"computers & gadgets",price:{official:3699,currency:"EUR"},specs:{cpu:"Intel Core i9-14900HX",gpu:"RTX 4090 16GB",ram:"32GB DDR5",screen:"OLED 16\" 240Hz",chassis:"CNC Aluminum"},images:["https://assets.razerzone.com/images/blade-16-2024-hero"],videos:[""],sources:{official:"https://www.razer.com/gaming-laptops/razer-blade-16"},tags:["OLED","Compact","RTX4090"]},
-  {id:"framework-13-amd",brand:"Framework",model:"Framework Laptop 13 AMD",year:2024,category:"computers & gadgets",price:{official:1049,currency:"EUR"},specs:{cpu:"Ryzen 7 7840U",ram:"32GB DDR5",ssd:"1TB",ports:"Modular Expansion",diy:"Repairable"},images:["https://frame.work/hero-13-amd"],videos:[""],sources:{official:"https://frame.work/fr/laptop-13"},tags:["Modular","Repairable","Linux"]},
-  {id:"msi-stealth-16",brand:"MSI",model:"Stealth 16 AI Studio",year:2024,category:"computers & gadgets",price:{official:2799,currency:"EUR"},specs:{cpu:"Intel Core Ultra 9 185H",gpu:"RTX 4080 12GB",ram:"32GB DDR5",screen:"OLED 16\" 16:10"},images:["https://www.msi.com/hero/stealth-16-ai-studio"],videos:[""],sources:{official:"https://www.msi.com/Laptop/Stealth-16-AI-Studio-A1V"},tags:["AI","Studio","Creator"]},
-  {id:"hp-omen-transcend",brand:"HP",model:"OMEN Transcend 16",year:2024,category:"computers & gadgets",price:{official:2299,currency:"EUR"},specs:{cpu:"Intel Core Ultra 9 185H",gpu:"RTX 4070 8GB",ram:"32GB",screen:"OLED 16\" 240Hz",weight:"1.8kg"},images:["https://www.hp.com/hero/omen-transcend-16"],videos:[""],sources:{official:"https://www.hp.com/fr-fr/shop/omen-laptops.html"},tags:["Light","OLED","Gaming"]},
-  {id:"dell-xps-16",brand:"Dell",model:"XPS 16 9640",year:2024,category:"computers & gadgets",price:{official:2699,currency:"EUR"},specs:{cpu:"Intel Core Ultra 7 155H",gpu:"RTX 4070 8GB",ram:"32GB LPDDR5X",screen:"OLED 16.3\" 3.5K"},images:["https://www.dell.com/hero/xps-16-9640"],videos:[""],sources:{official:"https://www.dell.com/fr-fr/shop/laptops/xps-16"},tags:["Premium","OLED","Creator"]},
-  {id:"asus-zenbook-duo",brand:"ASUS",model:"Zenbook Duo 2024",year:2024,category:"computers & gadgets",price:{official:2199,currency:"EUR"},specs:{cpu:"Intel Core Ultra 9 185H",ram:"32GB",ssd:"2TB",screen:"Dual OLED 14\" 120Hz",keyboard:"Detachable"},images:["https://www.asus.com/hero/zenbook-duo-2024"],videos:[""],sources:{official:"https://www.asus.com/fr/laptops/zenbook-duo/zenbook-duo-2024/"},tags:["DualScreen","OLED","Productivity"]},
+function updateStats(){$('#stat-products').textContent=products.length;$('#stat-sources').textContent='ClickWise+Local';const yrs=new Set(products.map(p=>p.year));$('#stat-coverage').textContent=`${yrs.size} ans`;$('#stat-updated').textContent=new Date().toLocaleDateString('fr-FR');}
+function fmtPrice(price,c='EUR'){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:c,minimumFractionDigits:0}).format(price)}
+function fmtPriceCrossed(p,c='EUR'){return `<span class="price-crossed">${fmtPrice(p,c)}</span>`}
+function toast(m,t='info'){const e=$('#toast');e.textContent=m;e.className='toast '+t+' visible';setTimeout(()=>e.classList.remove('visible'),3000)}
 
-  // ============ TABLETS & GADGETS (10) ============
-  {id:"ipad-pro-m4",brand:"Apple",model:"iPad Pro 13 M4",year:2024,category:"tablets and gadgets",price:{official:1599,currency:"EUR"},specs:{cpu:"M4 10C",gpu:"10C",ram:"16GB",ssd:"512GB",screen:"Ultra Retina XDR 13\" OLED"},images:["https://www.apple.com/v/ipad-pro-11-and-13/b/images/overview/hero.png"],videos:[""],sources:{official:"https://www.apple.com/fr/ipad-pro/"},tags:["M4","OLED","Pro"]},
-  {id:"ipad-air-m2",brand:"Apple",model:"iPad Air 13 M2",year:2024,category:"tablets and gadgets",price:{official:999,currency:"EUR"},specs:{cpu:"M2 8C/10C",ram:"8GB",ssd:"256GB",screen:"Liquid Retina 13\""},images:["https://www.apple.com/v/ipad-air-11-and-13-m2/b/images/overview/hero.png"],videos:[""],sources:{official:"https://www.apple.com/fr/ipad-air/"},tags:["M2","Air","Value"]},
-  {id:"galaxy-tab-s10-ultra",brand:"Samsung",model:"Galaxy Tab S10 Ultra",year:2024,category:"tablets and gadgets",price:{official:1399,currency:"EUR"},specs:{screen:"Dynamic AMOLED 14.6\" 120Hz",cpu:"Dimensity 9300+",ram:"16GB",ssd:"1TB","s-pen":"Inclus"},images:["https://images.samsung.com/is/image/samsung/p6pim/fr/sm-x926bzaeft/galaxy-tab-s10-ultra-539008888?$684_547_PNG$"],videos:[""],sources:{official:"https://www.samsung.com/fr/galaxy-tab-s10-ultra/"},tags:["AMOLED","S-Pen","DeX"]},
-  {id:"galaxy-tab-s10-plus",brand:"Samsung",model:"Galaxy Tab S10+",year:2024,category:"tablets and gadgets",price:{official:1099,currency:"EUR"},specs:{screen:"Dynamic AMOLED 12.4\" 120Hz",cpu:"Dimensity 9300+",ram:"12GB",ssd:"512GB"},images:["https://images.samsung.com/is/image/samsung/p6pim/fr/sm-x826bzaeft/galaxy-tab-s10-plus-539008888?$684_547_PNG$"],videos:[""],sources:{official:"https://www.samsung.com/fr/galaxy-tab-s10-plus/"},tags:["AMOLED","S-Pen","Compact"]},
-  {id:"xiaomi-pad-6-pro",brand:"Xiaomi",model:"Xiaomi Pad 6 Pro",year:2023,category:"tablets and gadgets",price:{official:499,currency:"EUR"},specs:{screen:"LCD 11\" 144Hz",cpu:"Snapdragon 8+ Gen 1",ram:"8GB",ssd:"256GB",pen:"Xiaomi Smart Pen"},images:["https://i01.appmifile.com/webfile/globalimg/products/pc/xiaomi-pad-6-pro/hero.png"],videos:[""],sources:{official:"https://www.mi.com/global/product/xiaomi-pad-6-pro/"},tags:["144Hz","Value","Pen"]},
-  {id:"lenovo-tab-extreme",brand:"Lenovo",model:"Tab Extreme",year:2023,category:"tablets and gadgets",price:{official:699,currency:"EUR"},specs:{screen:"OLED 14.5\" 120Hz",cpu:"Dimensity 9000",ram:"12GB",ssd:"256GB",stylus:"Precision Pen 3"},images:["https://www.lenovo.com/hero/tab-extreme"],videos:[""],sources:{official:"https://www.lenovo.com/fr/fr/p/tablets/lenovo-tab-extreme"},tags:["OLED","Large","Productivity"]},
-  {id:"oneplus-pad-2",brand:"OnePlus",model:"OnePlus Pad 2",year:2024,category:"tablets and gadgets",price:{official:549,currency:"EUR"},specs:{screen:"LCD 12.1\" 144Hz",cpu:"Snapdragon 8 Gen 3",ram:"12GB",ssd:"256GB",charge:"67W"},images:["https://image01.oneplus.net/hero/pad-2"],videos:[""],sources:{official:"https://www.oneplus.com/fr/pad-2"},tags:["144Hz","FastCharge","Value"]},
-  {id:"google-pixel-tablet",brand:"Google",model:"Pixel Tablet",year:2023,category:"tablets and gadgets",price:{official:679,currency:"EUR"},specs:{screen:"LCD 11\"",cpu:"Tensor G2",ram:"8GB",dock:"Charging Speaker Dock",cam:"8MP"},images:["https://www.gstatic.com/pixel/tablet/hero"],videos:[""],sources:{official:"https://store.google.com/fr/product/pixel_tablet"},tags:["Dock","Tensor","SmartHome"]},
-  {id:"ipad-mini-7",brand:"Apple",model:"iPad mini 7 (A17 Pro)",year:2024,category:"tablets and gadgets",price:{official:599,currency:"EUR"},specs:{screen:"Liquid Retina 8.3\"",cpu:"A17 Pro",ram:"8GB",ssd:"128GB",apple_pencil:"Pro"},images:["https://www.apple.com/v/ipad-mini/b/images/overview/hero.png"],videos:[""],sources:{official:"https://www.apple.com/fr/ipad-mini/"},tags:["Compact","A17Pro","Portable"]},
-  {id:"samsung-galaxy-tab-a9",brand:"Samsung",model:"Galaxy Tab A9+",year:2023,category:"tablets and gadgets",price:{official:269,currency:"EUR"},specs:{screen:"LCD 11\" 90Hz",cpu:"Snapdragon 695",ram:"8GB",ssd:"128GB"},images:["https://images.samsung.com/is/image/samsung/p6pim/fr/sm-x216bzaeft/galaxy-tab-a9-plus-539008888?$684_547_PNG$"],videos:[""],sources:{official:"https://www.samsung.com/fr/galaxy-tab-a9-plus/"},tags:["Budget","90Hz","Entry"]},
+// ============ DATA LOADING ============
+async function loadProducts(){
+  try {
+    toast('Chargement produits...','info');
+    products = [...LOCAL_DB];
+    products.forEach(p=>p.kifftech=calcKiffTechPrice(p.price.official));
+    filteredProducts=[...products];
+    applyFilters();
+    toast(`${products.length} produits charges (local)`,`success`);
 
-  // ============ HOLOGRAMMES & VR & AR (10) ============
-  {id:"apple-vision-pro",brand:"Apple",model:"Vision Pro",year:2024,category:"hologrames & VR & AR",price:{official:3999,currency:"EUR"},specs:{screen:"Micro-OLED 23M pixels",cpu:"M2 + R1",ram:"16GB",storage:"1TB",os:"visionOS",eyes:"EyeSight"},images:["https://www.apple.com/v/vision-pro/b/images/overview/hero.png"],videos:[""],sources:{official:"https://www.apple.com/fr/vision-pro/"},tags:["Spatial","MixedReality","Pro"]},
-  {id:"meta-quest-3",brand:"Meta",model:"Quest 3",year:2023,category:"hologrames & VR & AR",price:{official:549,currency:"EUR"},specs:{screen:"LCD 2064x2208 per eye",cpu:"Snapdragon XR2 Gen 2",ram:"8GB",storage:"512GB",mixed:"Passthrough Color"},images:["https://www.meta.com/hero/quest-3"],videos:[""],sources:{official:"https://www.meta.com/fr/quest/quest-3/"},tags:["MixedReality","Standalone","HandTracking"]},
-  {id:"meta-quest-pro",brand:"Meta",model:"Quest Pro",year:2022,category:"hologrames & VR & AR",price:{official:1499,currency:"EUR"},specs:{screen:"LCD 1800x1920 per eye",cpu:"Snapdragon XR2+",ram:"12GB",storage:"256GB",face:"Eye/Face Tracking"},images:["https://www.meta.com/hero/quest-pro"],videos:[""],sources:{official:"https://www.meta.com/fr/quest/quest-pro/"},tags:["Pro","FaceTracking","Work"]},
-  {id:"htc-vive-xr-elite",brand:"HTC",model:"VIVE XR Elite",year:2023,category:"hologrames & VR & AR",price:{official:1299,currency:"EUR"},specs:{screen:"LCD 1920x1920 per eye",cpu:"Snapdragon XR2",ram:"12GB",mixed:"Passthrough MR",battery:"Removable"},images:["https://www.vive.com/hero/xr-elite"],videos:[""],sources:{official:"https://www.vive.com/fr/product/vive-xr-elite/"},tags:["MR","Modular","PCVR"]},
-  {id:"pimax-crystal",brand:"Pimax",model:"Crystal",year:2023,category:"hologrames & VR & AR",price:{official:1899,currency:"EUR"},specs:{screen:"QLED 2880x2880 per eye",fov:"140 deg",cpu:"PCVR",lens:"Aspheric Glass",res:"5760x2880"},images:["https://www.pimax.com/hero/crystal"],videos:[""],sources:{official:"https://shop.pimax.com/products/pimax-crystal"},tags:["HighRes","WideFOV","PCVR"]},
-  {id:"varjo-xr-4",brand:"Varjo",model:"XR-4",year:2024,category:"hologrames & VR & AR",price:{official:3999,currency:"EUR"},specs:{screen:"Micro-OLED 4Kx4K per eye",fov:"120x105 deg",cpu:"PCVR",pass:"LiDAR + Cameras",res:"4000x4000"},images:["https://varjo.com/hero/xr-4"],videos:[""],sources:{official:"https://varjo.com/products/xr-4/"},tags:["Enterprise","HumanEye","LiDAR"]},
-  {id:"xreal-air-2-ultra",brand:"XREAL",model:"Air 2 Ultra",year:2024,category:"hologrames & VR & AR",price:{official:699,currency:"EUR"},specs:{screen:"Micro-OLED 1080p per eye",cpu:"Snapdragon XR2",hand:"6DoF Tracking",weight:"80g",compatibility:"USB-C"},images:["https://www.xreal.com/hero/air-2-ultra"],videos:[""],sources:{official:"https://www.xreal.com/air-2-ultra/"},tags:["AR","Lightweight","Spatial"]},
-  {id:"viture-pro-xr",brand:"VITURE",model:"Pro XR Glasses",year:2023,category:"hologrames & VR & AR",price:{official:549,currency:"EUR"},specs:{screen:"Micro-OLED 1080p",fov:"50 deg",cpu:"Mobile/PC",myopia:"0-500 deg adjustment"},images:["https://www.viture.one/hero/pro-xr"],videos:[""],sources:{official:"https://www.viture.one/pro-xr/"},tags:["AR","Glasses","MyopiaAdj"]},
-  {id:"rokid-max",brand:"Rokid",model:"Max AR Glasses",year:2023,category:"hologrames & VR & AR",price:{official:439,currency:"EUR"},specs:{screen:"Micro-OLED 1080p",fov:"50 deg",brightness:"600 nits",myopia:"0-600 deg"},images:["https://www.rokid.com/hero/max"],videos:[""],sources:{official:"https://www.rokid.com/max/"},tags:["AR","Brightness","Myopia"]},
-  {id:"rayneo-x2",brand:"RayNeo",model:"X2 Lite",year:2024,category:"hologrames & VR & AR",price:{official:699,currency:"EUR"},specs:{screen:"Micro-OLED 3000 nits",cpu:"Snapdragon XR2",waveguide:"Diffractive",ai:"On-device AI"},images:["https://www.rayneo.com/hero/x2-lite"],videos:[""],sources:{official:"https://www.rayneo.com/x2-lite/"},tags:["Bright","Waveguide","AI"]},
+    try {
+      const apiProducts = await fetchFromClickwise();
+      if (apiProducts && apiProducts.length) {
+        const apiMapped = apiProducts.map((p,i)=>({...p,id:p.id||`cw-${i}`,kifftech:calcKiffTechPrice(p.price?.official||p.price||0)}));
+        const existingIds = new Set(products.map(p=>p.id));
+        const newProducts = apiMapped.filter(p=>!existingIds.has(p.id));
+        if (newProducts.length) {
+          products = [...newProducts, ...products];
+          filteredProducts = [...products];
+          applyFilters();
+          toast(`${newProducts.length} nouveaux produits via ClickWise`,`success`);
+        }
+      }
+    } catch(e) { console.log('ClickWise background fetch skipped'); }
+  } catch(e) {
+    console.error(e);
+    products=[...LOCAL_DB];products.forEach(p=>p.kifftech=calcKiffTechPrice(p.price.official));
+    filteredProducts=[...products];
+    applyFilters();
+    toast('Mode local active','warning');
+  }
+}
 
-  // ============ SMART FURNITURES ELECTRONICS (10) ============
-  {id:"ikea-starkvind",brand:"IKEA",model:"STARKVIND Air Purifier Table",year:2021,category:"smart furnitures electronics",price:{official:179,currency:"EUR"},specs:{type:"Side Table + Air Purifier",filter:"3-stage",auto:"PM2.5 Sensor",app:"IKEA Home Smart"},images:["https://www.ikea.com/images/starkvind-hero"],videos:[""],sources:{official:"https://www.ikea.com/fr/fr/p/starkvind-table-air-purifier-50503122/"},tags:["Furniture","AirPurifier","Matter"]},
-  {id:"ikea-symfonisk",brand:"IKEA/Sonos",model:"SYMFONISK Picture Frame Speaker",year:2021,category:"smart furnitures electronics",price:{official:199,currency:"EUR"},specs:{type:"Wall Art + Speaker",audio:"Sonos Class D",wifi:"WiFi 5",multi:"Multi-room"},images:["https://www.ikea.com/images/symfonisk-frame-hero"],videos:[""],sources:{official:"https://www.ikea.com/fr/fr/p/symfonisk-picture-frame-wifi-speaker-90493122/"},tags:["Art","Speaker","Sonos"]},
-  {id:"samsung-frame-tv",brand:"Samsung",model:"The Frame 2024 65\"",year:2024,category:"smart furnitures electronics",price:{official:1999,currency:"EUR"},specs:{screen:"QLED 4K 120Hz",art:"Art Mode 2.0",matte:"Anti-Reflection",slim:"Slim Fit Wall Mount"},images:["https://images.samsung.com/is/image/samsung/p6pim/fr/ls03d-hero"],videos:[""],sources:{official:"https://www.samsung.com/fr/tvs/the-frame/"},tags:["ArtMode","Matte","Slim"]},
-  {id:"lg-olean-g4",brand:"LG",model:"OLED G4 65\"",year:2024,category:"smart furnitures electronics",price:{official:2699,currency:"EUR"},specs:{screen:"OLED MLA 4K 144Hz",brightness:"1500 nits",cpu:"Alpha 11 AI",gaming:"4x HDMI 2.1"},images:["https://www.lg.com/hero/oled-g4"],videos:[""],sources:{official:"https://www.lg.com/fr/tvs/lg-oled-g4"},tags:["MLA","Bright","Gaming"]},
-  {id:"hue-play-gradient",brand:"Philips Hue",model:"Play Gradient Lightstrip 65\"",year:2022,category:"smart furnitures electronics",price:{official:229,currency:"EUR"},specs:{type:"TV Backlight",colors:"16M",sync:"HDMI Sync Box",matter:"Matter/Thread"},images:["https://www.philips-hue.com/hero/gradient-lightstrip"],videos:[""],sources:{official:"https://www.philips-hue.com/fr-fr/p/hue-play-gradient-lightstrip"},tags:["Ambilight","Sync","Matter"]},
-  {id:"nanoleaf-shapes",brand:"Nanoleaf",model:"Shapes Hexagons",year:2021,category:"smart furnitures electronics",price:{official:199,currency:"EUR"},specs:{type:"Modular Wall Panels",touch:"Touch Reactive",rgb:"16M Colors",matter:"Matter/Thread"},images:["https://nanoleaf.me/hero/shapes"],videos:[""],sources:{official:"https://nanoleaf.me/fr/shapes/"},tags:["Modular","Touch","Thread"]},
-  {id:"govee-glide-wall",brand:"Govee",model:"Glide Wall Light",year:2022,category:"smart furnitures electronics",price:{official:89,currency:"EUR"},specs:{type:"RGBIC Wall Bars",segments:"12",matter:"Matter",music:"Audio Reactive"},images:["https://www.govee.com/hero/glide-wall"],videos:[""],sources:{official:"https://www.govee.com/products/govee-glide-wall-light"},tags:["Matter","MusicSync","Budget"]},
-  {id:"switchbot-curtain-3",brand:"SwitchBot",model:"Curtain 3",year:2024,category:"smart furnitures electronics",price:{official:99,currency:"EUR"},specs:{type:"Smart Curtain Motor",solar:"Solar Panel Option",matter:"Matter",voice:"Matter/Alexa/Google"},images:["https://www.switchbot.com/hero/curtain-3"],videos:[""],sources:{official:"https://www.switchbot.com/products/switchbot-curtain-3"},tags:["Matter","Solar","Retrofit"]},
-  {id:"aqara-smart-lock",brand:"Aqara",model:"Smart Lock U200",year:2024,category:"smart furnitures electronics",price:{official:249,currency:"EUR"},specs:{type:"Mortise Lock",unlock:"Fingerprint/Code/NFC/App",matter:"Matter",battery:"8 mois"},images:["https://www.aqara.com/hero/u200"],videos:[""],sources:{official:"https://www.aqara.com/fr/u200/"},tags:["Matter","Fingerprint","Security"]},
-  {id:"yale-linus-l2",brand:"Yale",model:"Linus L2 Smart Lock",year:2024,category:"smart furnitures electronics",price:{official:279,currency:"EUR"},specs:{type:"Cylinder Lock",unlock:"App/Keypad/Biometric",matter:"Matter",auto:"Auto-lock"},images:["https://www.yalehome.com/hero/linus-l2"],videos:[""],sources:{official:"https://www.yalehome.com/fr/linus-l2/"},tags:["Matter","Retrofit","Mortise"]},
+// ============ CART / SUB ============
+function addToCart(id){const p=products.find(x=>x.id===id);if(!p||userContext.cartItems.some(i=>i.id===id))return;userContext.cartItems.push({...p,qty:1});refreshKiffTechPrices();renderProducts();updateCartPanel();toast(`${p.model} ajoute`,`success`);}
+function removeFromCart(id){userContext.cartItems=userContext.cartItems.filter(i=>i.id!==id);refreshKiffTechPrices();renderProducts();updateCartPanel();}
+function updateCartBadge(){const c=userContext.cartItems.length;$('#cart-count').textContent=c;$('#cart-count').style.display=c?'flex':'none';updatePromoUI();}
+function updatePromoUI(){const el=$('#promo-indicator');if(!el)return;if(userContext.isSubscriber)el.innerHTML=`<span class="promo-active">Abonne • ${calcKiffTechPrice(100,{isSubscriber:true}).discount}% + Livraison</span>`;else if(userContext.cartItems.length>=10)el.innerHTML=`<span class="promo-active">Promo -20% activee</span>`;else el.innerHTML=`<span class="promo-pending">Ajoutez ${10-userContext.cartItems.length} articles pour -20%</span>`;}
+function updateCartPanel(){const p=$('#cart-panel');if(!p)return;if(!userContext.cartItems.length){p.innerHTML=`<p style="color:#8a92b8;text-align:center;padding:20px">Selection vide</p>`;return;}let to=0,tk=0;p.innerHTML=userContext.cartItems.map(i=>{const kt=calcKiffTechPrice(i.price.official,{isSubscriber:userContext.isSubscriber,cartItems:userContext.cartItems});to+=kt.official;tk+=kt.kifftech;return `<div style="display:flex;gap:12px;padding:12px;background:rgba(255,255,255,.03);border-radius:10px;border:1px solid rgba(255,255,255,.06)"><img src="${i.images[0]}" style="width:50px;height:50px;object-fit:cover;border-radius:8px"><div style="flex:1"><div style="font-weight:600">${i.model}</div><div style="font-size:.8rem;color:#8a92b8">${i.brand}</div></div><div style="text-align:right"><div style="font-size:.75rem;color:#8a92b8;text-decoration:line-through">${fmtPrice(kt.official)}</div><div style="font-weight:700;color:#27d17f">${fmtPrice(kt.kifftech)}</div></div><button onclick="removeFromCart('${i.id}')" style="width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,61,154,.3);background:rgba(255,61,154,.1);color:#ff3d9a;cursor:pointer">x</button></div>`;}).join('')+`<div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between"><div><div style="font-size:.8rem;color:#8a92b8">Total officiel</div><div style="text-decoration:line-through;color:#b9c0e6">${fmtPrice(to)}</div></div><div style="text-align:right"><div style="font-size:.8rem;color:#8a92b8">Prix KiffTech</div><div style="font-weight:800;color:#27d17f;font-size:1.2rem">${fmtPrice(tk)}</div><div style="font-size:.7rem;color:#27d17f">Economie ${fmtPrice(to-tk)}</div></div></div><button class="action-btn primary" style="margin-top:12px;width:100%" onclick="checkout()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/></svg>Commander</button>`;}
+function checkout(){toast('Redirection paiement...','info');}
+function toggleSub(){userContext.isSubscriber=!userContext.isSubscriber;userContext.tenureDays=userContext.isSubscriber?30:0;refreshKiffTechPrices();renderProducts();updateCartPanel();updateSubUI();toast(userContext.isSubscriber?'Abonnement active (1eur/jour)':'Desactive',userContext.isSubscriber?'success':'info');}
+function updateSubUI(){const html=userContext.isSubscriber?'Gerer':'S\'abonner 1eur/jour';[$('#btn-subscribe'),$('#btn-subscribe-header')].forEach(el=>{if(el){el.innerHTML=html;el.className='action-btn '+(userContext.isSubscriber?'primary':'');}});updatePromoUI();}
+function updatePromoUI(){const el=$('#promo-indicator');if(!el)return;if(userContext.isSubscriber)el.innerHTML=`<span class="promo-active">Abonne ${calcKiffTechPrice(100,{isSubscriber:true}).discount}%</span>`;else if(userContext.cartItems.length>=10)el.innerHTML=`<span class="promo-active">Promo -20%</span>`;else el.innerHTML=`<span class="promo-pending">${10-userContext.cartItems.length} pour -20%</span>`;}
 
-  // ============ CULTURE GARDEN (10) ============
-  {id:"click-grow-25",brand:"Click & Grow",model:"Smart Garden 25",year:2023,category:"culture garden",price:{official:249,currency:"EUR"},specs:{capacity:"25 pods",water:"Auto 5L",light:"LED 20W Full Spectrum",app:"App Control"},images:["https://www.clickandgrow.com/hero/smart-garden-25"],videos:[""],sources:{official:"https://www.clickandgrow.com/smart-garden-25/"},tags:["Hydroponic","Auto","Indoor"]},
-  {id:"click-grow-9",brand:"Click & Grow",model:"Smart Garden 9",year:2021,category:"culture garden",price:{official:149,currency:"EUR"},specs:{capacity:"9 pods",water:"Auto 4L",light:"LED 13W",app:"App Control"},images:["https://www.clickandgrow.com/hero/smart-garden-9"],videos:[""],sources:{official:"https://www.clickandgrow.com/smart-garden-9/"},tags:["Compact","Auto","Herbs"]},
-  {id:"aerogarden-bounty",brand:"AeroGarden",model:"Bounty Elite",year:2022,category:"culture garden",price:{official:329,currency:"EUR"},specs:{capacity:"9 pods",water:"Auto 4L",light:"LED 50W",touch:"Touchscreen",wifi:"WiFi"},images:["https://www.aerogarden.com/hero/bounty-elite"],videos:[""],sources:{official:"https://www.aerogarden.com/bounty-elite/"},tags:["Hydroponic","Touch","WiFi"]},
-  {id:"rise-garden",brand:"Rise Gardens",model:"Rise Garden Single",year:2022,category:"culture garden",price:{official:279,currency:"EUR"},specs:{capacity:"12 pods",water:"Auto 5L",light:"LED Full Spectrum",app:"App + Camera"},images:["https://www.risegardens.com/hero/single"],videos:[""],sources:{official:"https://www.risegardens.com/"},tags:["Hydroponic","Camera","Modular"]},
-  {id:"gardyn-3",brand:"Gardyn",model:"Home Kit 3.0",year:2023,category:"culture garden",price:{official:699,currency:"EUR"},specs:{capacity:"30 plants",water:"Auto 19L",light:"LED 500W",ai:"AI Camera Monitoring"},images:["https://www.gardyn.com/hero/3-0"],videos:[""],sources:{official:"https://www.gardyn.com/"},tags:["AI","Vertical","30Plants"]},
-  {id:"veritable-connect",brand:"Véritable",model:"Connect 4",year:2022,category:"culture garden",price:{official:219,currency:"EUR"},specs:{capacity:"4 pots",water:"Auto 1.5L",light:"LED 20W",app:"Bluetooth"},images:["https://www.veritable-garden.com/hero/connect"],videos:[""],sources:{official:"https://www.veritable-garden.com/connect/"},tags:["Compact","Bluetooth","French"]},
-  {id:"plantone-smart",brand:"Plantone",model:"Smart Planter",year:2023,category:"culture garden",price:{official:129,currency:"EUR"},specs:{capacity:"1 plant",sensor:"Moisture/Light/Temp",water:"Auto Reservoir",app:"App Alerts"},images:["https://www.plantone.com/hero/smart"],videos:[""],sources:{official:"https://www.plantone.com/"},tags:["Single","Sensors","Alerts"]},
-  {id:"parrot-pot",brand:"Parrot",model:"Pot Smart",year:2017,category:"culture garden",price:{official:99,currency:"EUR"},specs:{sensor:"Moisture/Temp/Light/Fertilizer",water:"Auto 2L",app:"Parrot Flower Power"},images:["https://www.parrot.com/hero/pot"],videos:[""],sources:{official:"https://www.parrot.com/fr/pot/"},tags:["Sensors","AutoWater","Classic"]},
-  {id:"xiaomi-mijia-plant",brand:"Xiaomi",model:"Mijia Smart Plant Monitor",year:2020,category:"culture garden",price:{official:19,currency:"EUR"},specs:{sensor:"Moisture/Light/Temp/Conductivity",battery:"1 an",app:"Mi Home"},images:["https://i01.appmifile.com/webfile/globalimg/products/pc/mijia-plant-monitor/hero.png"],videos:[""],sources:{official:"https://www.mi.com/global/product/mijia-plant-monitor/"},tags:["Monitor","Budget","MiHome"]},
-  {id:"husqvarna-automower",brand:"Husqvarna",model:"Automower 450X NERA",year:2023,category:"culture garden",price:{official:3499,currency:"EUR"},specs:{type:"Robot Lawn Mower",area:"5000 m2",gps:"RTK + EPOS",app:"Automower Connect",wireless:"Wireless"},images:["https://www.husqvarna.com/hero/automower-450x-nera"],videos:[""],sources:{official:"https://www.husqvarna.com/fr/automower-450x-nera/"},tags:["Robot","Wireless","RTK"]},
+// ============ FILTERS ============
+function applyFilters(){filteredProducts=products.filter(p=>{if(searchQuery&&!`${p.brand} ${p.model} ${p.category}`.toLowerCase().includes(searchQuery.toLowerCase()))return false;if(activeCategory!=='all'&&p.category!==activeCategory)return false;if(activeYear!=='all'&&p.year!==parseInt(activeYear))return false;if(activeBrand!=='all'&&p.brand!==activeBrand)return false;return true;});renderProducts();}
+function renderFilters(){const cats=['all',...new Set(products.map(p=>p.category))];$('#filter-category').innerHTML=cats.map(c=>`<button class="filter-btn ${c===activeCategory?'active':''}" data-cat="${c}">${c==='all'?'Toutes':c}</button>`).join('');const years=['all',...new Set(products.map(p=>p.year)).sort((a,b)=>b-a)];$('#filter-year').innerHTML=years.map(y=>`<button class="filter-btn ${y===activeYear?'active':''}" data-year="${y}">${y==='all'?'Toutes':y}</button>`).join('');const brands=['all',...new Set(products.map(p=>p.brand)).sort()];$('#filter-brand').innerHTML=brands.map(b=>`<button class="filter-btn ${b===activeBrand?'active':''}" data-brand="${b}">${b==='all'?'Toutes':b}</button>`).join('');}
 
-  // ============ COMPAGNY ROBOT AND STUDIYNG ROBOTS (10) ============
-  {id:"unitree-go2",brand:"Unitree",model:"Go2 Pro",year:2024,category:"Compagny Robot and Studiyng Robots",price:{official:2499,currency:"EUR"},specs:{type:"Quadruped Robot",cpu:"Intel N97",lidar:"4D LiDAR",camera:"4K Wide",speed:"5 m/s",payload:"5kg"},images:["https://www.unitree.com/hero/go2-pro"],videos:[""],sources:{official:"https://www.unitree.com/fr/go2/"},tags:["Quadruped","LiDAR","AI"]},
-  {id:"unitree-h1",brand:"Unitree",model:"H1 Humanoid",year:2024,category:"Compagny Robot and Studiyng Robots",price:{official:89999,currency:"EUR"},specs:{type:"Humanoid",height:"180cm",weight:"47kg",speed:"3.3 m/s",dof:"18",cpu:"Intel i7"},images:["https://www.unitree.com/hero/h1"],videos:[""],sources:{official:"https://www.unitree.com/fr/h1/"},tags:["Humanoid","Industrial","Research"]},
-  {id:"boston-dynamics-spot",brand:"Boston Dynamics",model:"Spot Enterprise",year:2023,category:"Compagny Robot and Studiyng Robots",price:{official:74500,currency:"EUR"},specs:{type:"Quadruped",payload:"14kg",range:"90 min",api:"SDK + ROS",autonomy:"Auto Dock"},images:["https://www.bostondynamics.com/hero/spot"],videos:[""],sources:{official:"https://www.bostondynamics.com/spot/"},tags:["Enterprise","SDK","Autonomy"]},
-  {id:"boston-dynamics-atlas",brand:"Boston Dynamics",model:"Atlas HD",year:2024,category:"Compagny Robot and Studiyng Robots",price:{official:150000,currency:"EUR"},specs:{type:"Humanoid",height:"150cm",weight:"80kg",dof:"28",hydraulic:"Electric"},images:["https://www.bostondynamics.com/hero/atlas-hd"],videos:[""],sources:{official:"https://www.bostondynamics.com/atlas/"},tags:["Humanoid","Hydraulic","Research"]},
-  {id:"anybotics-anyMal",brand:"ANYbotics",model:"ANYmal D",year:2023,category:"Compagny Robot and Studiyng Robots",price:{official:50000,currency:"EUR"},specs:{type:"Quadruped",inspection:"Autonomous",payload:"10kg",sensors:"LiDAR + Cameras",ip:"IP67"},images:["https://www.anybotics.com/hero/anymal-d"],videos:[""],sources:{official:"https://www.anybotics.com/anymal/"},tags:["Inspection","Autonomous","IP67"]},
-  {id:"agility-digit",brand:"Agility Robotics",model:"Digit v4",year:2024,category:"Compagny Robot and Studiyng Robots",price:{official:100000,currency:"EUR"},specs:{type:"Bipedal Humanoid",height:"165cm",payload:"16kg",walk:"Dynamic",hands:"Multi-finger"},images:["https://www.agilityrobotics.com/hero/digit-v4"],videos:[""],sources:{official:"https://www.agilityrobotics.com/digit/"},tags:["Bipedal","Logistics","Hands"]},
-  {id:"tesla-optimus",brand:"Tesla",model:"Optimus Gen 2",year:2024,category:"Compagny Robot and Studiyng Robots",price:{official:25000,currency:"EUR"},specs:{type:"Humanoid",height:"173cm",weight:"57kg",hands:"11 DoF",vision:"FSD Computer"},images:["https://www.tesla.com/hero/optimus-gen2"],videos:[""],sources:{official:"https://www.tesla.com/optimus"},tags:["Humanoid","FSD","Production"]},
-  {id:"figure-01",brand:"Figure",model:"Figure 01",year:2024,category:"Compagny Robot and Studiyng Robots",price:{official:30000,currency:"EUR"},specs:{type:"Humanoid",height:"168cm",weight:"60kg",hands:"16 DoF",ai:"OpenAI Integration"},images:["https://www.figure.ai/hero/01"],videos:[""],sources:{official:"https://www.figure.ai/01/"},tags:["Humanoid","AI","OpenAI"]},
-  {id:"ubtech-walker",brand:"UBTECH",model:"Walker X",year:2023,category:"Compagny Robot and Studiyng Robots",price:{official:150000,currency:"EUR"},specs:{type:"Humanoid",height:"180cm",weight:"77kg",hands:"15 DoF",force:"Force Control"},images:["https://www.ubtech.com/hero/walker-x"],videos:[""],sources:{official:"https://www.ubtech.com/fr/walker-x/"},tags:["Humanoid","ForceControl","Service"]},
-  {id:"xiaomi-cyberdog-2",brand:"Xiaomi",model:"CyberDog 2",year:2023,category:"Compagny Robot and Studiyng Robots",price:{official:12999,currency:"EUR"},specs:{type:"Quadruped",cpu:"NVIDIA Jetson Xavier NX",lidar:"LiDAR + Depth",camera:"RGB + IR",ai:"NVIDIA Isaac"},images:["https://i01.appmifile.com/webfile/globalimg/products/pc/cyberdog-2/hero.png"],videos:[""],sources:{official:"https://www.mi.com/global/product/cyberdog-2/"},tags:["Quadruped","NVIDIA","BioInspired"]}
-];
+// ============ PARTICLES ============
+function initParticles(){const c=$('#particules')||document.body.appendChild(Object.assign(document.createElement('div'),{id:'particules',className:'particules'}));const cols=['#1e6bff','#ff3d9a','#ffd23f','#27d17f','#00d4ff','#ff6b00'];for(let i=0;i<15;i++){const p=document.createElement('div');p.className='particule';const sx=(Math.random()-.5)*innerWidth*.8,sy=(Math.random()-.5)*innerHeight*.8,ex=(Math.random()-.5)*innerWidth*.8,ey=(Math.random()-.5)*innerHeight*.8,del=Math.random()*12,dur=10+Math.random()*8,op=.1+Math.random()*.2,clr=cols[Math.floor(Math.random()*cols.length)];p.style.cssText=`left:50%;top:50%;--sx:${sx}px;--sy:${sy}px;--ex:${ex}px;--ey:${ey}px;--op:${op};background:${clr};animation-duration:${dur}s;animation-delay:${del}s`;c.appendChild(p);}}
+
+// ============ MODAL ============
+function openModal(id){const p=products.find(x=>x.id===id);if(!p)return;const kt=p.kifftech;const has=kt.discount>0;
+$('#modal-brand').textContent=p.brand;$('#modal-name').textContent=p.model;
+$('#modal-meta').innerHTML=`<span class="meta-year">${p.year}</span><span>${p.category}</span>${kt.discount>0?`<span class="meta-promo">-${kt.discount}%</span>`:''}`;
+$('#modal-desc').textContent=`${p.brand} ${p.model} (${p.year}) - ${Object.entries(p.specs||{}).slice(0,3).map(([k,v])=>`${k}: ${v}`).join(', ')}`;
+$('#modal-specs').innerHTML=Object.entries(p.specs||{}).map(([k,v])=>`<div class="spec-item"><span class="spec-label">${k}</span><span class="spec-value">${v}</span></div>`).join('');
+$('#modal-prices').innerHTML=`<div class="price-card"><div class="price-source">Officiel</div><div class="price-value">${has?fmtPriceCrossed(kt.official):fmtPrice(kt.official)}</div><a class="price-link" href="${p.sources?.official||'#'}" target="_blank">Voir</a></div>${has?`<div class="price-card primary"><div class="price-source">KiffTech <span class="discount-tag">-${kt.discount}%</span></div><div class="price-value">${fmtPrice(kt.kifftech)}</div><div style="color:#27d17f">Economisez ${fmtPrice(kt.savings)}</div><button class="price-link" style="margin-top:12px;background:linear-gradient(135deg,#27d17f,#1e6bff)" onclick="addToCart('${p.id}');closeModal()">Ajouter</button></div>`:''}`;
+const m=$('#modal-media');m.innerHTML='';(p.images||[]).forEach((img,i)=>{const e=document.createElement('img');e.src=img;e.style.display=i===0?'block':'none';m.appendChild(e);});
+const nav=$('#media-nav');nav.innerHTML='';(p.images||[]).forEach((_,i)=>{const d=document.createElement('button');d.className='media-dot'+(i===0?' active':'');d.onclick=()=>showMedia(i);nav.appendChild(d);});
+$('#modal-title').dataset.currentId=id;$('#modal-overlay').classList.add('visible');document.body.style.overflow='hidden';}
+function showMedia(idx){$$('#modal-media img').forEach((e,i)=>{e.style.display=i===idx?'block':'none'});$$('#media-nav button').forEach((d,i)=>{d.classList.toggle('active',i===idx)});}
+function closeModal(){$('#modal-overlay').classList.remove('visible');document.body.style.overflow='';}
+function showMedia(idx){$$('#modal-media img').forEach((e,i)=>{e.style.display=i===idx?'block':'none'});$$('#media-nav button').forEach((d,i)=>{d.classList.toggle('active',i===idx)});}
+
+// ============ SUB ============
+function toggleSub(){userContext.isSubscriber=!userContext.isSubscriber;userContext.tenureDays=userContext.isSubscriber?30:0;refreshKiffTechPrices();renderProducts();updateCartPanel();updateSubUI();toast(userContext.isSubscriber?'Abonnement active (1eur/jour)':'Desactive',userContext.isSubscriber?'success':'info');}
+function updateSubUI(){const html=userContext.isSubscriber?'Gerer':`S'abonner 1eur/jour`;[$('#btn-subscribe'),$('#btn-subscribe-header')].forEach(el=>{if(el){el.innerHTML=html;el.className='action-btn '+(userContext.isSubscriber?'primary':'');}});updatePromoUI();}
+function updatePromoUI(){const el=$('#promo-indicator');if(!el)return;if(userContext.isSubscriber)el.innerHTML=`<span class="promo-active">Abonne ${calcKiffTechPrice(100,{isSubscriber:true}).discount}%</span>`;else if(userContext.cartItems.length>=10)el.innerHTML=`<span class="promo-active">Promo -20%</span>`;else el.innerHTML=`<span class="promo-pending">${10-userContext.cartItems.length} pour -20%</span>`;}
+
+// ============ EVENTS ============
+function initEvents(){
+  $('#search-input').addEventListener('input',e=>{searchQuery=e.target.value;applyFilters();});
+  $$('.filter-btn[data-cat]').forEach(b=>b.addEventListener('click',()=>{activeCategory=b.dataset.cat;$$('.filter-btn[data-cat]').forEach(x=>x.classList.toggle('active',x===b));applyFilters();}));
+  $$('.filter-btn[data-year]').forEach(b=>b.addEventListener('click',()=>{activeYear=b.dataset.year;$$('.filter-btn[data-year]').forEach(x=>x.classList.toggle('active',x===b));applyFilters();}));
+  $$('.filter-btn[data-brand]').forEach(b=>b.addEventListener('click',()=>{activeBrand=b.dataset.brand;$$('.filter-btn[data-brand]').forEach(x=>x.classList.toggle('active',x===b));applyFilters();}));
+  $('#btn-fetch').addEventListener('click',async()=>{toast('Rechargement...','info');await loadProducts();});
+  $('#btn-clear').addEventListener('click',()=>{products=[...LOCAL_DB];products.forEach(p=>p.kifftech=calcKiffTechPrice(p.price.official));filteredProducts=[...products];applyFilters();toast('Base locale restauree','success');});
+  $('#btn-subscribe').addEventListener('click',()=>{userContext.isSubscriber=!userContext.isSubscriber;userContext.tenureDays=userContext.isSubscriber?30:0;refreshKiffTechPrices();renderProducts();updateCartPanel();updateSubUI();toast(userContext.isSubscriber?'Abonnement active (1eur/jour)':'Desactive',userContext.isSubscriber?'success':'info');});
+  $('#btn-subscribe-header').addEventListener('click',()=>{userContext.isSubscriber=!userContext.isSubscriber;userContext.tenureDays=userContext.isSubscriber?30:0;refreshKiffTechPrices();renderProducts();updateCartPanel();updateSubUI();toast(userContext.isSubscriber?'Abonnement active (1eur/jour)':'Desactive',userContext.isSubscriber?'success':'info');});
+  $('#btn-cart-header').addEventListener('click',()=>document.getElementById('cart-panel').scrollIntoView({behavior:'smooth'}));
+  $('#modal-close').addEventListener('click',closeModal);
+  $('#modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+}
+
+// ============ INIT ============
+function init(){
+  console.log('KiffTech init, LOCAL_DB:', LOCAL_DB?.length);
+  try {
+    if (!products?.length) products = [...LOCAL_DB];
+    products.forEach(p => { if (!p.kifftech) p.kifftech = calcKiffTechPrice(p.price.official); });
+    filteredProducts = [...products];
+    
+    renderFilters();
+    refreshKiffTechPrices();
+    applyFilters();
+    loadProducts();
+    initEvents();
+    initParticles();
+    updateSubUI();
+    console.log('KiffTech initialized, products:', products.length);
+  } catch(e) {
+    console.error('KiffTech init error:', e);
+    document.body.innerHTML += '<pre style="color:red;padding:20px;background:#1a1d3a;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;overflow:auto">INIT ERROR: ' + e.message + '\n' + e.stack + '</pre>';
+  }
+}
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+
+window.KiffTech={products:()=>products,fetch:loadProducts,subscribe:()=>{userContext.isSubscriber=!userContext.isSubscriber;userContext.tenureDays=userContext.isSubscriber?30:0;refreshKiffTechPrices();renderProducts();updateSubUI();}};
