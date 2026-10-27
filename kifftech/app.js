@@ -1,5 +1,6 @@
 // ============ LOCAL_DB (80 produits, 8 catégories × 10) ============
 console.log('[KiffTech] SCRIPT START - Loading app.js');
+document.title = '[KiffTech] Script loaded - ' + document.title;
 console.log('[KiffTech] Module loaded, LOCAL_DB length:', 80);
 const LOCAL_DB = [
   // --- Smartphones (10) ---
