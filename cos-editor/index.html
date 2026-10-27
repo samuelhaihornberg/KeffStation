@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0066ff">
+<meta name="description" content="Éditeur cos - Syntaxe interactive">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E📝%3C/text%3E%3C/svg%3E">
+<title>Éditeur cos — Syntaxe interactive</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,sans-serif}
+.app{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+header{padding:clamp(16px,4vh,24px) clamp(12px,3vw,20px);background:rgba(10,12,34,.9);border-bottom:1px solid rgba(255,255,255,.1);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.logo{font-size:clamp(24px,5vw,32px)} h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:700;background:linear-gradient(90deg,#0066ff,#00d4ff,#27d17f);-webkit-background-clip:text;background-clip:text;color:transparent}
+main{flex:1;padding:clamp(16px,3vw,24px);display:grid;gap:clamp(12px,2vw,16px);grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:clamp(16px,3vw,20px);transition:transform .2s,box-shadow .2s,border-color .2s;display:flex;flex-direction:column;gap:12px}
+.card:hover{transform:translateY(-4px);border-color:#0066ff;box-shadow:0 12px 40px rgba(0,102,255,.2)}
+.card h3{font-size:clamp(1rem,2.5vw,1.2rem);color:#ffd23f}
+.card p{color:#b9c0e6;line-height:1.5;flex:1}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:.7rem;padding:4px 10px;border-radius:999px;background:rgba(0,102,255,.2);border:1px solid rgba(0,102,255,.4);color:#8ab4ff}
+.btn{display:inline-flex;align-items:center;gap:8px;margin-top:auto;padding:12px 20px;border-radius:999px;border:1px solid #0066ff;background:linear-gradient(135deg,#0066ff,#00d4ff);color:#fff;font-weight:600;text-decoration:none;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:scale(1.02);box-shadow:0 8px 24px rgba(0,102,255,.4)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><span class="logo">📝</span><h1>Éditeur cos</h1></header>
+<main>
+<article class="card"><h3>Guide de démarrage</h3><p>Premiers pas : syntaxe de base, connexions A1➡️B2, mode sandwich miroir, adresses alphanumériques.</p><div class="tags"><span class="tag">Guide</span><span class="tag">Débutant</span><span class="tag">cos</span></div><a href="#" class="btn">Commencer →</a></article>
+<article class="card"><h3>Référence complète</h3><p>Tous opérateurs, motifs CSM, adresses, exemples commentés. Recherche instantanée.</p><div class="tags"><span class="tag">Référence</span><span class="tag">Doc</span><span class="tag">cos</span></div><a href="#" class="btn">Voir →</a></article>
+<article class="card"><h3>Snippets prêts à l'emploi</h3><p>Templates : pipelines, boucles, conditions, parallélisme, gestion erreurs, retry/timeout.</p><div class="tags"><span class="tag">Snippets</span><span class="tag">Templates</span><span class="tag">cos</span></div><a href="#" class="btn">Copier →</a></article>
+<article class="card"><h3>Débogage visuel</h3><p>Inspecteur graphe, points d'arrêt, exécution pas à pas, logs colorés, time-travel debugging.</p><div class="tags"><span class="tag">Debug</span><span class="tag">Inspecteur</span><span class="tag">Time-travel</span></div><a href="#" class="btn">Lancer →</a></article>
+<article class="card"><h3>Playground live</h3><p>Éditeur Monaco/CodeMirror, validation temps réel, coloration, autocomplétion, export JSON.</p><div class="tags"><span class="tag">Playground</span><span class="tag">Live</span><span class="tag">Export</span></div><a href="#" class="btn">Éditer →</a></article>
+<article class="card"><h3>Intégration CI/CD</h3><p>GitHub Actions, GitLab CI, validation PR, tests cos unitaires, déploiement auto.</p><div class="tags"><span class="tag">CI/CD</span><span class="tag">GitHub</span><span class="tag">GitLab</span></div><a href="#" class="btn">Config →</a></article>
+</main>
+</div>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ff3d9a">
+<meta name="description" content="Tricktrocjob - Plateforme Trix / Trox / Services">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E🔄%3C/text%3E%3C/svg%3E">
+<title>Tricktrocjob — Trix / Trox / Services</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,sans-serif}
+.app{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+header{padding:clamp(16px,4vh,24px) clamp(12px,3vw,20px);background:rgba(10,12,34,.9);border-bottom:1px solid rgba(255,255,255,.1);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.logo{font-size:clamp(24px,5vw,32px)} h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:700;background:linear-gradient(90deg,#ff3d9a,#ffd23f,#27d17f);-webkit-background-clip:text;background-clip:text;color:transparent}
+main{flex:1;padding:clamp(16px,3vw,24px);display:grid;gap:clamp(12px,2vw,16px);grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:clamp(16px,3vw,20px);transition:transform .2s,box-shadow .2s,border-color .2s;display:flex;flex-direction:column;gap:12px}
+.card:hover{transform:translateY(-4px);border-color:#ff3d9a;box-shadow:0 12px 40px rgba(255,61,154,.2)}
+.card h3{font-size:clamp(1rem,2.5vw,1.2rem);color:#ffd23f}
+.card p{color:#b9c0e6;line-height:1.5;flex:1}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:.7rem;padding:4px 10px;border-radius:999px;background:rgba(255,61,154,.2);border:1px solid rgba(255,61,154,.4);color:#ffb3d1}
+.btn{display:inline-flex;align-items:center;gap:8px;margin-top:auto;padding:12px 20px;border-radius:999px;border:1px solid #ff3d9a;background:linear-gradient(135deg,#ff3d9a,#ffd23f);color:#070816;font-weight:600;text-decoration:none;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:scale(1.02);box-shadow:0 8px 24px rgba(255,61,154,.4)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><span class="logo">🔄</span><h1>Tricktrocjob</h1></header>
+<main>
+<article class="card"><h3>Créer un Trix</h3><p>Tutoriel pas à pas pour publier votre astuce ou tutoriel. Structure virale, étapes numérotées, photos qualité.</p><div class="tags"><span class="tag">Tutoriel</span><span class="tag">Publication</span><span class="tag">Trix</span></div><a href="#" class="btn">Commencer →</a></article>
+<article class="card"><h3>Échanger un Trox</h3><p>Mettre en ligne un objet, gérer les propositions, finaliser l'échange en main propre ou par envoi.</p><div class="tags"><span class="tag">Trox</span><span class="tag">Échange</span><span class="tag">Objet</span></div><a href="#" class="btn">Publier →</a></article>
+<article class="card"><h3>Proposer un Service</h3><p>Créer une offre de service, fixer le prix (crédits/€), gérer les clients, facturation auto.</p><div class="tags"><span class="tag">Service</span><span class="tag">Freelance</span><span class="tag">Compétence</span></div><a href="#" class="btn">Créer →</a></article>
+<article class="card"><h3>Gagner des crédits</h3><p>Système de récompenses, parrainage 500 crédits/filleul, bonus de validation, économie dégressive 17%→5%.</p><div class="tags"><span class="tag">Crédits</span><span class="tag">Récompense</span><span class="tag">Économie</span></div><a href="#" class="btn">Voir →</a></article>
+<article class="card"><h3>Service récurrent</h3><p>Abonnement mensuel, facturation auto, fidélisation. Ex: maintenance PC, cours hebdo, livraison courses.</p><div class="tags"><span class="tag">Récurrent</span><span class="tag">Revenus</span><span class="tag">Auto</span></div><a href="#" class="btn">Configurer →</a></article>
+<article class="card"><h3>Trix vidéo court</h3><p>Format 60-90s, hook 3s, démo claire, CTA crédits. Vertical, sous-titres, +300% engagement.</p><div class="tags"><span class="tag">Vidéo</span><span class="tag">Format</span><span class="tag">Viral</span></div><a href="#" class="btn">Créer →</a></article>
+<article class="card"><h3>Objets rares : expertise pro</h3><p>Gratuit pour objets >500€. Certificat authenticité, estimation marché, assurance transport incluse.</p><div class="tags"><span class="tag">Expertise</span><span class="tag">Luxe</span><span class="tag">Sécurité</span></div><a href="#" class="btn">Demander →</a></article>
+<article class="card"><h3>Communauté locale</h3><p>Événements ville par ville, échanges en main propre, ateliers réparation. Zéro frais port.</p><div class="tags"><span class="tag">Local</span><span class="tag">Rencontre</span><span class="tag">Confiance</span></div><a href="#" class="btn">Rejoindre →</a></article>
+</main>
+</div>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
+</script>
+</body>
+</html>

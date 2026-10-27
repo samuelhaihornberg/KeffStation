@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1e6bff">
+<meta name="description" content="KiffTech - Smart devices & gadgets boutique">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E📱%3C/text%3E%3C/svg%3E">
+<title>KiffTech — Smart devices & gadgets</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,sans-serif}
+.app{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+header{padding:clamp(16px,4vh,24px) clamp(12px,3vw,20px);background:rgba(10,12,34,.9);border-bottom:1px solid rgba(255,255,255,.1);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.logo{font-size:clamp(24px,5vw,32px)} h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:700;background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);-webkit-background-clip:text;background-clip:text;color:transparent}
+main{flex:1;padding:clamp(16px,3vw,24px);display:grid;gap:clamp(12px,2vw,16px);grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:clamp(16px,3vw,20px);transition:transform .2s,box-shadow .2s,border-color .2s;display:flex;flex-direction:column;gap:12px}
+.card:hover{transform:translateY(-4px);border-color:#1e6bff;box-shadow:0 12px 40px rgba(30,107,255,.2)}
+.card h3{font-size:clamp(1rem,2.5vw,1.2rem);color:#ffd23f}
+.card p{color:#b9c0e6;line-height:1.5;flex:1}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:.7rem;padding:4px 10px;border-radius:999px;background:rgba(30,107,255,.2);border:1px solid rgba(30,107,255,.4);color:#8ab4ff}
+.btn{display:inline-flex;align-items:center;gap:8px;margin-top:auto;padding:12px 20px;border-radius:999px;border:1px solid #1e6bff;background:linear-gradient(135deg,#1e6bff,#138,77,255);color:#fff;font-weight:600;text-decoration:none;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:scale(1.02);box-shadow:0 8px 24px rgba(30,107,255,.4)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><span class="logo">📱</span><h1>KiffTech</h1></header>
+<main>
+<article class="card"><h3>Galaxy Buds 3 Pro</h3><p>ANC adaptatif IA, 30h autonomie, boîtier sans fil. Prix compétitif vs AirPods Pro 2.</p><div class="tags"><span class="tag">Samsung</span><span class="tag">Audio</span><span class="tag">ANC</span></div><a href="#" class="btn">Voir fiche →</a></article>
+<article class="card"><h3>Xiaomi Smart Band 9 Pro</h3><p>Écran AMOLED 1.74", GPS intégré, 21 jours autonomie, 150+ modes sport.</p><div class="tags"><span class="tag">Xiaomi</span><span class="tag">Fitness</span><span class="tag">AMOLED</span></div><a href="#" class="btn">Voir fiche →</a></article>
+<article class="card"><h3>Samsung Galaxy SmartTag 3</h3><p>Tracker UWB + Thread, Matter, 1 an autonomie. Trouvez tout instantanément.</p><div class="tags"><span class="tag">Samsung</span><span class="tag">Tracker</span><span class="tag">UWB</span></div><a href="#" class="btn">Voir fiche →</a></article>
+<article class="card"><h3>Chargeur 65W GaN 3 ports</h3><p>2x USB-C + 1x USB-A, nitrure de gallium, taille carte crédit. Idéal voyage.</p><div class="tags"><span class="tag">Chargeur</span><span class="tag">GaN</span><span class="tag">Multi-port</span></div><a href="#" class="btn">Voir fiche →</a></article>
+<article class="card"><h3>Xiaomi Redmi Buds 6 Pro</h3><p>Hi-Res LDAC, ANC hybride 55dB, 38h autonomie, 3 micros IA. Sous 100€.</p><div class="tags"><span class="tag">Xiaomi</span><span class="tag">Audio</span><span class="tag">LDAC</span></div><a href="#" class="btn">Voir fiche →</a></article>
+<article class="card"><h3>Samsung Galaxy Watch 7</h3><p>BioActive 2.0, sommeil IA, ECG/TA, 40h, Wear OS 5. Santé complète.</p><div class="tags"><span class="tag">Samsung</span><span class="tag">Montre</span><span class="tag">Santé</span></div><a href="#" class="btn">Voir fiche →</a></article>
+<article class="card"><h3>Robot Xiaomi X20 Pro</h3><p>LDS 360°, IA objets, serpillière auto-lift, station vidage 60 jours.</p><div class="tags"><span class="tag">Xiaomi</span><span class="tag">Robot</span><span class="tag">IA</span></div><a href="#" class="btn">Voir fiche →</a></article>
+<article class="card"><h3>Chargeur sans fil 50W MagSafe</h3><p>Magnétique 50W (iPhone 15+), ventilation active, 30 min pour 50%.</p><div class="tags"><span class="tag">MagSafe</span><span class="tag">Sans-fil</span><span class="tag">Rapide</span></div><a href="#" class="btn">Voir fiche →</a></article>
+</main>
+</div>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
+</script>
+</body>
+</html>
