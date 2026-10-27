@@ -1,6 +1,7 @@
 /* ===== KeffStation App Module ===== */
 /* Loaded as ES module with proper error handling */
 
+// ============ DATA ============
 const APPS = [
   {
     num: "Kifftech",
@@ -72,28 +73,10 @@ const APPS = [
   }
 ];
 
-const HAS_POINTER = 'PointerEvent' in window;
-const DOWN = 'pointerdown' in window ? 'pointerdown' : 'touchstart';
-const MOVE = 'pointermove' in window ? 'pointermove' : 'touchmove';
-const UP = 'pointerup' in window ? 'pointerup' : 'touchend';
-const CANCEL = 'pointercancel' in window ? 'pointercancel' : 'touchcancel';
-
-function getClientX(e) { return e.clientX ?? e.touches?.[0]?.clientX ?? 0; }
-function getClientY(e) { return e.clientY ?? e.touches?.[0]?.clientY ?? 0; }
-function setPointerCapture(e) { if (e.target?.setPointerCapture) e.target.setPointerCapture(e.pointerId); }
-function releasePointerCapture(e) { if (e.target?.releasePointerCapture) e.target.releasePointerCapture(e.pointerId); }
-
 function sanitizeHTML(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
-}
-
-function createTag(tag, className = '') {
-  const el = document.createElement('span');
-  el.className = 'tag' + (className ? ' ' + className : '');
-  el.textContent = tag;
-  return el;
 }
 
 class KeffStation {
@@ -111,7 +94,6 @@ class KeffStation {
     this.nav = document.getElementById('nav');
     this.gesture = document.getElementById('gesture');
     this.arrows = document.getElementById('arrows');
-    this.navEl = document.getElementById('nav');
     this.loading = document.getElementById('loading');
 
     // Debug: check if elements are found
@@ -240,7 +222,7 @@ class KeffStation {
 
   setupEventListeners() {
     // Roadmap clicks
-    Array.from(this.nav.children).forEach((btn, i) => {
+    this.nav.querySelectorAll('button').forEach((btn, i) => {
       btn.addEventListener('click', () => this.goTo(i));
     });
 
@@ -253,12 +235,11 @@ class KeffStation {
     });
 
     // Arrow buttons
-    const arrows = document.getElementById('arrows');
-    if (arrows) {
-      arrows.querySelector('.arrow-left')?.addEventListener('click', () => this.goTo(this.current - 1));
-      arrows.querySelector('.arrow-right')?.addEventListener('click', () => this.goTo(this.current + 1));
-      arrows.querySelector('.arrow-up')?.addEventListener('click', () => this.goSub(-1));
-      arrows.querySelector('.arrow-down')?.addEventListener('click', () => this.goSub(1));
+    if (this.arrows) {
+      this.arrows.querySelector('.arrow-left')?.addEventListener('click', () => this.goTo(this.current - 1));
+      this.arrows.querySelector('.arrow-right')?.addEventListener('click', () => this.goTo(this.current + 1));
+      this.arrows.querySelector('.arrow-up')?.addEventListener('click', () => this.goSub(-1));
+      this.arrows.querySelector('.arrow-down')?.addEventListener('click', () => this.goSub(1));
     }
 
     // Touch drag
@@ -272,27 +253,6 @@ class KeffStation {
       gesture.addEventListener('touchmove', (e) => this.onDragMove(e), { passive: true });
       gesture.addEventListener('touchend', (e) => this.onDragEnd(e));
       gesture.addEventListener('touchcancel', () => this.onDragEnd(null));
-    }
-
-    // Keyboard
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') this.goTo(this.current - 1);
-      else if (e.key === 'ArrowRight') this.goTo(this.current + 1);
-      else if (e.key === 'ArrowUp') this.goSub(-1);
-      else if (e.key === 'ArrowDown') this.goSub(1);
-    });
-
-    // Roadmap clicks
-    this.nav.querySelectorAll('button').forEach((btn, i) => {
-      btn.addEventListener('click', () => this.goTo(i));
-    });
-
-    // Arrow buttons
-    if (this.arrows) {
-      this.arrows.querySelector('.arrow-left')?.addEventListener('click', () => this.goTo(this.current - 1));
-      this.arrows.querySelector('.arrow-right')?.addEventListener('click', () => this.goTo(this.current + 1));
-      this.arrows.querySelector('.arrow-up')?.addEventListener('click', () => this.goSub(-1));
-      this.arrows.querySelector('.arrow-down')?.addEventListener('click', () => this.goSub(1));
     }
   }
 
@@ -319,14 +279,6 @@ class KeffStation {
     document.getElementById('nav')?.setAttribute('data-face', this.current);
 
     this.subCurrent = 0;
-    this.renderSubArticle();
-  }
-
-  goSub(delta) {
-    const app = APPS[this.current];
-    if (!app) return;
-    const max = app.subArticles.length - 1;
-    this.subCurrent = Math.max(0, Math.min(max, this.subCurrent + delta));
     this.renderSubArticle();
   }
 
@@ -407,7 +359,7 @@ class KeffStation {
         const dur = 10 + Math.random() * 8;
         const op = .15 + Math.random() * .25;
         const clr = colors[Math.floor(Math.random() * colors.length)];
-        p.style.cssText = `left:50%;top:50%;--sx:${sx}px;--sy:${sy}px;--ex:${ex}px;--ey:${ey}px;--op:${.15+Math.random()*.25};background:${clr};animation-duration:${dur}s;animation-delay:${delay}s`;
+        p.style.cssText = `left:50%;top:50%;--sx:${sx}px;--sy:${sy}px;--ex:${ex}px;--ey:${ey}px;--op:${op};background:${clr};animation-duration:${dur}s;animation-delay:${delay}s`;
         container.appendChild(p);
       }
     } catch (e) {
@@ -429,13 +381,7 @@ class KeffStation {
   }
 }
 
-function sanitizeHTML(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-// Initialize app when DOM is ready
+// ============ INIT ============
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initApp);
 } else {
@@ -443,6 +389,7 @@ if (document.readyState === 'loading') {
 }
 
 function initApp() {
+  console.log('initApp called');
   const loading = document.getElementById('loading');
   if (loading) loading.textContent = '🔄 Initialisation...';
 
@@ -486,3 +433,4 @@ function initApp() {
 
 // Expose for debugging
 window.KeffStation = KeffStation;
+console.log('KeffStation module loaded');
