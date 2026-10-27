@@ -7,8 +7,8 @@ const APPS = [
     title: "Kifftech",
     desc: "Boutique PWA : Samsung, Xiaomi, prix sous officiels, livraison mondiale. Backend Node unique, zéro dépendance, données JSON.",
     tags: ["PWA", "Node", "E-commerce", "Smart tech"],
-    appUrl: "https://samuelhaihornberg.github.io/keffstation/kifftech/",
-    embedUrl: "https://samuelhaihornberg.github.io/keffstation/kifftech/",
+    appUrl: "https://samuelhaihornberg.github.io/keffstation/kifftech/catalog.html",
+    embedUrl: "https://samuelhaihornberg.github.io/keffstation/kifftech/catalog.html",
     embedLabel: "Ouvrir Kifftech",
     color: "#1e6bff",
     subArticles: [
