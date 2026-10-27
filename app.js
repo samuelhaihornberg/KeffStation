@@ -142,6 +142,7 @@ class KeffStation {
   constructor() {
     this.apps = APPS;
     this.current = 0;
+    this.subCurrent = 0;
     this.startX = 0;
     this.currentAngle = 0;
     this.isDragging = false;
@@ -184,6 +185,7 @@ class KeffStation {
     this.faces = null;
     this.dots = null;
     this.current = 0;
+    this.subCurrent = 0;
     this.startX = 0;
     this.currentAngle = 0;
     this.isDragging = false;
@@ -277,7 +279,7 @@ class KeffStation {
           -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
           box-shadow:0 4px 16px rgba(30,107,255,.2);">
           <span>📱</span>
-          <span class="embed-btn-text">${sanitizeHTML(app.embedLabel || 'Ouvrir ' + app.num + ' dans KeffStation')}</span>
+          <span class="embed-btn-text">${sanitizeHTML(app.embedLabel || 'Ouvrir ' + app.num)}</span>
           <span class="embed-preload-status" style="
             width:8px;height:8px;border-radius:50%;
             background:rgba(255,210,63,.5);margin-left:8px;
@@ -285,27 +287,22 @@ class KeffStation {
         </button>
       ` : '';
       
-      // All sub-articles as a proper list
-      const subArticlesHTML = app.subArticles.map(sub => `
-        <article class="sub-article-card" style="
-          background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
-          border-radius:12px;padding:clamp(12px,2.5vw,16px);margin-bottom:clamp(8px,1.5vw,12px);
-          transition:transform .15s,box-shadow .15s,border-color .15s;
-          -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);">
-          <h3 style="font-size:clamp(.9rem,2.2vw,1.1rem);margin:0 0 .4em;color:#ffd23f;">${sanitizeHTML(sub.title)}</h3>
-          <p style="font-size:clamp(.8rem,1.8vw,.9rem);color:#b9c0e6;line-height:1.5;margin-bottom:.7em;">${sanitizeHTML(sub.desc)}</p>
-          <div class="tags" style="display:flex;flex-wrap:wrap;gap:6px;">${sub.tags.map(t => `<span class="tag" style="font-size:clamp(.55rem,1.3vw,.65rem);padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#ffd23f;">${sanitizeHTML(t)}</span>`).join('')}</div>
-        </article>
-      `).join('');
+      // First sub-article
+      const sub = app.subArticles[0];
       
       face.innerHTML = `
         <div class="num">${sanitizeHTML(app.num)}</div>
         <h2><a href="${sanitizeHTML(app.appUrl)}" target="_blank" rel="noopener noreferrer" class="app-link">${sanitizeHTML(app.title)}</a></h2>
         <p>${sanitizeHTML(app.desc)}</p>
-        <div class="sub-articles-list" style="max-height:60vh;overflow-y:auto;padding-right:8px;margin-top:.8em;">
-          ${subArticlesHTML}
+        <div class="sub-article">
+          <h3>${sanitizeHTML(sub.title)}</h3>
+          <p>${sanitizeHTML(sub.desc)}</p>
+          <div class="tags">${sub.tags.map(t => `<span class="tag">${sanitizeHTML(t)}</span>`).join('')}</div>
         </div>
-        <div class="tags" style="margin-top:1em;">${app.tags.map(t => `<span class="tag" style="font-size:clamp(.55rem,1.5vw,.65rem);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#ffd23f;">${sanitizeHTML(t)}</span>`).join('')}</div>
+        <div class="sub-nav">
+          <span class="sub-indicator">1/${app.subArticles.length}</span>
+        </div>
+        <div class="tags">${app.tags.map(t => `<span class="tag">${sanitizeHTML(t)}</span>`).join('')}</div>
         ${embedBtn}
       `;
       document.getElementById('prisme').appendChild(face);
@@ -332,6 +329,9 @@ class KeffStation {
 
     this.faces = document.getElementById('prisme').children;
     this.dots = this.nav.children;
+
+    // Initial render
+    this.renderSubArticle();
   }
 
   setupEventListeners() {
@@ -340,16 +340,20 @@ class KeffStation {
       btn.addEventListener('click', () => this.goTo(i));
     });
 
-    // Keyboard navigation (left/right only - up/down removed, all sub-articles visible)
+    // Keyboard navigation
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') this.goTo(this.current - 1);
       else if (e.key === 'ArrowRight') this.goTo(this.current + 1);
+      else if (e.key === 'ArrowUp') this.goSub(-1);
+      else if (e.key === 'ArrowDown') this.goSub(1);
     });
 
-    // Arrow buttons (left/right only)
+    // Arrow buttons
     if (this.arrows) {
       this.arrows.querySelector('.arrow-left')?.addEventListener('click', () => this.goTo(this.current - 1));
       this.arrows.querySelector('.arrow-right')?.addEventListener('click', () => this.goTo(this.current + 1));
+      this.arrows.querySelector('.arrow-up')?.addEventListener('click', () => this.goSub(-1));
+      this.arrows.querySelector('.arrow-down')?.addEventListener('click', () => this.goSub(1));
     }
 
     // Touch drag
@@ -386,6 +390,40 @@ class KeffStation {
     // Update data-face attributes for theming
     document.getElementById('arrows')?.setAttribute('data-face', this.current);
     document.getElementById('nav')?.setAttribute('data-face', this.current);
+
+    this.subCurrent = 0;
+    this.renderSubArticle();
+  }
+
+  renderSubArticle() {
+    const app = APPS[this.current];
+    if (!app) return;
+    const sub = app.subArticles[this.subCurrent];
+    const face = this.faces[this.current];
+    if (!face) return;
+
+    const subEl = face.querySelector('.sub-article');
+    const indicator = face.querySelector('.sub-indicator');
+    if (subEl && sub) {
+      subEl.innerHTML = `
+        <h3>${sanitizeHTML(sub.title)}</h3>
+        <p>${sanitizeHTML(sub.desc)}</p>
+        <div class="tags">${sub.tags.map(t => `<span class="tag">${sanitizeHTML(t)}</span>`).join('')}</div>
+      `;
+    }
+    if (indicator) {
+      indicator.textContent = `${this.subCurrent + 1}/${app.subArticles.length}`;
+    }
+    // Update roadmap active state
+    Array.from(this.nav.children).forEach((d, idx) => d.classList.toggle('active', idx === this.current));
+  }
+
+  goSub(delta) {
+    const app = APPS[this.current];
+    if (!app) return;
+    const max = app.subArticles.length - 1;
+    this.subCurrent = Math.max(0, Math.min(max, this.subCurrent + delta));
+    this.renderSubArticle();
   }
 
   onDragStart(e) {
