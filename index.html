@@ -96,14 +96,20 @@
   .particules{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
   .particule{position:absolute;width:3px;height:3px;border-radius:50%;opacity:0;animation:float 12s ease-in-out infinite}
   @keyframes float{0%{transform:translate(var(--sx),var(--sy)) scale(0);opacity:0}10%{opacity:var(--op)}90%{opacity:var(--op)}100%{transform:translate(var(--ex),var(--ey)) scale(1);opacity:0}}
-  .loading{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:#070816;color:#ffd23f;font:16px/1.55 system-ui}
+  .loading{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#070816;color:#ffd23f;font:16px/1.55 system-ui;gap:16px}
   .loading.hidden{display:none}
+  .loading-bar{width:200px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+  .loading-bar-inner{width:0%;height:100%;background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);border-radius:2px;transition:width .3s ease}
+  .loading-text{font-size:clamp(14px,3vw,18px)}
 </style>
 </head>
 <body>
 <div id="bg"></div>
 <div class="particules" id="particules"></div>
-<div class="loading" id="loading">🔄 Initialisation KeffStation…</div>
+<div class="loading" id="loading">
+  <div class="loading-text">🔄 Initialisation KeffStation…</div>
+  <div class="loading-bar" aria-hidden="true"><div class="loading-bar-inner" id="loading-bar-inner"></div></div>
+</div>
 
 <div class="reader" role="region" aria-roledescription="lecteur d'applications" aria-label="Kifftech, Tricktrocjob, ViArtificial labs">
   <div class="vitrine">

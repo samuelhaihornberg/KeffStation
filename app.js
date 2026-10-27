@@ -88,6 +88,7 @@ class KeffStation {
     this.currentAngle = 0;
     this.isDragging = false;
     this.initialized = false;
+    this.loadingProgress = 0;
 
     // DOM elements
     this.prisme = document.getElementById('prisme');
@@ -95,6 +96,7 @@ class KeffStation {
     this.gesture = document.getElementById('gesture');
     this.arrows = document.getElementById('arrows');
     this.loading = document.getElementById('loading');
+    this.loadingBar = document.getElementById('loading-bar-inner');
 
     // Debug: check if elements are found
     const elementsFound = {
@@ -102,7 +104,8 @@ class KeffStation {
       nav: !!this.nav,
       gesture: !!this.gesture,
       arrows: !!this.arrows,
-      loading: !!this.loading
+      loading: !!this.loading,
+      particules: !!document.getElementById('particules')
     };
     console.log('KeffStation constructor - Elements found:', elementsFound);
     
@@ -118,6 +121,7 @@ class KeffStation {
       }
       throw new Error(msg);
     }
+    console.log('All elements found, continuing...');
 
     this.faces = null;
     this.dots = null;
@@ -132,31 +136,42 @@ class KeffStation {
   async init() {
     try {
       console.log('KeffStation: Starting initialization...');
+      this.setProgress(5, '🔄 Initialisation...');
       
       // Validate endpoints first
       console.log('KeffStation: Validating endpoints...');
+      this.setProgress(15, '🔍 Vérification des endpoints...');
       await this.validateEndpoints();
       console.log('KeffStation: Endpoints validated');
+      this.setProgress(25, '✅ Endpoints validés');
 
       // Build UI
       console.log('KeffStation: Building UI...');
+      this.setProgress(35, '🏗️ Construction de l\'interface...');
       this.buildUI();
       console.log('KeffStation: UI built');
+      this.setProgress(50, '✅ Interface construite');
 
       // Setup event listeners
       console.log('KeffStation: Setting up event listeners...');
+      this.setProgress(60, '⌨️ Configuration des événements...');
       this.setupEventListeners();
       console.log('KeffStation: Event listeners set up');
+      this.setProgress(70, '✅ Événements configurés');
 
       // Initialize particles
       console.log('KeffStation: Initializing particles...');
+      this.setProgress(80, '✨ Initialisation des particules...');
       this.initParticles();
       console.log('KeffStation: Particles initialized');
+      this.setProgress(90, '✅ Particules prêtes');
 
       // Hide loading
       console.log('KeffStation: Hiding loading...');
+      this.setProgress(95, '🎯 Presque prêt...');
       this.hideLoading();
       console.log('KeffStation: Loading hidden');
+      this.setProgress(100, '✅ KeffStation prêt');
 
       this.initialized = true;
       console.log('KeffStation initialized successfully');
@@ -379,6 +394,16 @@ class KeffStation {
       loading.style.color = '#ff3d9a';
     }
   }
+
+  setProgress(percent, text) {
+    if (this.loadingBar) {
+      this.loadingBar.style.width = percent + '%';
+    }
+    const loadingText = this.loading?.querySelector('.loading-text');
+    if (loadingText && text) {
+      loadingText.textContent = text;
+    }
+  }
 }
 
 // ============ INIT ============
@@ -389,9 +414,14 @@ if (document.readyState === 'loading') {
 }
 
 function initApp() {
-  console.log('initApp called');
+  console.log('initApp called, readyState:', document.readyState);
   const loading = document.getElementById('loading');
-  if (loading) loading.textContent = '🔄 Initialisation...';
+  if (loading) {
+    loading.textContent = '🔄 Initialisation...';
+    console.log('Loading element found');
+  } else {
+    console.error('Loading element NOT found!');
+  }
 
   const timeoutId = setTimeout(() => {
     if (loading) {
@@ -403,6 +433,7 @@ function initApp() {
   try {
     window.keffStation = new KeffStation();
     console.log('KeffStation created, starting init...');
+    window.keffStation.setProgress(2, '📦 Chargement du module...');
     window.keffStation.init().then(() => {
       clearTimeout(timeoutId);
       const loading = document.getElementById('loading');
