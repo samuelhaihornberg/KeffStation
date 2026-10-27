@@ -181,8 +181,8 @@ class KeffStation {
       this.initialized = true;
       console.log('KeffStation initialized successfully');
       
-      // Preload embedded PWAs in background
-      setTimeout(() => this.preloadAllEmbedded(), 1000);
+      // Preload embedded PWAs immediately in background (don't wait)
+      this.preloadAllEmbedded();
     } catch (error) {
       console.error('Initialization failed:', error);
       this.showError(error?.message || error?.toString() || 'Erreur inconnue');
@@ -213,7 +213,7 @@ class KeffStation {
       
       // Embedded PWA button if app supports it
       const embedBtn = app.embedded ? `
-        <button type="button" class="embed-btn" data-app-index="${i}" style="
+        <button type="button" class="embed-btn" data-app-index="${i}" data-embed-url="${sanitizeHTML(app.embedUrl)}" style="
           margin-top:1em;padding:clamp(10px,2vw,14px) clamp(16px,3vw,24px);
           border-radius:999px;border:1px solid rgba(30,107,255,.4);
           background:linear-gradient(135deg,rgba(30,107,255,.2),rgba(138,77,255,.15));
@@ -222,7 +222,12 @@ class KeffStation {
           display:inline-flex;align-items:center;gap:8px;
           -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
           box-shadow:0 4px 16px rgba(30,107,255,.2);">
-          <span>📱</span> Ouvrir KiffTech dans KeffStation
+          <span>📱</span>
+          <span class="embed-btn-text">Ouvrir KiffTech dans KeffStation</span>
+          <span class="embed-preload-status" style="
+            width:8px;height:8px;border-radius:50%;
+            background:rgba(255,210,63,.5);margin-left:8px;
+            transition:background .3s,transform .3s;opacity:.8;"></span>
         </button>
       ` : '';
       
@@ -450,6 +455,18 @@ class KeffStation {
       .then(() => {
         this.pwaCache.set(app.embedUrl, true);
         console.log('PWA preloaded:', app.num);
+        // Update button status indicator
+        const btns = document.querySelectorAll(`.embed-btn[data-embed-url="${app.embedUrl}"]`);
+        btns.forEach(btn => {
+          const status = btn.querySelector('.embed-preload-status');
+          const text = btn.querySelector('.embed-btn-text');
+          if (status) {
+            status.style.background = '#27d17f';
+            status.style.transform = 'scale(1.2)';
+            status.title = 'Préchargé ✓';
+          }
+          if (text) text.textContent = 'Prêt — Ouvrir dans KeffStation';
+        });
       })
       .catch(err => console.warn('PWA preload failed (CORS expected):', app.num, err));
   }
