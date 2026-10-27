@@ -35,7 +35,7 @@ const APPS = [
     desc: "Échange d'astuces pas à pas, troc d'objets, services entre particuliers. Frais dégressifs 17%→5%, double porte-monnaie (solde + crédits).",
     tags: ["Marketplace", "Troc", "Crédits", "Communauté"],
     appUrl: "https://samuelhaihornberg.github.io/keffjobtrictrocc/",
-    embedded: true,
+    embedded: false,
     embedUrl: "https://samuelhaihornberg.github.io/keffjobtrictrocc/",
     embedLabel: "Ouvrir Tricktrocjob",
     subArticles: [
@@ -61,7 +61,7 @@ const APPS = [
     desc: "Syntaxe cos (connexions), famille SuperBots (ViA, BTB+Golem, Geeko, Guideoplan), blocs logiques BLM/BLSM, motor.s injection.",
     tags: ["cos", "SuperBots", "BLM", "motor.s"],
     appUrl: "https://samuelhaihornberg.github.io/ViArtificial/",
-    embedded: true,
+    embedded: false,
     embedUrl: "https://samuelhaihornberg.github.io/ViArtificial/",
     embedLabel: "Ouvrir SuperBots from ViArtificial Labs",
     subArticles: [
@@ -86,7 +86,7 @@ const APPS = [
     desc: "Éditeur interactif pour la syntaxe cos (connexions, sandwich, adresses alphanumériques, CSM). Validation temps réel, coloration, autocomplétion.",
     tags: ["cos", "Éditeur", "Syntax", "Dev"],
     appUrl: "https://samuelhaihornberg.github.io/cos-editor/",
-    embedded: true,
+    embedded: false,
     embedUrl: "https://samuelhaihornberg.github.io/cos-editor/",
     embedLabel: "Ouvrir Éditeur cos",
     subArticles: [
@@ -102,7 +102,7 @@ const APPS = [
     desc: "Expérimentations NLP/LLM locaux : tokenisation, embeddings, génération contrôlée, fine-tuning LoRA, quantization GGUF.",
     tags: ["NLP", "LLM", "Expérimental", "Local-First"],
     appUrl: "https://samuelhaihornberg.github.io/linguistic-motors/",
-    embedded: true,
+    embedded: false,
     embedUrl: "https://samuelhaihornberg.github.io/linguistic-motors/",
     embedLabel: "Ouvrir Moteurs linguistiques",
     subArticles: [
@@ -118,7 +118,7 @@ const APPS = [
     desc: "Catalogue jeux, emulation, cloud gaming, mods, benchmarks. PAWAW, Rollspunch, indés, retro, AAA.",
     tags: ["Jeux", "Gaming", "Emulation", "Cloud"],
     appUrl: "https://samuelhaihornberg.github.io/Videogames/",
-    embedded: true,
+    embedded: false,
     embedUrl: "https://samuelhaihornberg.github.io/Videogames/",
     embedLabel: "Ouvrir Videogames",
     subArticles: [
