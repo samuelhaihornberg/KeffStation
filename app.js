@@ -10,6 +10,7 @@ const APPS = [
     appUrl: "https://samuelhaihornberg.github.io/keffstation/kifftech/catalog.html",
     embedUrl: "https://samuelhaihornberg.github.io/keffstation/kifftech/catalog.html",
     embedLabel: "Ouvrir Kifftech",
+    embedded: true,
     color: "#1e6bff",
     subArticles: [
       { title: "Catalogue Samsung", desc: "Galaxy Buds, SmartTag, chargeurs rapides — fiches complètes.", tags: ["Samsung", "Audio", "Accessoires"] },
