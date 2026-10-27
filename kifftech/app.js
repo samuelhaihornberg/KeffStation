@@ -251,19 +251,29 @@ function initEvents(){
 // ============ INIT ============
 function init(){
   console.log('[KiffTech] init() called');
+  console.log('[KiffTech] document.readyState:', document.readyState);
   console.log('KiffTech init, LOCAL_DB:', LOCAL_DB?.length);
   try {
     if (!products?.length) products = [...LOCAL_DB];
+    console.log('[KiffTech] products assigned, length:', products.length);
     products.forEach(p => { if (!p.kifftech) p.kifftech = calcKiffTechPrice(p.price.official); });
     filteredProducts = [...products];
+    console.log('[KiffTech] filteredProducts assigned, length:', filteredProducts.length);
     
     renderFilters();
+    console.log('[KiffTech] renderFilters done');
     refreshKiffTechPrices();
+    console.log('[KiffTech] refreshKiffTechPrices done');
     applyFilters();
+    console.log('[KiffTech] applyFilters done');
     loadProducts();
+    console.log('[KiffTech] loadProducts called');
     initEvents();
+    console.log('[KiffTech] initEvents done');
     initParticles();
+    console.log('[KiffTech] initParticles done');
     updateSubUI();
+    console.log('[KiffTech] updateSubUI done');
     console.log('KiffTech initialized, products:', products.length);
     console.log('[KiffTech] init() completed successfully');
   } catch(e) {
