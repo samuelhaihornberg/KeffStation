@@ -207,9 +207,15 @@ main{flex:1;padding:clamp(16px,3vw,24px);display:grid;gap:clamp(16px,2.5vw,20px)
 </div>
 <script type="module" src="app.js"></script>
 <script>
+console.log('[Catalog] Inline script executed');
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').then(reg => console.log('[SW] Registered:', reg.scope)).catch(err => console.warn('[SW] Registration failed:', err));
 }
+setTimeout(() => {
+  const grid = document.getElementById('products-grid');
+  console.log('[Catalog] products-grid children:', grid?.children?.length || 0);
+  console.log('[Catalog] products-grid innerHTML length:', grid?.innerHTML?.length || 0);
+}, 1000);
 </script>
 </body>
 </html>
