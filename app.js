@@ -258,7 +258,7 @@ class KeffStation {
           <p class="face-desc">${sanitizeHTML(app.desc)}</p>
           ${articlesHTML}
           <div class="face-tags">${faceTags}</div>
-          <button type="button" class="embed-btn" data-app-index="${i}" data-embed-url="${sanitizeHTML(app.embedUrl)}">
+          <button type="button" class="embed-btn" data-app-index="${i}" data-app-url="${sanitizeHTML(app.appUrl)}" data-embed-url="${sanitizeHTML(app.embedUrl)}">
             <span>📱</span>
             <span class="embed-btn-text">${sanitizeHTML(app.embedLabel || 'Ouvrir ' + app.num)}</span>
             <span class="embed-preload-status"></span>
@@ -267,13 +267,16 @@ class KeffStation {
       `;
       this.cube.appendChild(face);
 
-      // Embed button event
+      // Embed button event - NAVIGATE to appUrl (change URL)
       const embedBtnEl = face.querySelector('.embed-btn');
       if (embedBtnEl) {
         embedBtnEl.addEventListener('click', (e) => {
           e.stopPropagation();
           const idx = parseInt(embedBtnEl.dataset.appIndex, 10);
-          this.openEmbed(this.apps[idx]);
+          const app = this.apps[idx];
+          if (app.appUrl) {
+            window.location.href = app.appUrl;  // NAVIGATE - URL changes
+          }
         });
       }
 
