@@ -20,6 +20,14 @@ header{position:sticky;top:0;z-index:50;padding:clamp(12px,3vh,20px) clamp(12px,
 .logo{font-size:clamp(28px,5vw,36px)}
 h1{font-size:clamp(1.3rem,3.5vw,2rem);font-weight:800;background:linear-gradient(90deg,#1e6bff,#00d4ff,#27d17f);-webkit-background-clip:text;background-clip:text;color:transparent}
 .agent-badge{font-size:clamp(.65rem,1.5vw,.8rem);padding:4px 10px;border-radius:999px;background:linear-gradient(135deg,#1e6bff,#00d4ff);color:#fff;font-weight:700;letter-spacing:.05em;animation:pulse 2s ease-in-out infinite}
+
+.header-right{display:flex;align-items:center;gap:10px}
+.cart-btn{position:relative;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#ffd23f;cursor:pointer;transition:all .2s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.cart-btn:hover{border-color:#1e6bff;background:rgba(30,107,255,.15);transform:scale(1.05)}
+#cart-count{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:linear-gradient(135deg,#1e6bff,#ff3d9a);color:#fff;font-size:.6rem;font-weight:700;border-radius:999px;padding:0 5px;display:flex;align-items:center;justify-content:center;display:none}
+.sub-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;border:1px solid rgba(30,107,255,.4);background:linear-gradient(135deg,rgba(30,107,255,.15),rgba(0,212,255,.1));color:#8ab4ff;font-weight:700;font-size:clamp(.75rem,1.6vw,.85rem);cursor:pointer;transition:all .2s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);white-space:nowrap}
+.sub-btn:hover{border-color:#1e6bff;box-shadow:0 6px 20px rgba(30,107,255,.3)}
+.sub-btn.active{background:linear-gradient(135deg,#27d17f,#1e6bff);border-color:transparent;color:#fff}
 @keyframes pulse{0%,100%{box-shadow:0 0 8px rgba(30,107,255,.5)}50%{box-shadow:0 0 20px rgba(0,212,255,.8)}}
 
 main{flex:1;padding:clamp(16px,3vw,24px);display:grid;gap:clamp(16px,2.5vw,20px);grid-template-columns:1fr}
@@ -101,8 +109,42 @@ main{flex:1;padding:clamp(16px,3vw,24px);display:grid;gap:clamp(16px,2.5vw,20px)
 .product-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:clamp(.65rem,1.4vw,.75rem)}
 .meta-item{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#b9c0e6}
 .meta-year{background:rgba(0,212,255,.15);border-color:rgba(0,212,255,.3);color:#00d4ff}
-.meta-price{background:rgba(255,210,63,.15);border-color:rgba(255,210,63,.3);color:#ffd23f;font-weight:700}
-.meta-source{background:rgba(255,61,154,.15);border-color:rgba(255,61,154,.3);color:#ffb3d1}
+.meta-price-wrap{display:flex;align-items:center;gap:6px}
+.price-crossed{text-decoration:line-through;color:#8a92b8;font-size:.85em}
+.price-kifftech{font-weight:800;color:#27d17f;font-size:1.05em}
+.price-kifftech.has-discount{color:#27d17f}
+.discount-badge{display:flex;align-items:center;gap:6px;padding:6px 10px;background:linear-gradient(135deg,rgba(39,209,127,.15),rgba(30,107,255,.1));border:1px solid rgba(39,209,127,.3);border-radius:8px;font-size:clamp(.65rem,1.3vw,.75rem);color:#27d17f;font-weight:600}
+.badge-promo{background:linear-gradient(135deg,#ff3d9a,#ff6b00);color:#fff;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 8px rgba(255,61,154,.5)}50%{box-shadow:0 0 20px rgba(255,107,0,.8)}}
+
+.product-specs{display:flex;flex-direction:column;gap:6px}
+.spec-row{display:flex;justify-content:space-between;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.04);font-size:clamp(.7rem,1.5vw,.8rem)}
+.spec-label{color:#8a92b8}
+.spec-value{color:#fff;font-weight:600;text-align:right;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.product-actions{display:flex;gap:8px;margin-top:4px}
+.btn-sm{flex:1;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#b9c0e6;font-size:clamp(.75rem,1.6vw,.85rem);font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-sm:hover{border-color:#1e6bff;background:rgba(30,107,255,.15);color:#8ab4ff}
+.btn-sm.primary{background:linear-gradient(135deg,#1e6bff,#00d4ff);border-color:transparent;color:#fff}
+.btn-sm.primary:hover{box-shadow:0 6px 20px rgba(30,107,255,.4)}
+
+/* Cart items */
+.cart-item{display:flex;gap:12px;padding:12px;background:rgba(255,255,255,.03);border-radius:10px;border:1px solid rgba(255,255,255,.06);align-items:center}
+.cart-item img{width:50px;height:50px;object-fit:cover;border-radius:8px}
+.cart-item-info{flex:1}
+.cart-item-name{font-weight:600}
+.cart-item-meta{font-size:.8rem;color:#8a92b8}
+.cart-item-prices{text-align:right}
+.cart-item-official{font-size:.75rem;color:#8a92b8;text-decoration:line-through}
+.cart-item-kifftech{font-weight:700;color:#27d17f}
+
+/* Promo indicator */
+.promo-active{color:#27d17f;font-weight:700}
+.promo-pending{color:#ffd23f}
+.promo-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;background:linear-gradient(135deg,rgba(39,209,127,.2),rgba(30,107,255,.15));border:1px solid rgba(39,209,127,.3);border-radius:999px;font-size:.7rem;color:#27d17f;font-weight:700}
+
+/* Subscription panel */
+#promo-indicator{transition:all .3s}
 
 .product-specs{display:flex;flex-direction:column;gap:6px}
 .spec-row{display:flex;justify-content:space-between;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.04);font-size:clamp(.7rem,1.5vw,.8rem)}
@@ -175,6 +217,13 @@ main{flex:1;padding:clamp(16px,3vw,24px);display:grid;gap:clamp(16px,2.5vw,20px)
 <h1>KiffTech</h1>
 <span class="agent-badge">AGENT IA</span>
 </div>
+<div class="header-right">
+<button class="sub-btn" id="btn-subscribe-header" type="button" aria-label="S'abonner KiffTech Club"></button>
+<button class="cart-btn" id="btn-cart-header" type="button" aria-label="Ma sélection">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+<span id="cart-count">0</span>
+</button>
+</div>
 </header>
 <main>
 <aside class="sidebar">
@@ -214,6 +263,25 @@ main{flex:1;padding:clamp(16px,3vw,24px);display:grid;gap:clamp(16px,2.5vw,20px)
 <button class="action-btn" id="btn-fetch" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg><span>Lancer la veille</span></button>
 <button class="action-btn" id="btn-export" type="button" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Exporter JSON</span></button>
 <button class="action-btn" id="btn-clear" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg><span>Vider le cache</span></button>
+</section>
+
+<!-- KiffTech Club -->
+<section class="panel">
+<div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>KiffTech Club</div>
+<div id="promo-indicator" style="margin-bottom:12px;padding:12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);font-size:.8rem"></div>
+<button class="action-btn" id="btn-subscribe" type="button" style="margin-bottom:12px"></button>
+<div style="font-size:.75rem;color:#8a92b8;line-height:1.6">
+<strong>1€/jour</strong> (≈30€/mois) • Sans engagement<br>
+• -10% à -21% selon ancienneté<br>
+• Livraison toujours offerte<br>
+• Accès priorité nouveautés
+</div>
+</section>
+
+<!-- Ma Sélection -->
+<section class="panel">
+<div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>Ma Sélection <span id="cart-count" style="background:#1e6bff;color:#fff;padding:2px 6px;border-radius:999px;font-size:.65rem;margin-left:8px;display:none">0</span></div>
+<div id="cart-panel" style="max-height:200px;overflow-y:auto"></div>
 </section>
 </aside>
 
