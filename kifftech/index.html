@@ -4,44 +4,261 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1e6bff">
-<meta name="description" content="KiffTech - Smart devices & gadgets boutique">
+<meta name="description" content="KiffTech - Agent IA veille tech, prix officiels & réseaux sociaux 2020-2026">
 <link rel="manifest" href="./manifest.json">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E📱%3C/text%3E%3C/svg%3E">
-<title>KiffTech — Smart devices & gadgets</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E🤖%3C/text%3E%3C/svg%3E">
+<title>KiffTech — Agent IA Veille Tech</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,sans-serif}
-.app{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
-header{padding:clamp(16px,4vh,24px) clamp(12px,3vw,20px);background:rgba(10,12,34,.9);border-bottom:1px solid rgba(255,255,255,.1);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;gap:12px;flex-shrink:0}
-.logo{font-size:clamp(24px,5vw,32px)} h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:700;background:linear-gradient(90deg,#1e6bff,#ff3d9a,#ffd23f);-webkit-background-clip:text;background-clip:text;color:transparent}
-main{flex:1;padding:clamp(16px,3vw,24px);display:grid;gap:clamp(12px,2vw,16px);grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
-.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:clamp(16px,3vw,20px);transition:transform .2s,box-shadow .2s,border-color .2s;display:flex;flex-direction:column;gap:12px}
-.card:hover{transform:translateY(-4px);border-color:#1e6bff;box-shadow:0 12px 40px rgba(30,107,255,.2)}
-.card h3{font-size:clamp(1rem,2.5vw,1.2rem);color:#ffd23f}
-.card p{color:#b9c0e6;line-height:1.5;flex:1}
-.tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{font-size:.7rem;padding:4px 10px;border-radius:999px;background:rgba(30,107,255,.2);border:1px solid rgba(30,107,255,.4);color:#8ab4ff}
-.btn{display:inline-flex;align-items:center;gap:8px;margin-top:auto;padding:12px 20px;border-radius:999px;border:1px solid #1e6bff;background:linear-gradient(135deg,#1e6bff,#138,77,255);color:#fff;font-weight:600;text-decoration:none;transition:transform .15s,box-shadow .15s}
-.btn:hover{transform:scale(1.02);box-shadow:0 8px 24px rgba(30,107,255,.4)}
+html{font-size:16px}@media (max-width:360px){html{font-size:14px}}@media (min-width:768px){html{font-size:18px}}@media (min-width:1200px){html{font-size:20px}}
+body{min-height:100vh;min-height:100dvh;background:#070816;color:#f4f6ff;font:1rem/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.app{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+header{position:sticky;top:0;z-index:50;padding:clamp(12px,3vh,20px) clamp(12px,3vw,20px);background:rgba(10,12,34,.95);border-bottom:1px solid rgba(255,255,255,.1);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;flex-shrink:0}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo{font-size:clamp(28px,5vw,36px)}
+h1{font-size:clamp(1.3rem,3.5vw,2rem);font-weight:800;background:linear-gradient(90deg,#1e6bff,#00d4ff,#27d17f);-webkit-background-clip:text;background-clip:text;color:transparent}
+.agent-badge{font-size:clamp(.65rem,1.5vw,.8rem);padding:4px 10px;border-radius:999px;background:linear-gradient(135deg,#1e6bff,#00d4ff);color:#fff;font-weight:700;letter-spacing:.05em;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 8px rgba(30,107,255,.5)}50%{box-shadow:0 0 20px rgba(0,212,255,.8)}}
+
+main{flex:1;padding:clamp(16px,3vw,24px);display:grid;gap:clamp(16px,2.5vw,20px);grid-template-columns:1fr}
+@media (min-width:900px){main{grid-template-columns:320px 1fr}}
+@media (min-width:1400px){main{grid-template-columns:360px 1fr}}
+
+/* Sidebar - Agent Panel */
+.sidebar{display:flex;flex-direction:column;gap:clamp(16px,2.5vw,20px);height:fit-content;position:sticky;top:calc(100px + 2vh);max-height:calc(100vh - 120px);overflow-y:auto}
+.panel{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:clamp(16px,3vw,20px);transition:border-color .2s,box-shadow .2s}
+.panel:hover{border-color:rgba(30,107,255,.3);box-shadow:0 8px 30px rgba(30,107,255,.1)}
+.panel-title{display:flex;align-items:center;gap:10px;font-size:clamp(.9rem,2vw,1.1rem);font-weight:700;color:#ffd23f;margin-bottom:clamp(12px,2vw,16px)}
+.panel-title svg{width:22px;height:22px;color:#1e6bff}
+
+/* Search & Filters */
+.search-box{display:flex;flex-direction:column;gap:10px}
+.search-input-wrap{position:relative}
+.search-input{width:100%;padding:14px 16px 14px 44px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;font-size:clamp(.9rem,2vw,1rem);transition:border-color .2s,box-shadow .2s}
+.search-input:focus{outline:none;border-color:#1e6bff;box-shadow:0 0 0 3px rgba(30,107,255,.2)}
+.search-input::placeholder{color:rgba(255,255,255,.4)}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:rgba(255,255,255,.5);pointer-events:none}
+
+.filter-row{display:flex;gap:8px;flex-wrap:wrap}
+.filter-btn{padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#b9c0e6;font-size:clamp(.7rem,1.5vw,.8rem);font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.filter-btn:hover{border-color:#1e6bff;background:rgba(30,107,255,.15);color:#8ab4ff}
+.filter-btn.active{background:linear-gradient(135deg,#1e6bff,#00d4ff);border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(30,107,255,.4)}
+
+/* Source toggles */
+.source-toggle{display:flex;flex-direction:column;gap:10px}
+.source-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);transition:all .15s;cursor:pointer}
+.source-item:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.source-item input{width:18px;height:18px;accent-color:#1e6bff;cursor:pointer}
+.source-label{display:flex;align-items:center;gap:8px;font-size:clamp(.8rem,1.8vw,.9rem);color:#e8ecf5;cursor:pointer}
+.source-icon{width:18px;height:18px;flex-shrink:0}
+.source-badge{margin-left:auto;font-size:.65rem;padding:2px 8px;border-radius:999px;background:rgba(30,107,255,.2);color:#8ab4ff;font-weight:700}
+
+/* Action buttons */
+.action-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 20px;border-radius:12px;border:1px solid rgba(30,107,255,.4);background:linear-gradient(135deg,rgba(30,107,255,.15),rgba(0,212,255,.1));color:#8ab4ff;font-weight:700;font-size:clamp(.9rem,2vw,1rem);cursor:pointer;transition:all .2s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.action-btn:hover{transform:translateY(-2px);border-color:#1e6bff;box-shadow:0 8px 30px rgba(30,107,255,.3)}
+.action-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.action-btn.loading{position:relative;color:transparent}
+.action-btn.loading::after{content:'';position:absolute;width:20px;height:20px;border:2px solid rgba(255,255,255,.2);border-top-color:#ffd23f;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:14px;text-align:center}
+.stat-value{font-size:clamp(1.3rem,3vw,1.8rem);font-weight:800;color:#ffd23f;line-height:1}
+.stat-label{font-size:clamp(.65rem,1.4vw,.75rem);color:#8a92b8;margin-top:4px}
+
+/* Product Grid */
+.products-section{display:flex;flex-direction:column;gap:clamp(16px,2.5vw,20px)}
+.section-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.section-title{font-size:clamp(1.1rem,2.5vw,1.4rem);font-weight:700;background:linear-gradient(90deg,#fff,#b9c0e6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.results-count{font-size:clamp(.8rem,1.8vw,.9rem);color:#8a92b8}
+
+.products-grid{display:grid;gap:clamp(16px,2vw,20px);grid-template-columns:1fr}
+@media (min-width:600px){.products-grid{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:900px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:1200px){.products-grid{grid-template-columns:repeat(4,1fr)}}
+
+.product-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.product-card:hover{transform:translateY(-6px);border-color:rgba(30,107,255,.4);box-shadow:0 20px 50px rgba(30,107,255,.2)}
+
+.product-media{position:relative;aspect-ratio:1;overflow:hidden;background:rgba(255,255,255,.02)}
+.product-media img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.product-card:hover .product-media img{transform:scale(1.05)}
+.product-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+.product-card:hover .product-video{display:block}
+.media-badge{position:absolute;top:10px;right:10px;display:flex;gap:6px}
+.badge{font-size:.6rem;padding:4px 8px;border-radius:999px;font-weight:700;letter-spacing:.02em}
+.badge-video{background:rgba(255,61,154,.9);color:#fff}
+.badge-gallery{background:rgba(0,212,255,.9);color:#070816}
+.badge-social{background:rgba(255,210,63,.9);color:#070816}
+.badge-official{background:rgba(39,209,127,.9);color:#070816}
+
+.product-info{padding:clamp(14px,3vw,18px);display:flex;flex-direction:column;gap:10px;flex:1}
+.product-brand{font-size:clamp(.7rem,1.5vw,.8rem);color:#1e6bff;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.product-name{font-size:clamp(1rem,2.2vw,1.2rem);font-weight:700;color:#fff;line-height:1.2}
+.product-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:clamp(.65rem,1.4vw,.75rem)}
+.meta-item{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#b9c0e6}
+.meta-year{background:rgba(0,212,255,.15);border-color:rgba(0,212,255,.3);color:#00d4ff}
+.meta-price{background:rgba(255,210,63,.15);border-color:rgba(255,210,63,.3);color:#ffd23f;font-weight:700}
+.meta-source{background:rgba(255,61,154,.15);border-color:rgba(255,61,154,.3);color:#ffb3d1}
+
+.product-specs{display:flex;flex-direction:column;gap:6px}
+.spec-row{display:flex;justify-content:space-between;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.04);font-size:clamp(.7rem,1.5vw,.8rem)}
+.spec-label{color:#8a92b8}
+.spec-value{color:#fff;font-weight:600;text-align:right;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.product-actions{display:flex;gap:8px;margin-top:4px}
+.btn-sm{flex:1;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#b9c0e6;font-size:clamp(.75rem,1.6vw,.85rem);font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-sm:hover{border-color:#1e6bff;background:rgba(30,107,255,.15);color:#8ab4ff}
+.btn-sm.primary{background:linear-gradient(135deg,#1e6bff,#00d4ff);border-color:transparent;color:#fff}
+.btn-sm.primary:hover{box-shadow:0 6px 20px rgba(30,107,255,.4)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.modal-overlay.visible{opacity:1;visibility:visible}
+.modal{width:100%;max-width:900px;max-height:90vh;background:#0a0c1e;border:1px solid rgba(255,255,255,.1);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transform:scale(.95);transition:transform .3s}
+.modal-overlay.visible .modal{transform:scale(1)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:clamp(16px,3vw,20px);background:rgba(10,12,34,.9);border-bottom:1px solid rgba(255,255,255,.1);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);flex-shrink:0}
+.modal-title{font-size:clamp(1.1rem,2.5vw,1.4rem);font-weight:700;color:#ffd23f}
+.modal-close{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#ffd23f;font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.modal-close:hover{background:rgba(255,61,154,.3);border-color:#ff3d9a;transform:scale(1.1)}
+.modal-body{flex:1;overflow-y:auto;padding:clamp(20px,4vw,28px);display:grid;gap:clamp(20px,3vw,28px);grid-template-columns:1fr}
+@media (min-width:800px){.modal-body{grid-template-columns:1fr 1fr}}
+.modal-media{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:rgba(255,255,255,.02)}
+.modal-media img,.modal-media video{width:100%;height:100%;object-fit:cover}
+.media-nav{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.media-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.3);border:none;cursor:pointer;transition:all .2s}
+.media-dot.active{background:#ffd23f;transform:scale(1.2)}
+.modal-details{display:flex;flex-direction:column;gap:16px}
+.modal-brand{font-size:clamp(.8rem,1.8vw,.95rem);color:#1e6bff;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.modal-name{font-size:clamp(1.3rem,3vw,1.8rem);font-weight:800;color:#fff;line-height:1.15}
+.modal-meta{display:flex;flex-wrap:wrap;gap:8px}
+.modal-desc{color:#b9c0e6;line-height:1.6;font-size:clamp(.9rem,2vw,1rem)}
+.modal-specs{display:grid;gap:10px}
+@media (min-width:500px){.modal-specs{grid-template-columns:repeat(2,1fr)}}
+.spec-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px}
+.spec-card h4{font-size:clamp(.75rem,1.6vw,.85rem);color:#8a92b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.spec-grid{display:grid;gap:10px}
+@media (min-width:400px){.spec-grid{grid-template-columns:repeat(2,1fr)}}
+.spec-item{display:flex;flex-direction:column;gap:4px}
+.spec-item-label{font-size:clamp(.65rem,1.4vw,.75rem);color:#8a92b8}
+.spec-item-value{font-size:clamp(.85rem,1.8vw,.95rem);color:#fff;font-weight:600}
+.modal-prices{display:flex;flex-wrap:wrap;gap:10px}
+.price-card{flex:1;min-width:180px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;text-align:center}
+.price-source{font-size:clamp(.7rem,1.5vw,.8rem);color:#8a92b8;margin-bottom:6px}
+.price-value{font-size:clamp(1.2rem,2.5vw,1.5rem);font-weight:800;color:#ffd23f}
+.price-currency{color:#b9c0e6}
+.price-link{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:8px 16px;border-radius:999px;background:linear-gradient(135deg,#1e6bff,#00d4ff);color:#fff;font-size:clamp(.75rem,1.6vw,.85rem);font-weight:600;text-decoration:none;transition:transform .15s,box-shadow .15s}
+.price-link:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(30,107,255,.4)}
+
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:#8a92b8;gap:16px}
+.spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.1);border-top-color:#1e6bff;border-radius:50%;animation:spin .8s linear infinite}
+.empty-state{text-align:center;padding:60px 20px;color:#8a92b8}
+.empty-icon{font-size:clamp(48px,10vw,72px);margin-bottom:16px;opacity:.5}
+
+.toast{position:fixed;bottom:24px;right:24px;z-index:2000;padding:14px 20px;border-radius:12px;background:rgba(10,12,34,.95);border:1px solid rgba(255,255,255,.1);color:#fff;font-weight:600;display:flex;align-items:center;gap:10px;transform:translateY(100px);opacity:0;transition:all .3s;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.toast.visible{transform:translateY(0);opacity:1}
+.toast.success{border-color:rgba(39,209,127,.4)}
+.toast.error{border-color:rgba(255,61,154,.4)}
+.toast-warning{border-color:rgba(255,210,63,.4)}
+
+@media (prefers-color-scheme:light){:root{color-scheme:dark}}
 </style>
 </head>
 <body>
 <div class="app">
-<header><span class="logo">📱</span><h1>KiffTech</h1></header>
+<header>
+<div class="header-left">
+<span class="logo">🤖</span>
+<h1>KiffTech</h1>
+<span class="agent-badge">AGENT IA</span>
+</div>
+</header>
 <main>
-<article class="card"><h3>Galaxy Buds 3 Pro</h3><p>ANC adaptatif IA, 30h autonomie, boîtier sans fil. Prix compétitif vs AirPods Pro 2.</p><div class="tags"><span class="tag">Samsung</span><span class="tag">Audio</span><span class="tag">ANC</span></div><a href="#" class="btn">Voir fiche →</a></article>
-<article class="card"><h3>Xiaomi Smart Band 9 Pro</h3><p>Écran AMOLED 1.74", GPS intégré, 21 jours autonomie, 150+ modes sport.</p><div class="tags"><span class="tag">Xiaomi</span><span class="tag">Fitness</span><span class="tag">AMOLED</span></div><a href="#" class="btn">Voir fiche →</a></article>
-<article class="card"><h3>Samsung Galaxy SmartTag 3</h3><p>Tracker UWB + Thread, Matter, 1 an autonomie. Trouvez tout instantanément.</p><div class="tags"><span class="tag">Samsung</span><span class="tag">Tracker</span><span class="tag">UWB</span></div><a href="#" class="btn">Voir fiche →</a></article>
-<article class="card"><h3>Chargeur 65W GaN 3 ports</h3><p>2x USB-C + 1x USB-A, nitrure de gallium, taille carte crédit. Idéal voyage.</p><div class="tags"><span class="tag">Chargeur</span><span class="tag">GaN</span><span class="tag">Multi-port</span></div><a href="#" class="btn">Voir fiche →</a></article>
-<article class="card"><h3>Xiaomi Redmi Buds 6 Pro</h3><p>Hi-Res LDAC, ANC hybride 55dB, 38h autonomie, 3 micros IA. Sous 100€.</p><div class="tags"><span class="tag">Xiaomi</span><span class="tag">Audio</span><span class="tag">LDAC</span></div><a href="#" class="btn">Voir fiche →</a></article>
-<article class="card"><h3>Samsung Galaxy Watch 7</h3><p>BioActive 2.0, sommeil IA, ECG/TA, 40h, Wear OS 5. Santé complète.</p><div class="tags"><span class="tag">Samsung</span><span class="tag">Montre</span><span class="tag">Santé</span></div><a href="#" class="btn">Voir fiche →</a></article>
-<article class="card"><h3>Robot Xiaomi X20 Pro</h3><p>LDS 360°, IA objets, serpillière auto-lift, station vidage 60 jours.</p><div class="tags"><span class="tag">Xiaomi</span><span class="tag">Robot</span><span class="tag">IA</span></div><a href="#" class="btn">Voir fiche →</a></article>
-<article class="card"><h3>Chargeur sans fil 50W MagSafe</h3><p>Magnétique 50W (iPhone 15+), ventilation active, 30 min pour 50%.</p><div class="tags"><span class="tag">MagSafe</span><span class="tag">Sans-fil</span><span class="tag">Rapide</span></div><a href="#" class="btn">Voir fiche →</a></article>
+<aside class="sidebar">
+<!-- Agent Status Panel -->
+<section class="panel">
+<div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Agent de Veille</div>
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-value" id="stat-products">0</div><div class="stat-label">Produits</div></div>
+<div class="stat-card"><div class="stat-value" id="stat-sources">0</div><div class="stat-label">Sources</div></div>
+<div class="stat-card"><div class="stat-value" id="stat-updated">—</div><div class="stat-label">MAJ</div></div>
+<div class="stat-card"><div class="stat-value" id="stat-coverage">0%</div><div class="stat-label">Couverture</div></div>
+</div>
+</section>
+
+<!-- Search & Filters -->
+<section class="panel">
+<div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Recherche & Filtres</div>
+<div class="search-box">
+<div class="search-input-wrap">
+<svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+<input type="search" class="search-input" id="search-input" placeholder="Produit, marque, modèle..." aria-label="Rechercher">
+</div>
+<div class="filter-row" id="filter-category" role="group" aria-label="Catégories"></div>
+<div class="filter-row" id="filter-year" role="group" aria-label="Années"></div>
+<div class="filter-row" id="filter-brand" role="group" aria-label="Marques"></div>
+</section>
+
+<!-- Sources Configuration -->
+<section class="panel">
+<div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>Sources de Données</div>
+<div class="source-toggle" id="source-toggles"></div>
+</section>
+
+<!-- Actions -->
+<section class="panel">
+<div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Actions</div>
+<button class="action-btn" id="btn-fetch" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg><span>Lancer la veille</span></button>
+<button class="action-btn" id="btn-export" type="button" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Exporter JSON</span></button>
+<button class="action-btn" id="btn-clear" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg><span>Vider le cache</span></button>
+</section>
+</aside>
+
+<!-- Products Grid -->
+<section class="products-section">
+<header class="section-header">
+<h2 class="section-title">Catalogue Produits</h2>
+<span class="results-count" id="results-count">0 produits</span>
+</header>
+<div class="products-grid" id="products-grid" role="list">
+<!-- Injected by JS -->
+</div>
+</section>
 </main>
 </div>
-<script>
-if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
-</script>
+
+<!-- Product Modal -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Détails produit">
+<div class="modal">
+<header class="modal-header">
+<div class="modal-title" id="modal-title"></div>
+<button class="modal-close" id="modal-close" type="button" aria-label="Fermer">×</button>
+</header>
+<div class="modal-body">
+<div class="modal-media" id="modal-media">
+<div class="media-nav" id="media-nav"></div>
+</div>
+<div class="modal-details">
+<div>
+<div class="modal-brand" id="modal-brand"></div>
+<h2 class="modal-name" id="modal-name"></h2>
+<div class="modal-meta" id="modal-meta"></div>
+<p class="modal-desc" id="modal-desc"></div>
+</div>
+<div>
+<section class="spec-card"><h4>Caractéristiques</h4><div class="spec-grid" id="modal-specs"></div></section>
+<section class="spec-card"><h4>Prix & Sources</h4><div class="modal-prices" id="modal-prices"></div></section>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+<script type="module" src="app.js"></script>
 </body>
 </html>
