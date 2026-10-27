@@ -249,6 +249,7 @@ function initEvents(){
 
 // ============ INIT ============
 function init(){
+  console.log('[KiffTech] init() called');
   console.log('KiffTech init, LOCAL_DB:', LOCAL_DB?.length);
   try {
     if (!products?.length) products = [...LOCAL_DB];
@@ -263,8 +264,9 @@ function init(){
     initParticles();
     updateSubUI();
     console.log('KiffTech initialized, products:', products.length);
+    console.log('[KiffTech] init() completed successfully');
   } catch(e) {
-    console.error('KiffTech init error:', e);
+    console.error('[KiffTech] init() ERROR:', e);
     document.body.innerHTML += '<pre style="color:red;padding:20px;background:#1a1d3a;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;overflow:auto">INIT ERROR: ' + e.message + '\n' + e.stack + '</pre>';
   }
 }
