@@ -45,7 +45,7 @@ const LOCAL_DB = [
   {id:'vr6',brand:'XREAL',model:'Air 2 Ultra',year:2024,category:'VR AR gadgets',price:{official:699},specs:{Écran:'Micro-OLED 1080p/œil 120Hz',Processeur:'Snapdragon XR2',RAM:'6 Go',Stockage:'128 Go',Tracking:'6DoF + mains',Autonomie:'3 h (ext.)'}},  
   {id:'vr7',brand:'Rokid',model:'Max Pro',year:2024,category:'VR AR gadgets',price:{official:599},specs:{Écran:'Micro-OLED 1080p/œil 120Hz',Processeur:'Intégré',RAM:'4 Go',Stockage:'32 Go',Tracking:'3DoF',Autonomie:'2 h (ext.)'}},  
   {id:'vr8',brand:'Viture',model:'Pro XR',year:2024,category:'VR AR gadgets',price:{official:499},specs:{Écran:'Micro-OLED 1080p/œil 120Hz',Processeur:'Aucun (téléphone)',RAM:'-',Stockage:'-',Tracking:'3DoF',Autonomie:'N/A'}},  
-  {id:'vr9',brand:'RayNeo',model:'X2',year:2024,category:'VR AR gadgets',price:{official':799},specs:{Écran:'Micro-LED 1080p/œil',Processeur:'Snapdragon XR2',RAM:'6 Go',Stockage:'32 Go',Tracking:'6DoF + SLAM',Autonomie:'2 h'}},  
+  {id:'vr9',brand:'RayNeo',model:'X2',year:2024,category:'VR AR gadgets',price:{official:799},specs:{Écran:'Micro-LED 1080p/œil',Processeur:'Snapdragon XR2',RAM:'6 Go',Stockage:'32 Go',Tracking:'6DoF + SLAM',Autonomie:'2 h'}},  
   {id:'vr10',brand:'DPVR',model:'P2',year:2024,category:'VR AR gadgets',price:{official:399},specs:{Écran:'LCD 2160x2160/œil 90Hz',Processeur:'XR2 Gen 1',RAM:'8 Go',Stockage:'128 Go',Tracking:'Inside-out',Autonomie:'2.5 h'}},  
 
   // --- Composant electronic & informatic (10) ---
