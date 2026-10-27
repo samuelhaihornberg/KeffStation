@@ -9,6 +9,8 @@ const APPS = [
     desc: "Boutique PWA : Samsung, Xiaomi, prix sous officiels, livraison mondiale. Backend Node unique, zéro dépendance, données JSON.",
     tags: ["PWA", "Node", "E-commerce", "Smart tech"],
     appUrl: "https://samuelhaihornberg.github.io/Kiff-Tech/",
+    embedded: true,
+    embedUrl: "https://samuelhaihornberg.github.io/Kiff-Tech/",
     subArticles: [
       { title: "Catalogue Samsung", desc: "Galaxy Buds, SmartTag, chargeurs rapides — fiches complètes.", tags: ["Samsung", "Audio", "Accessoires"] },
       { title: "Catalogue Xiaomi", desc: "Redmi Buds, Smart Band, caméras Wi-Fi — specs et prix.", tags: ["Xiaomi", "Fitness", "Maison"] },
@@ -131,6 +133,9 @@ class KeffStation {
     this.currentAngle = 0;
     this.isDragging = false;
     this.initialized = false;
+    // Embedded PWA state
+    this.embeddedApp = null;
+    this.embeddedIframe = null;
   }
 
   async init() {
@@ -202,6 +207,22 @@ class KeffStation {
       face.className = 'face' + (i === 0 ? ' active' : '');
       face.dataset.index = i;
       const sub = app.subArticles[0];
+      
+      // Embedded PWA button if app supports it
+      const embedBtn = app.embedded ? `
+        <button type="button" class="embed-btn" data-app-index="${i}" style="
+          margin-top:1em;padding:clamp(10px,2vw,14px) clamp(16px,3vw,24px);
+          border-radius:999px;border:1px solid rgba(30,107,255,.4);
+          background:linear-gradient(135deg,rgba(30,107,255,.2),rgba(138,77,255,.15));
+          color:#8ab4ff;font-weight:600;font-size:clamp(.8rem,2vw,.95rem);
+          cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;
+          display:inline-flex;align-items:center;gap:8px;
+          -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+          box-shadow:0 4px 16px rgba(30,107,255,.2);">
+          <span>📱</span> Ouvrir KiffTech dans KeffStation
+        </button>
+      ` : '';
+      
       face.innerHTML = `
         <div class="num">${sanitizeHTML(app.num)}</div>
         <h2><a href="${sanitizeHTML(app.appUrl)}" target="_blank" rel="noopener noreferrer" class="app-link">${sanitizeHTML(app.title)}</a></h2>
@@ -215,8 +236,19 @@ class KeffStation {
           <span class="sub-indicator">1/${app.subArticles.length}</span>
         </div>
         <div class="tags">${app.tags.map(t => `<span class="tag">${sanitizeHTML(t)}</span>`).join('')}</div>
+        ${embedBtn}
       `;
       document.getElementById('prisme').appendChild(face);
+
+      // Embed button event
+      const embedBtnEl = face.querySelector('.embed-btn');
+      if (embedBtnEl) {
+        embedBtnEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = parseInt(embedBtnEl.dataset.appIndex, 10);
+          this.openEmbedded(this.apps[idx]);
+        });
+      }
 
       // Roadmap button
       const btn = document.createElement('button');
@@ -403,6 +435,104 @@ class KeffStation {
     if (loadingText && text) {
       loadingText.textContent = text;
     }
+  }
+
+  // ============ EMBEDDED PWA ============
+  openEmbedded(app) {
+    if (!app.embedded || !app.embedUrl) return;
+    console.log('Opening embedded PWA:', app.num);
+    this.embeddedApp = app;
+    
+    // Hide prism, nav, arrows
+    this.prisme.style.display = 'none';
+    this.nav.style.display = 'none';
+    this.arrows.style.display = 'none';
+    this.gesture.style.display = 'none';
+    
+    // Create embedded container if not exists
+    let embedContainer = document.getElementById('embed-container');
+    if (!embedContainer) {
+      embedContainer = document.createElement('div');
+      embedContainer.id = 'embed-container';
+      embedContainer.style.cssText = `
+        position:fixed;inset:0;z-index:20;
+        background:#070816;display:flex;flex-direction:column;
+        overflow:hidden;
+      `;
+      embedContainer.innerHTML = `
+        <div class="embed-header" style="
+          display:flex;align-items:center;justify-content:space-between;
+          padding:clamp(10px,2vh,16px) clamp(12px,3vw,20px);
+          background:rgba(10,12,34,.9);border-bottom:1px solid rgba(255,255,255,.1);
+          -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+          z-index:1;flex-shrink:0;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button id="embed-back" type="button" aria-label="Retour à KeffStation" style="
+              width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.2);
+              background:rgba(255,255,255,.05);color:#ffd23f;font-size:20px;
+              display:flex;align-items:center;justify-content:center;cursor:pointer;
+              transition:transform .15s,background .15s,border-color .15s;
+              -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);">←</button>
+            <div>
+              <div style="font-weight:600;font-size:clamp(14px,3vw,18px);color:#fff;">${sanitizeHTML(app.title)}</div>
+              <div style="font-size:clamp(11px,2vw,13px);color:#b9c0e6;">${sanitizeHTML(app.num)}</div>
+            </div>
+          </div>
+          <button id="embed-refresh" type="button" aria-label="Actualiser" style="
+            width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.2);
+            background:rgba(255,255,255,.05);color:#ffd23f;font-size:18px;
+            display:flex;align-items:center;justify-content:center;cursor:pointer;
+            transition:transform .15s,background .15s,border-color .15s;
+            -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);">↻</button>
+        </div>
+        <iframe id="embed-iframe" src="${sanitizeHTML(app.embedUrl)}" style="
+          flex:1;width:100%;border:none;background:#070816;" 
+          allow="camera; microphone; geolocation; payment; clipboard-read; clipboard-write"
+          loading="eager"></iframe>
+      `;
+      document.body.appendChild(embedContainer);
+    }
+    
+    this.embeddedIframe = document.getElementById('embed-iframe');
+    
+    // Event listeners
+    document.getElementById('embed-back')?.addEventListener('click', () => this.closeEmbedded());
+    document.getElementById('embed-refresh')?.addEventListener('click', () => {
+      if (this.embeddedIframe) this.embeddedIframe.src = this.embeddedIframe.src;
+    });
+    
+    // Keyboard: Escape to close
+    this.embeddedKeydownHandler = (e) => {
+      if (e.key === 'Escape') this.closeEmbedded();
+    };
+    document.addEventListener('keydown', this.embeddedKeydownHandler);
+    
+    // Focus iframe for PWA interactions
+    setTimeout(() => this.embeddedIframe?.focus(), 100);
+  }
+
+  closeEmbedded() {
+    if (!this.embeddedApp) return;
+    console.log('Closing embedded PWA:', this.embeddedApp.num);
+    
+    // Remove event listener
+    if (this.embeddedKeydownHandler) {
+      document.removeEventListener('keydown', this.embeddedKeydownHandler);
+      this.embeddedKeydownHandler = null;
+    }
+    
+    // Remove embed container
+    const embedContainer = document.getElementById('embed-container');
+    if (embedContainer) embedContainer.remove();
+    
+    // Show prism, nav, arrows
+    this.prisme.style.display = '';
+    this.nav.style.display = '';
+    this.arrows.style.display = '';
+    this.gesture.style.display = '';
+    
+    this.embeddedApp = null;
+    this.embeddedIframe = null;
   }
 }
 
