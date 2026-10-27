@@ -1,4 +1,5 @@
 // ============ LOCAL_DB (80 produits, 8 catégories × 10) ============
+console.log('[KiffTech] Module loaded, LOCAL_DB length:', 80);
 const LOCAL_DB = [
   // --- Smartphones (10) ---
   {id:'sp1',brand:'Samsung',model:'Galaxy S24 Ultra',year:2024,category:'Smartphones',price:{official:1469},specs:{Écran:'6.8" Dynamic AMOLED 2X 120Hz',Processeur:'Snapdragon 8 Gen 3',RAM:'12 Go',Stockage:'256 Go',Appareil:'200+50+12+10 MP',Batterie:'5000 mAh'}},  
