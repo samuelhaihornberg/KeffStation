@@ -11,6 +11,7 @@ const APPS = [
     appUrl: "https://samuelhaihornberg.github.io/Kiff-Tech/",
     embedded: true,
     embedUrl: "https://samuelhaihornberg.github.io/Kiff-Tech/",
+    embedLabel: "Ouvrir Kifftech",
     subArticles: [
       { title: "Catalogue Samsung", desc: "Galaxy Buds, SmartTag, chargeurs rapides — fiches complètes.", tags: ["Samsung", "Audio", "Accessoires"] },
       { title: "Catalogue Xiaomi", desc: "Redmi Buds, Smart Band, caméras Wi-Fi — specs et prix.", tags: ["Xiaomi", "Fitness", "Maison"] },
@@ -34,6 +35,9 @@ const APPS = [
     desc: "Échange d'astuces pas à pas, troc d'objets, services entre particuliers. Frais dégressifs 17%→5%, double porte-monnaie (solde + crédits).",
     tags: ["Marketplace", "Troc", "Crédits", "Communauté"],
     appUrl: "https://samuelhaihornberg.github.io/keffjobtrictrocc/",
+    embedded: true,
+    embedUrl: "https://samuelhaihornberg.github.io/keffjobtrictrocc/",
+    embedLabel: "Ouvrir Tricktrocjob",
     subArticles: [
       { title: "Comment créer un Trix", desc: "Tutoriel pas à pas pour publier votre astuce ou tutoriel.", tags: ["Tutoriel", "Publication", "Trix"] },
       { title: "Échanger un Trox", desc: "Mettre en ligne un objet, gérer les propositions, finaliser l'échange.", tags: ["Trox", "Échange", "Objet"] },
@@ -57,6 +61,9 @@ const APPS = [
     desc: "Syntaxe cos (connexions), famille SuperBots (ViA, BTB+Golem, Geeko, Guideoplan), blocs logiques BLM/BLSM, motor.s injection.",
     tags: ["cos", "SuperBots", "BLM", "motor.s"],
     appUrl: "https://samuelhaihornberg.github.io/ViArtificial/",
+    embedded: true,
+    embedUrl: "https://samuelhaihornberg.github.io/ViArtificial/",
+    embedLabel: "Ouvrir SuperBots from ViArtificial Labs",
     subArticles: [
       { title: "Syntaxe cos", desc: "Référence complète : connexions, sandwich, adresses, CSM.", tags: ["cos", "Syntax", "Référence"] },
       { title: "SuperBots", desc: "ViA, BTB+Golem, Geeko, Guideoplan — personnalités et rôles.", tags: ["SuperBots", "IA", "Personnalité"] },
@@ -71,6 +78,56 @@ const APPS = [
       { title: "BLSM : générer images/sons/3D", desc: "Prompts structurés, seeds reproductibles, variations contrôlées. Export assets jeu/web/app. Pipeline créatif.", tags: ["BLSM", "Génératif", "Assets", "Pipeline"] },
       { title: "motor.s injection : noyau partiel", desc: "MOTOR.noyau(['COS','FENETRE']) — 50KB gzippé. CDN global, cache éternel, versioning sémantique. Zéro config.", tags: ["motor.s", "Injection", "CDN", "Performance"] },
       { title: "ERN : mémoire distribuée", desc: "Entités-Relations-Nœuds, graphe persistant, requêtes locales. Mémoire IA souveraine.", tags: ["ERN", "Mémoire", "Graphe", "Souveraineté"] }
+    ]
+  },
+  {
+    num: "Éditeur cos",
+    title: "Éditeur de syntaxe cos",
+    desc: "Éditeur interactif pour la syntaxe cos (connexions, sandwich, adresses alphanumériques, CSM). Validation temps réel, coloration, autocomplétion.",
+    tags: ["cos", "Éditeur", "Syntax", "Dev"],
+    appUrl: "https://samuelhaihornberg.github.io/cos-editor/",
+    embedded: true,
+    embedUrl: "https://samuelhaihornberg.github.io/cos-editor/",
+    embedLabel: "Ouvrir Éditeur cos",
+    subArticles: [
+      { title: "Guide de démarrage", desc: "Premiers pas avec l'éditeur cos : syntaxe de base, connexions A1➡️B2, mode sandwich.", tags: ["Guide", "Débutant", "cos"] },
+      { title: "Référence complète", desc: "Tous les opérateurs, adresses, motifs, CSM, exemples commentés.", tags: ["Référence", "Documentation", "cos"] },
+      { title: "Snippets prêts à l'emploi", desc: "Templates : pipelines, boucles, conditions, parallélisme, gestion d'erreurs.", tags: ["Snippets", "Templates", "cos"] },
+      { title: "Débogage visuel", desc: "Inspecteur de graphe, points d'arrêt, exécution pas à pas, logs colorés.", tags: ["Debug", "Inspecteur", "cos"] }
+    ]
+  },
+  {
+    num: "Moteurs linguistiques",
+    title: "Moteurs linguistiques expérimentaux",
+    desc: "Expérimentations NLP/LLM locaux : tokenisation, embeddings, génération contrôlée, fine-tuning LoRA, quantization GGUF.",
+    tags: ["NLP", "LLM", "Expérimental", "Local-First"],
+    appUrl: "https://samuelhaihornberg.github.io/linguistic-motors/",
+    embedded: true,
+    embedUrl: "https://samuelhaihornberg.github.io/linguistic-motors/",
+    embedLabel: "Ouvrir Moteurs linguistiques",
+    subArticles: [
+      { title: "Tokenizer visualizer", desc: "Visualisation interactive BPE/WordPiece/Unigram, vocabulaire, merges.", tags: ["Tokenizer", "Visualisation", "NLP"] },
+      { title: "Embedding explorer", desc: "Projection 2D/3D (t-SNE, UMAP), similarité cosinus, analogies vectorielles.", tags: ["Embeddings", "Projection", "NLP"] },
+      { title: "Generation playground", desc: "Sampling top-k/p, temperature, repetition penalty, logits bias, seeds.", tags: ["Génération", "Sampling", "LLM"] },
+      { title: "LoRA/QLoRA trainer", desc: "Fine-tuning low-rank adaptatif, quantization 4-bit, export GGML/GGUF.", tags: ["LoRA", "Fine-tuning", "Quantization"] }
+    ]
+  },
+  {
+    num: "Videogames",
+    title: "Videogames Hub",
+    desc: "Catalogue jeux, emulation, cloud gaming, mods, benchmarks. PAWAW, Rollspunch, indés, retro, AAA.",
+    tags: ["Jeux", "Gaming", "Emulation", "Cloud"],
+    appUrl: "https://samuelhaihornberg.github.io/Videogames/",
+    embedded: true,
+    embedUrl: "https://samuelhaihornberg.github.io/Videogames/",
+    embedLabel: "Ouvrir Videogames",
+    subArticles: [
+      { title: "PAWAW", desc: "Plateforme arcade web, high-scores, tournois, replays, modding.", tags: ["PAWAW", "Arcade", "Web"] },
+      { title: "Rollspunch", desc: "RPG tactique tour par tour, éditeur de campagnes, multijoueur async.", tags: ["Rollspunch", "RPG", "Tactique"] },
+      { title: "Cloud Gaming", desc: "GeForce Now, Xbox Cloud, Luna, Shadow — comparatif latence/prix.", tags: ["Cloud", "Streaming", "Latence"] },
+      { title: "Emulation station", desc: "RetroArch, Dolphin, PCSX2, Ryujinx, Cemu — configs optimisées.", tags: ["Emulation", "Retro", "Config"] },
+      { title: "Benchmarks GPU/CPU", desc: "FPS, frametime, 1% low, consommation, DLSS/FSR/XeSS comparo.", tags: ["Benchmark", "Performance", "GPU"] },
+      { title: "Mods & Tools", desc: "Nexus, Thunderstore, Vortex, MO2 — gestion, profils, déploiement.", tags: ["Mods", "Tools", "Gestion"] }
     ]
   }
 ];
@@ -223,7 +280,7 @@ class KeffStation {
           -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
           box-shadow:0 4px 16px rgba(30,107,255,.2);">
           <span>📱</span>
-          <span class="embed-btn-text">Ouvrir KiffTech dans KeffStation</span>
+          <span class="embed-btn-text">${sanitizeHTML(app.embedLabel || 'Ouvrir ' + app.num + ' dans KeffStation')}</span>
           <span class="embed-preload-status" style="
             width:8px;height:8px;border-radius:50%;
             background:rgba(255,210,63,.5);margin-left:8px;
