@@ -126,14 +126,21 @@ function refreshKiffTechPrices(){products.forEach(p=>p.kifftech=calcKiffTechPric
 async function fetchFromClickwise() {
   try {
     toast('Connexion a ClickWise API...','info');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
     const res = await fetch(`${CLICKWISE_API_BASE}/products`, {
-      headers: { 'Authorization': `Bearer ${CLICKWISE_API_KEY}`, 'Content-Type': 'application/json' }
+      headers: { 'Authorization': `Bearer ${CLICKWISE_API_KEY}`, 'Content-Type': 'application/json' },
+      signal: controller.signal
     });
+    clearTimeout(timeout);
     if (!res.ok) throw new Error(`API ${res.status}`);
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) throw new Error('Non-JSON response');
     const data = await res.json();
+    if (!data || (!Array.isArray(data) && !data.products)) throw new Error('Invalid data format');
     return data.products || data;
   } catch (e) {
-    console.warn('ClickWise API failed, using local DB:', e);
+    console.warn('ClickWise API failed, using local DB:', e.message);
     toast('API indisponible, base locale utilisee','warning');
     return LOCAL_DB;
   }
@@ -163,17 +170,32 @@ function toast(m,t='info'){const e=$('#toast');e.textContent=m;e.className='toas
 async function loadProducts(){
   try {
     toast('Chargement produits...','info');
-    const apiProducts = await fetchFromClickwise();
-    if (apiProducts && apiProducts.length) {
-      // Transform ClickWise format to our format
-      products = apiProducts.map((p,i)=>({...p,id:p.id||`cw-${i}`,kifftech:calcKiffTechPrice(p.price?.official||p.price||0)}));
-    } else {
-      products = [...LOCAL_DB];
-    }
-    products.forEach(p=>p.kifftech=calcKiffTechPrice(p.price?.official||p.price||0));
+    // Load local DB immediately for instant display
+    products = [...LOCAL_DB];
+    products.forEach(p=>p.kifftech=calcKiffTechPrice(p.price.official));
     filteredProducts=[...products];
     applyFilters();
-    toast(`${products.length} produits charges`,'success');
+    toast(`${products.length} produits charges (local)`,`success`);
+
+    // Then try to enhance with ClickWise API in background
+    try {
+      const apiProducts = await fetchFromClickwise();
+      if (apiProducts && apiProducts.length) {
+        // Merge API products with local (avoid duplicates)
+        const apiMapped = apiProducts.map((p,i)=>({...p,id:p.id||`cw-${i}`,kifftech:calcKiffTechPrice(p.price?.official||p.price||0)}));
+        const existingIds = new Set(products.map(p=>p.id));
+        const newProducts = apiMapped.filter(p=>!existingIds.has(p.id));
+        if (newProducts.length) {
+          products = [...newProducts, ...products];
+          filteredProducts = [...products];
+          applyFilters();
+          toast(`${newProducts.length} nouveaux produits via ClickWise`,`success`);
+        }
+      }
+    } catch(e) {
+      // API failed silently, local already loaded
+      console.log('ClickWise background fetch skipped');
+    }
   } catch(e) {
     console.error(e);
     products=[...LOCAL_DB];products.forEach(p=>p.kifftech=calcKiffTechPrice(p.price.official));
