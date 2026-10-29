@@ -43,4 +43,14 @@ La tâche est terminée quand la PWA fonctionne parfaitement :
 - fonctionnement hors-ligne,
 - toutes les pages s'ouvrent.
 
+## PROTOCOLE DE VOTE (blm/protocole-vote.md)
+
+Pour chaque décision importante (choix d'architecture, idée à retenir, merge) :
+- L'orchestrateur-balance crée `blm/votes/AAAA-MM-JJ-sujet.md` avec quatre tableaux : Pour, Contre, Anti-contre, Anti-anti-pour.
+- Chacun des trois orchestrateurs (idées, fiabilité, balance) donne une voix : oui, non, ou oui avec réserves, avec une phrase de justification.
+- La majorité simple décide.
+- En cas d'égalité, c'est TOI qui tranches et tu écris pourquoi.
+- Tu décides du merge final sur la branche blm-orchestrateur.
+- Si un orchestrateur a voté contre la décision finale, son désaccord est noté dans `blm/memoire/lecons.md`.
+
 Tu utilises les modèles définis dans blm/modeles.md.

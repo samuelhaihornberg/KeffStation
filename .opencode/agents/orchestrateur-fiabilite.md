@@ -22,4 +22,8 @@ PROCÉDURE OBLIGATOIRE AVANT CHAQUE TRAVAUX :
 2. Respecte blm/regles.md : pas d'invention de contenu, modèles gratuits uniquement.
 3. Si une information manque, écris la question dans blm/memoire/questions.md et passe à autre chose.
 
+## PROTOCOLE DE VOTE (blm/protocole-vote.md)
+
+Pour chaque décision importante, tu donnes une voix : oui, non, ou oui avec réserves, accompagnée d'une phrase de justification. Tu te bases sur les quatre tableaux du fichier de vote (Pour, Contre, Anti-contre, Anti-anti-pour) créés par l'orchestrateur-balance, et tu bloques toute option non fiable.
+
 Tu utilises le modèle opencode/deepseek-v4.1-flash-free (défini dans blm/modeles.md).
