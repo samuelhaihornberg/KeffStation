@@ -30,6 +30,32 @@ const APPS = [
     ]
   },
   {
+    num: "Tricktrocjob",
+    title: "Tricktrocjob",
+    desc: "Échange d'astuces pas à pas, troc d'objets, services entre particuliers. Frais dégressifs 17%→5%, double porte-monnaie (solde + crédits).",
+    tags: ["Marketplace", "Troc", "Crédits", "Communauté"],
+    appUrl: "https://samuelhaihornberg.github.io/keffstation/tricktrocjob/",
+    embedUrl: "https://samuelhaihornberg.github.io/keffstation/tricktrocjob/",
+    embedLabel: "Ouvrir Tricktrocjob",
+    color: "#ff3d9a",
+    subArticles: [
+      { title: "Comment créer un Trix", desc: "Tutoriel pas à pas pour publier votre astuce ou tutoriel.", tags: ["Tutoriel", "Publication", "Trix"] },
+      { title: "Échanger un Trox", desc: "Mettre en ligne un objet, gérer les propositions, finaliser l'échange.", tags: ["Trox", "Échange", "Objet"] },
+      { title: "Proposer un Service", desc: "Créer une offre de service, fixer le prix, gérer les clients.", tags: ["Service", "Freelance", "Compétence"] },
+      { title: "Gagner des crédits", desc: "Système de récompenses, parrainage, bonus de validation.", tags: ["Crédits", "Récompense", "Économie"] },
+      { title: "Créer un Trix viral : structure gagnante", desc: "Titre accrocheur, étapes numérotées, photos qualité, prix en crédits. Exemples de Trix à 10k+ vues.", tags: ["Trix", "Viral", "Rédaction", "Visibilité"] },
+      { title: "Négocier un Trox : techniques gagnantes", desc: "Évaluer la valeur, proposer contre-offre, photos sous angles, description honnête. Évitez les arnaques.", tags: ["Trox", "Négociation", "Sécurité", "Évaluation"] },
+      { title: "Service récurrent : revenus passifs", desc: "Abonnement mensuel, facturation auto, fidélisation clients. Ex: maintenance PC, cours hebdo, livraison courses.", tags: ["Service", "Récurrent", "Revenus", "Automatisation"] },
+      { title: "Parrainage : 500 crédits par filleul", desc: "Partagez votre lien, filleul valide son 1er échange = 500 crédits chacun. Illimité, cumulable avec promos.", tags: ["Parrainage", "Crédits", "Récompense", "Viral"] },
+      { title: "Trix vidéo : format court engageant", desc: "60-90 sec, hook 3 sec, démo claire, CTA crédits. Format vertical, sous-titres, musique libre. +300% engagement.", tags: ["Trix", "Vidéo", "Format", "Engagement"] },
+      { title: "Objets rares : authentification pro", desc: "Service expertise gratuite pour objets >500€. Certificat authenticité, estimation marché, assurance transport incluse.", tags: ["Expertise", "Authentique", "Luxe", "Sécurité"] },
+      { title: "Communauté locale : rencontres mensuelles", desc: "Événements ville par ville, échanges en main propre, ateliers réparation. Zéro frais port, confiance directe.", tags: ["Communauté", "Local", "Rencontre", "Échange"] },
+      { title: "Dashboard vendeur : stats temps réel", desc: "Vues, favoris, conversions, revenus crédits/€. Alertes prix, relance paniers, export CSV. Pilotage pro.", tags: ["Dashboard", "Stats", "Vente", "Pro"] },
+      { title: "API publique : intégration tierce", desc: "REST + Webhooks, taux limités, scopes granulaires. Intégrez Tricktroc dans votre app.", tags: ["API", "Intégration", "Dev", "Webhook"] },
+      { title: "Mode hors-ligne : PWA offline-first", desc: "Cache intelligent, sync différée, conflits résolus. Travaillez sans connexion.", tags: ["PWA", "Offline", "Sync", "Cache"] }
+    ]
+  },
+  {
     num: "ViArtificial labs",
     title: "ViArtificial labs",
     desc: "Syntaxe cos (connexions), famille SuperBots (ViA, BTB+Golem, Geeko, Guideoplan), blocs logiques BLM/BLSM, motor.s injection.",
@@ -58,7 +84,14 @@ const APPS = [
       { title: "Generation Playground", desc: "Sampling top-k/p, temperature, repetition penalty, logits bias, seeds reproductibles, streaming.", tags: ["Génération", "Sampling", "LLM"] },
       { title: "LoRA/QLoRA Trainer", desc: "Fine-tuning low-rank adaptatif, quantization 4-bit NF4, gradient checkpointing, export GGML/GGUF/ONNX.", tags: ["LoRA", "Fine-tuning", "Quantization"] },
       { title: "Quantization Lab", desc: "GPTQ, AWQ, GGUF q2_k→q8_0, calibration, perplexity eval, benchmark vitesse/mémoire.", tags: ["Quantization", "GPTQ", "Benchmark"] },
-      { title: "Local-First Runtime", desc: "WebLLM, Transformers.js, llama.cpp WASM, ONNX Runtime Web. Zero-server inference.", tags: ["Local-First", "WASM", "Zero-Server"] }
+      { title: "Local-First Runtime", desc: "WebLLM, Transformers.js, llama.cpp WASM, ONNX Runtime Web. Zero-server inference.", tags: ["Local-First", "WASM", "Zero-Server"] },
+      { title: "Éditeur cos : écrire la syntaxe", desc: "Éditeur interactif cos (connexions, sandwich, adresses, CSM). Validation temps réel, coloration, autocomplétion.", tags: ["cos", "Éditeur", "Dev"] },
+      { title: "Guide de démarrage cos", desc: "Premiers pas avec l'éditeur cos : syntaxe de base, connexions A1➡️B2, mode sandwich miroir.", tags: ["Guide", "Débutant", "cos"] },
+      { title: "Référence cos complète", desc: "Tous les opérateurs, adresses, motifs, CSM, exemples commentés.", tags: ["Référence", "Documentation", "cos"] },
+      { title: "Snippets cos prêts à l'emploi", desc: "Templates : pipelines, boucles, conditions, parallélisme, gestion d'erreurs.", tags: ["Snippets", "Templates", "cos"] },
+      { title: "Débogage visuel cos", desc: "Inspecteur de graphe, points d'arrêt, exécution pas à pas, logs colorés.", tags: ["Debug", "Inspecteur", "cos"] },
+      { title: "Playground cos live", desc: "Éditeur Monaco/CodeMirror, validation temps réel, coloration, autocomplétion, export JSON.", tags: ["Playground", "Live", "Export"] },
+      { title: "cos en CI/CD", desc: "GitHub Actions, GitLab CI, validation PR, tests cos unitaires, déploiement auto.", tags: ["CI/CD", "GitHub", "GitLab"] }
     ]
   },
   {
@@ -320,8 +353,8 @@ class KeffStation {
   }
 
   updateCubeRotation() {
-    // 3 faces en triangle : pas de 120° sur l'axe Y
-    const angle = -this.current * 120;
+    // 4 faces en carré : pas de 90° sur l'axe Y
+    const angle = -this.current * 90;
     this.currentRotationY = angle;
     this.cube.style.transform = `rotateY(${angle}deg)`;
     this.faces.forEach((face, i) => {
