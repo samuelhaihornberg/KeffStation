@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070816">
-<meta name="description" content="KeffStation — Cube 3D des 5 PWAs : KiffTech, Tricktrocjob, ViArtificial (NLP inclus), cos Editor, Videogames">
+<meta name="description" content="KeffStation — Prisme 3D des 3 PWAs : KiffTech, ViArtificial (NLP inclus), Videogames">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="KeffStation">
@@ -34,39 +34,26 @@
   
   .cube-face{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:clamp(16px,4vw,28px);text-align:center;background:rgba(10,12,34,.85);border:1px solid rgba(255,255,255,.1);border-radius:0;box-shadow:0 20px 60px -10px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.1);transform-origin:center center;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.8,.2,1), opacity .3s, z-index 0s .6s;overflow:hidden}
   
-  /* Cube faces - 5 faces : 4 côtés (axe Y) + 1 haut (axe X) */
-  .cube-face[data-face="0"]{transform:rotateY(0deg) translateZ(180px);background:linear-gradient(135deg,rgba(30,107,255,.15),rgba(138,77,255,.08))}
-  .cube-face[data-face="1"]{transform:rotateY(-90deg) translateZ(180px);background:linear-gradient(135deg,rgba(255,61,154,.15),rgba(255,210,63,.08))}
-  .cube-face[data-face="2"]{transform:rotateY(180deg) translateZ(180px);background:linear-gradient(135deg,rgba(39,209,127,.15),rgba(138,77,255,.08))}
-  .cube-face[data-face="3"]{transform:rotateY(90deg) translateZ(180px);background:linear-gradient(135deg,rgba(0,102,255,.15),rgba(0,212,255,.08))}
-  .cube-face[data-face="4"]{transform:rotateX(90deg) translateZ(180px);background:linear-gradient(135deg,rgba(0,255,136,.15),rgba(39,209,127,.08))}
-  .cube-face[data-face="5"]{transform:rotateX(-90deg) translateZ(180px);background:linear-gradient(135deg,rgba(255,107,0,.15),rgba(255,210,63,.08))}
+  /* 3 faces en triangle : pas de 120° */
+  .cube-face[data-face="0"]{transform:rotateY(0deg) translateZ(155px);background:linear-gradient(135deg,rgba(30,107,255,.15),rgba(138,77,255,.08))}
+  .cube-face[data-face="1"]{transform:rotateY(-120deg) translateZ(155px);background:linear-gradient(135deg,rgba(184,77,255,.15),rgba(138,77,255,.08))}
+  .cube-face[data-face="2"]{transform:rotateY(120deg) translateZ(155px);background:linear-gradient(135deg,rgba(255,107,0,.15),rgba(255,210,63,.08))}
   
   @media (max-width:420px){
-    .cube-face[data-face="0"]{transform:rotateY(0deg) translateZ(140px)}
-    .cube-face[data-face="1"]{transform:rotateY(-90deg) translateZ(140px)}
-    .cube-face[data-face="2"]{transform:rotateY(180deg) translateZ(140px)}
-    .cube-face[data-face="3"]{transform:rotateY(90deg) translateZ(140px)}
-    .cube-face[data-face="4"]{transform:rotateX(90deg) translateZ(140px)}
-    .cube-face[data-face="5"]{transform:rotateX(-90deg) translateZ(140px)}
+    .cube-face[data-face="0"]{transform:rotateY(0deg) translateZ(105px)}
+    .cube-face[data-face="1"]{transform:rotateY(-120deg) translateZ(105px)}
+    .cube-face[data-face="2"]{transform:rotateY(120deg) translateZ(105px)}
   }
   @media (min-width:768px){
-    .cube-face[data-face="0"]{transform:rotateY(0deg) translateZ(220px)}
-    .cube-face[data-face="1"]{transform:rotateY(-90deg) translateZ(220px)}
-    .cube-face[data-face="2"]{transform:rotateY(180deg) translateZ(220px)}
-    .cube-face[data-face="3"]{transform:rotateY(90deg) translateZ(220px)}
-    .cube-face[data-face="4"]{transform:rotateX(90deg) translateZ(220px)}
-    .cube-face[data-face="5"]{transform:rotateX(-90deg) translateZ(220px)}
+    .cube-face[data-face="0"]{transform:rotateY(0deg) translateZ(190px)}
+    .cube-face[data-face="1"]{transform:rotateY(-120deg) translateZ(190px)}
+    .cube-face[data-face="2"]{transform:rotateY(120deg) translateZ(190px)}
   }
   
   /* Active face - front and center, chaque face contre-compense la rotation du cube */
-  .cube-face.active[data-face="0"]{opacity:1;z-index:10;transform:rotateY(0deg) translateZ(200px) scale(1.05)}
-  .cube-face.active[data-face="1"]{opacity:1;z-index:10;transform:rotateY(90deg) translateZ(200px) scale(1.05)}
-  .cube-face.active[data-face="2"]{opacity:1;z-index:10;transform:rotateY(180deg) translateZ(200px) scale(1.05)}
-  .cube-face.active[data-face="3"]{opacity:1;z-index:10;transform:rotateY(-90deg) translateZ(200px) scale(1.05)}
-  /* Faces haut (4) et bas (5) : axe X */
-  .cube-face.active[data-face="4"]{opacity:1;z-index:10;transform:rotateX(90deg) translateZ(200px) scale(1.05)}
-  .cube-face.active[data-face="5"]{opacity:1;z-index:10;transform:rotateX(-90deg) translateZ(200px) scale(1.05)}
+  .cube-face.active[data-face="0"]{opacity:1;z-index:10;transform:rotateY(0deg) translateZ(175px) scale(1.05)}
+  .cube-face.active[data-face="1"]{opacity:1;z-index:10;transform:rotateY(120deg) translateZ(175px) scale(1.05)}
+  .cube-face.active[data-face="2"]{opacity:1;z-index:10;transform:rotateY(240deg) translateZ(175px) scale(1.05)}
   .cube-face:not(.active){opacity:0.15;pointer-events:none}
   
   /* Expanded face - unfolds from top */
@@ -174,7 +161,7 @@
   <div class="loading-bar" aria-hidden="true"><div class="loading-bar-inner" id="loading-bar-inner"></div></div>
 </div>
 
-<div class="reader" role="region" aria-roledescription="cube des applications" aria-label="Kifftech, Tricktrocjob, ViArtificial labs, Éditeur cos, Videogames">
+<div class="reader" role="region" aria-roledescription="cube des applications" aria-label="Kifftech, ViArtificial labs, Videogames">
   <div class="vitrine">
     <div class="cube" id="cube">
       <!-- Faces will be injected by JS -->
