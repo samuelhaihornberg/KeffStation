@@ -123,6 +123,15 @@ check('catalogue : pas de plantage sur éléments absents', () => {
   assert(!/^\s*\$\('#(btn-fetch|btn-clear|btn-subscribe|btn-subscribe-header|btn-cart-header|modal-close|modal-overlay)'\)\.addEventListener/m.test(kapp), 'addEventListener non gardé');
   assert(kapp.includes('if(mt)mt.dataset.currentId'), 'modal-title non gardé');
 });
+check('agent IA : référence exacte + previews + prix barrés', () => {
+  const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.v2.js'), 'utf8');
+  assert(kapp.includes('function agentFind'), 'agentFind absent');
+  assert(kapp.includes('function previewImage'), 'previewImage absent');
+  assert(kapp.includes('CAT_EMOJI'), 'emojis rayons absents');
+  assert(/let discount=10/.test(kapp), 'remise de base -10% absente');
+  const kcat = fs.readFileSync(path.join(ROOT, 'kifftech/catalog.html'), 'utf8');
+  assert(kcat.includes('id="agent-input"') && kcat.includes('id="agent-result"'), 'panneau agent absent du catalogue');
+});
 check('bouton hard-refresh global + overlay', () => {
   const rjs = fs.readFileSync(path.join(ROOT, 'refresh.js'), 'utf8');
   assert(rjs.includes('caches.delete'), 'refresh.js: purge caches absente');
