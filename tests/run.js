@@ -107,7 +107,7 @@ check('faces actives droites (pas de miroir)', () => {
 check('KiffTech : page rayons + filtre ?rayon', () => {
   const rayons = fs.readFileSync(path.join(ROOT, 'kifftech/rayons.html'), 'utf8');
   assert(rayons.includes('catalog.html?rayon='), 'rayons.html: liens ?rayon absents');
-  for (const c of ["'Smartphones'", "'Computers'", "'Tablets'"]) {
+  for (const c of ["'Smartphones'", "'Computers'", "'Tablets'", "'Audio & Wearables'", "'VR AR gadgets'", "'Garden & furnitures smart devices'", "'Composant electronic & informatic'", "'Company & studying Robots'"]) {
     assert(rayons.includes(`id: ${c}`), `rayons.html: rayon ${c} absent`);
   }
   const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.js'), 'utf8');
@@ -116,6 +116,11 @@ check('KiffTech : page rayons + filtre ?rayon', () => {
   assert(appJs.includes('kifftech/rayons.html'), 'cube: bouton KiffTech ne mène pas aux rayons');
 });
 
+check('catalogue : pas de plantage sur éléments absents', () => {
+  const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.js'), 'utf8');
+  assert(!/^\s*\$\('#(btn-fetch|btn-clear|btn-subscribe|btn-subscribe-header|btn-cart-header|modal-close|modal-overlay)'\)\.addEventListener/m.test(kapp), 'addEventListener non gardé');
+  assert(kapp.includes('if(mt)mt.dataset.currentId'), 'modal-title non gardé');
+});
 check('bouton hard-refresh global + overlay', () => {
   const rjs = fs.readFileSync(path.join(ROOT, 'refresh.js'), 'utf8');
   assert(rjs.includes('caches.delete'), 'refresh.js: purge caches absente');

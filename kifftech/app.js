@@ -230,7 +230,7 @@ $('#modal-specs').innerHTML=Object.entries(p.specs||{}).map(([k,v])=>`<div class
 $('#modal-prices').innerHTML=`<div class="price-card"><div class="price-source">Officiel</div><div class="price-value">${has?fmtPriceCrossed(kt.official):fmtPrice(kt.official)}</div><a class="price-link" href="${p.sources?.official||'#'}" target="_blank">Voir</a></div>${has?`<div class="price-card primary"><div class="price-source">KiffTech <span class="discount-tag">-${kt.discount}%</span></div><div class="price-value">${fmtPrice(kt.kifftech)}</div><div style="color:#27d17f">Economisez ${fmtPrice(kt.savings)}</div><button class="price-link" style="margin-top:12px;background:linear-gradient(135deg,#27d17f,#1e6bff)" onclick="addToCart('${p.id}');closeModal()">Ajouter</button></div>`:''}`;
 const m=$('#modal-media');m.innerHTML='';(p.images||[]).forEach((img,i)=>{const e=document.createElement('img');e.src=img;e.style.display=i===0?'block':'none';m.appendChild(e);});
 const nav=$('#media-nav');nav.innerHTML='';(p.images||[]).forEach((_,i)=>{const d=document.createElement('button');d.className='media-dot'+(i===0?' active':'');d.onclick=()=>showMedia(i);nav.appendChild(d);});
-$('#modal-title').dataset.currentId=id;$('#modal-overlay').classList.add('visible');document.body.style.overflow='hidden';}
+const mt=$('#modal-title');if(mt)mt.dataset.currentId=id;$('#modal-overlay').classList.add('visible');document.body.style.overflow='hidden';}
 function showMedia(idx){$$('#modal-media img').forEach((e,i)=>{e.style.display=i===idx?'block':'none'});$$('#media-nav button').forEach((d,i)=>{d.classList.toggle('active',i===idx)});}
 function closeModal(){$('#modal-overlay').classList.remove('visible');document.body.style.overflow='';}
 function showMedia(idx){$$('#modal-media img').forEach((e,i)=>{e.style.display=i===idx?'block':'none'});$$('#media-nav button').forEach((d,i)=>{d.classList.toggle('active',i===idx)});}
@@ -242,17 +242,19 @@ function updatePromoUI(){const el=$('#promo-indicator');if(!el)return;if(userCon
 
 // ============ EVENTS ============
 function initEvents(){
-  $('#search-input').addEventListener('input',e=>{searchQuery=e.target.value;applyFilters();});
+  const on = (sel, ev, fn) => { const el = $(sel); if (el) el.addEventListener(ev, fn); };
+  on('#search-input', 'input', e => { searchQuery = e.target.value; applyFilters(); });
   $$('.filter-btn[data-cat]').forEach(b=>b.addEventListener('click',()=>{activeCategory=b.dataset.cat;$$('.filter-btn[data-cat]').forEach(x=>x.classList.toggle('active',x===b));applyFilters();}));
   $$('.filter-btn[data-year]').forEach(b=>b.addEventListener('click',()=>{activeYear=b.dataset.year;$$('.filter-btn[data-year]').forEach(x=>x.classList.toggle('active',x===b));applyFilters();}));
   $$('.filter-btn[data-brand]').forEach(b=>b.addEventListener('click',()=>{activeBrand=b.dataset.brand;$$('.filter-btn[data-brand]').forEach(x=>x.classList.toggle('active',x===b));applyFilters();}));
-  $('#btn-fetch').addEventListener('click',async()=>{toast('Rechargement...','info');await loadProducts();});
-  $('#btn-clear').addEventListener('click',()=>{products=[...LOCAL_DB];products.forEach(p=>p.kifftech=calcKiffTechPrice(p.price.official));filteredProducts=[...products];applyFilters();toast('Base locale restauree','success');});
-  $('#btn-subscribe').addEventListener('click',()=>{userContext.isSubscriber=!userContext.isSubscriber;userContext.tenureDays=userContext.isSubscriber?30:0;refreshKiffTechPrices();renderProducts();updateCartPanel();updateSubUI();toast(userContext.isSubscriber?'Abonnement active (1eur/jour)':'Desactive',userContext.isSubscriber?'success':'info');});
-  $('#btn-subscribe-header').addEventListener('click',()=>{userContext.isSubscriber=!userContext.isSubscriber;userContext.tenureDays=userContext.isSubscriber?30:0;refreshKiffTechPrices();renderProducts();updateCartPanel();updateSubUI();toast(userContext.isSubscriber?'Abonnement active (1eur/jour)':'Desactive',userContext.isSubscriber?'success':'info');});
-  $('#btn-cart-header').addEventListener('click',()=>document.getElementById('cart-panel').scrollIntoView({behavior:'smooth'}));
-  $('#modal-close').addEventListener('click',closeModal);
-  $('#modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+  on('#btn-fetch', 'click', async () => { toast('Rechargement...', 'info'); await loadProducts(); });
+  on('#btn-clear', 'click', () => { products = [...LOCAL_DB]; products.forEach(p => p.kifftech = calcKiffTechPrice(p.price.official)); filteredProducts = [...products]; applyFilters(); toast('Base locale restauree', 'success'); });
+  const toggleSubHandler = () => { userContext.isSubscriber = !userContext.isSubscriber; userContext.tenureDays = userContext.isSubscriber ? 30 : 0; refreshKiffTechPrices(); renderProducts(); updateCartPanel(); updateSubUI(); toast(userContext.isSubscriber ? 'Abonnement active (1eur/jour)' : 'Desactive', userContext.isSubscriber ? 'success' : 'info'); };
+  on('#btn-subscribe', 'click', toggleSubHandler);
+  on('#btn-subscribe-header', 'click', toggleSubHandler);
+  on('#btn-cart-header', 'click', () => { const p = document.getElementById('cart-panel'); if (p) p.scrollIntoView({ behavior: 'smooth' }); });
+  on('#modal-close', 'click', closeModal);
+  on('#modal-overlay', 'click', e => { if (e.target === e.currentTarget) closeModal(); });
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 }
 
