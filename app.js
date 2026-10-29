@@ -133,6 +133,24 @@ const APPS = [
       { title: "Benchmarks GPU/CPU", desc: "FPS, frametime, 1% low, 0.1% low, consommation, DLSS/FSR/XeSS, frame gen.", tags: ["Benchmark", "Performance", "Upscaling"] },
       { title: "Mods & Tools", desc: "Nexus, Thunderstore, Vortex, MO2, r2modman — profils, déploiement, résolution conflits.", tags: ["Mods", "Tools", "Gestion"] }
     ]
+  },
+  {
+    num: "Critiques Services",
+    title: "Critiques Services",
+    desc: "Plateforme de critiques de services avec preuves vidéo — Expériences personnelles réelles uniquement. Authentification, votes, commentaires, géolocalisation, galerie preuves, PWA hors-ligne.",
+    tags: ["PWA", "Critiques", "Vidéos", "Géolocalisation"],
+    appUrl: "https://samuelhaihornberg.github.io/critiques-services.com/",
+    embedUrl: "https://samuelhaihornberg.github.io/critiques-services.com/",
+    embedLabel: "Ouvrir Critiques Services",
+    color: "#e94560",
+    subArticles: [
+      { title: "Lire les critiques", desc: "Consultez les critiques de services avec preuves vidéo, filtres et recherche.", tags: ["Lecture", "Critiques", "Recherche"] },
+      { title: "Créer une critique", desc: "Publiez votre propre critique avec photos, vidéos, géolocalisation et prix.", tags: ["Création", "Preuves", "Géolocalisation"] },
+      { title: "Voter et commenter", desc: "Système de votes 👍/👎, réactions emoji, commentaires forum.", tags: ["Votes", "Commentaires", "Réactions"] },
+      { title: "Carte des services", desc: "Géolocalisation Leaflet + Nominatim, services en ligne.", tags: ["Carte", "Géolocalisation", "Leaflet"] },
+      { title: "Profil utilisateur", desc: "Infos, stats, onglets critiques et statistiques.", tags: ["Profil", "Stats", "Utilisateur"] },
+      { title: "PWA hors-ligne", desc: "Service Worker, manifest, mode hors-ligne, installation sur écran d'accueil.", tags: ["PWA", "Hors-ligne", "Installable"] }
+    ]
   }
 ];
 
@@ -454,7 +472,7 @@ class KeffStation {
     try {
       const container = document.getElementById('particules');
       if (!container) return;
-      const colors = ['#1e6bff','#ff3d9a','#ffd23f','#27d17f','#8a4dff','#ff6b00'];
+      const colors = ['#1e6bff','#ff3d9a','#ffd23f','#27d17f','#8a4dff','#ff6b00','#e94560'];
       for (let i = 0; i < 20; i++) {
         const p = document.createElement('div');
         p.className = 'particule';
