@@ -1,4 +1,4 @@
-const CACHE = 'keffstation-cube-v1';
+const CACHE = 'keffstation-cube-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './app.js'];
 
 self.addEventListener('install', e => {
@@ -12,10 +12,30 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).then(r => {
-      if (r.ok) caches.open(CACHE).then(c => c.put(e.request, r.clone()));
-      return r;
-    }).catch(() => cached))
-  );
+  const url = new URL(e.request.url);
+  if (url.origin !== self.location.origin) return;
+  if (e.request.mode === 'navigate') {
+    // HTML : réseau d'abord, cache en secours (toujours frais en ligne)
+    e.respondWith(
+      fetch(e.request).then(r => {
+        if (r.ok) caches.open(CACHE).then(c => c.put(e.request, r.clone()));
+        return r;
+      }).catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
+    );
+    return;
+  }
+  if (/\.(js|css|png|jpg|jpeg|gif|svg|webp|woff2?|ttf|ico|json)$/.test(url.pathname)) {
+    // Statiques : périmé-pendant-revalidation (rapide + frais en arrière-plan)
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        const net = fetch(e.request).then(r => {
+          if (r.ok) caches.open(CACHE).then(c => c.put(e.request, r.clone()));
+          return r;
+        }).catch(() => cached);
+        return cached || net;
+      })
+    );
+    return;
+  }
+  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
 });

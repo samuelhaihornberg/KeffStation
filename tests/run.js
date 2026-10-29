@@ -26,8 +26,21 @@ const swJs = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));
 
 check('syntaxe app.js / install.js / sw.js', () => {
-  for (const f of ['app.js', 'install.js', 'sw.js']) {
+  const files = ['app.js', 'install.js', 'sw.js', 'kifftech/sw.js', 'tricktrocjob/sw.js', 'viartificial/sw.js', 'cos-editor/sw.js', 'linguistic-motors/sw.js', 'videogames/sw.js'];
+  for (const f of files) {
     execSync(`node --check ${f}`, { cwd: ROOT, stdio: 'pipe' });
+  }
+});
+
+check('caches vidés (v2) et adaptatifs', () => {
+  const sws = ['sw.js', 'kifftech/sw.js', 'tricktrocjob/sw.js', 'viartificial/sw.js', 'cos-editor/sw.js', 'linguistic-motors/sw.js', 'videogames/sw.js'];
+  for (const f of sws) {
+    const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    assert(/-v2'/.test(src), `${f}: version v2 absente (vieux cache conservé)`);
+    assert(!/-v1'/.test(src), `${f}: référence v1 restante`);
+    assert(src.includes("mode === 'navigate'") || src.includes('mode==='), `${f}: stratégie navigation absente`);
+    assert(src.includes('woff2'), `${f}: stratégie statiques absente`);
+    assert(!/"\/(index\.html|app\.js|manifest\.json)"/.test(src), `${f}: chemin absolu`);
   }
 });
 
