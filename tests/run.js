@@ -110,14 +110,16 @@ check('KiffTech : page rayons + filtre ?rayon', () => {
   for (const c of ["'Smartphones'", "'Computers'", "'Tablets'", "'Audio & Wearables'", "'VR AR gadgets'", "'Garden & furnitures smart devices'", "'Composant electronic & informatic'", "'Company & studying Robots'"]) {
     assert(rayons.includes(`id: ${c}`), `rayons.html: rayon ${c} absent`);
   }
-  const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.js'), 'utf8');
+  const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.v2.js'), 'utf8');
   assert(kapp.includes("params.get('rayon')"), 'catalogue: support ?rayon absent');
-  execSync('node --check kifftech/app.js', { cwd: ROOT, stdio: 'pipe' });
+  const kcat = fs.readFileSync(path.join(ROOT, 'kifftech/catalog.html'), 'utf8');
+  assert(kcat.includes('src="app.v2.js"'), 'catalog.html: ne charge pas app.v2.js');
+  execSync('node --check kifftech/app.v2.js', { cwd: ROOT, stdio: 'pipe' });
   assert(appJs.includes('kifftech/rayons.html'), 'cube: bouton KiffTech ne mène pas aux rayons');
 });
 
 check('catalogue : pas de plantage sur éléments absents', () => {
-  const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.js'), 'utf8');
+  const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.v2.js'), 'utf8');
   assert(!/^\s*\$\('#(btn-fetch|btn-clear|btn-subscribe|btn-subscribe-header|btn-cart-header|modal-close|modal-overlay)'\)\.addEventListener/m.test(kapp), 'addEventListener non gardé');
   assert(kapp.includes('if(mt)mt.dataset.currentId'), 'modal-title non gardé');
 });
