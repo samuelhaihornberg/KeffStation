@@ -2,7 +2,7 @@
   "name": "KeffStation",
   "short_name": "KeffStation",
   "description": "Cube 3D — 6 PWAs : KiffTech, Tricktrocjob, ViArtificial, cos Editor, Linguistic Motors, Videogames",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#070816",

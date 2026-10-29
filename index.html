@@ -59,8 +59,11 @@
     .cube-face[data-face="5"]{transform:rotateX(-90deg) translateZ(220px)}
   }
   
-  /* Active face - front and center */
-  .cube-face.active{opacity:1;z-index:10;transform:rotateY(0deg) translateZ(200px) scale(1.05)}
+  /* Active face - front and center (faces 0-3 : axe Y) */
+  .cube-face.active[data-face="0"],.cube-face.active[data-face="1"],.cube-face.active[data-face="2"],.cube-face.active[data-face="3"]{opacity:1;z-index:10;transform:rotateY(0deg) translateZ(200px) scale(1.05)}
+  /* Faces haut (4) et bas (5) : axe X */
+  .cube-face.active[data-face="4"]{opacity:1;z-index:10;transform:rotateX(90deg) translateZ(200px) scale(1.05)}
+  .cube-face.active[data-face="5"]{opacity:1;z-index:10;transform:rotateX(-90deg) translateZ(200px) scale(1.05)}
   .cube-face:not(.active){opacity:0.15;pointer-events:none}
   
   /* Expanded face - unfolds from top */

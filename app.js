@@ -373,9 +373,18 @@ class KeffStation {
   }
 
   updateCubeRotation() {
-    const angle = -this.current * 90;
-    this.currentRotationY = angle;
-    this.cube.style.transform = `rotateY(${angle}deg)`;
+    // Faces 0-3 : rotation Y ; faces 4 (haut) et 5 (bas) : rotation X
+    if (this.current < 4) {
+      const angle = -this.current * 90;
+      this.currentRotationY = angle;
+      this.cube.style.transform = `rotateY(${angle}deg)`;
+    } else if (this.current === 4) {
+      this.currentRotationY = 0;
+      this.cube.style.transform = 'rotateX(-90deg)';
+    } else {
+      this.currentRotationY = 0;
+      this.cube.style.transform = 'rotateX(90deg)';
+    }
     this.faces.forEach((face, i) => {
       face.classList.toggle('active', i === this.current);
     });
@@ -560,13 +569,21 @@ if (document.readyState === 'loading') {
   initApp();
 }
 
+function setLoadingText(loading, text, color) {
+  if (!loading) return;
+  const t = loading.querySelector('.loading-text');
+  if (t) t.textContent = text;
+  else loading.textContent = text;
+  if (color) loading.style.color = color;
+}
+
 function initApp() {
   console.log('initApp called, readyState:', document.readyState);
   const loading = document.getElementById('loading');
-  if (loading) loading.textContent = '🔄 Initialisation…';
+  setLoadingText(loading, '🔄 Initialisation…');
 
   const timeoutId = setTimeout(() => {
-    if (loading) { loading.textContent = '⚠️ Initialisation lente…'; loading.style.color = '#ffd23f'; }
+    setLoadingText(loading, '⚠️ Initialisation lente…', '#ffd23f');
   }, 5000);
 
   try {
@@ -575,16 +592,17 @@ function initApp() {
     window.keffStation.setProgress(2, '📦 Chargement module…');
     window.keffStation.init().then(() => {
       clearTimeout(timeoutId);
-      if (loading) { loading.textContent = '✅ KeffStation prêt'; loading.style.color = '#27d17f'; setTimeout(() => loading.classList.add('hidden'), 1000); }
+      setLoadingText(loading, '✅ KeffStation prêt', '#27d17f');
+      setTimeout(() => loading.classList.add('hidden'), 1000);
     }).catch(e => {
       clearTimeout(timeoutId);
       console.error('App init failed:', e);
-      if (loading) { loading.textContent = '❌ Erreur: ' + (e?.message || e?.toString() || 'Erreur inconnue'); loading.style.color = '#ff3d9a'; }
+      setLoadingText(loading, '❌ Erreur: ' + (e?.message || e?.toString() || 'Erreur inconnue'), '#ff3d9a');
     });
   } catch (e) {
     clearTimeout(timeoutId);
     console.error('Constructor/InitApp sync error:', e);
-    if (loading) { loading.textContent = '❌ Erreur sync: ' + (e?.message || e?.toString() || 'Erreur inconnue'); loading.style.color = '#ff3d9a'; }
+    setLoadingText(loading, '❌ Erreur sync: ' + (e?.message || e?.toString() || 'Erreur inconnue'), '#ff3d9a');
   }
 }
 
