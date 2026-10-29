@@ -263,6 +263,11 @@ function init(){
   console.log('KiffTech init, LOCAL_DB:', LOCAL_DB?.length);
   try {
     if (!products?.length) products = [...LOCAL_DB];
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const rayon = params.get('rayon');
+      if (rayon && products.some(p => p.category === rayon)) activeCategory = rayon;
+    } catch (e) { console.warn('[KiffTech] rayon param ignoré:', e.message); }
     console.log('[KiffTech] products assigned, length:', products.length);
     products.forEach(p => { if (!p.kifftech) p.kifftech = calcKiffTechPrice(p.price.official); });
     filteredProducts = [...products];

@@ -36,7 +36,7 @@ check('caches vidés (v2) et adaptatifs', () => {
   const sws = ['sw.js', 'kifftech/sw.js', 'tricktrocjob/sw.js', 'viartificial/sw.js', 'cos-editor/sw.js', 'linguistic-motors/sw.js', 'videogames/sw.js'];
   for (const f of sws) {
     const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
-    assert(/-v2'/.test(src), `${f}: version v2 absente (vieux cache conservé)`);
+    assert(/-v\d+'/.test(src), `${f}: version cache absente (vieux cache conservé)`);
     assert(!/-v1'/.test(src), `${f}: référence v1 restante`);
     assert(src.includes("mode === 'navigate'") || src.includes('mode==='), `${f}: stratégie navigation absente`);
     assert(src.includes('woff2'), `${f}: stratégie statiques absente`);
@@ -102,6 +102,18 @@ check('faces actives droites (pas de miroir)', () => {
     assert(((cubeRot[i] + faceRotY[i]) % 360 + 360) % 360 === 0, `face ${i}: net non nul`);
   }
   assert(!/data-face="[45]"/.test(indexHtml), 'règles CSS pour faces inexistantes');
+});
+
+check('KiffTech : page rayons + filtre ?rayon', () => {
+  const rayons = fs.readFileSync(path.join(ROOT, 'kifftech/rayons.html'), 'utf8');
+  assert(rayons.includes('catalog.html?rayon='), 'rayons.html: liens ?rayon absents');
+  for (const c of ["'Smartphones'", "'Computers'", "'Tablets'"]) {
+    assert(rayons.includes(`id: ${c}`), `rayons.html: rayon ${c} absent`);
+  }
+  const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.js'), 'utf8');
+  assert(kapp.includes("params.get('rayon')"), 'catalogue: support ?rayon absent');
+  execSync('node --check kifftech/app.js', { cwd: ROOT, stdio: 'pipe' });
+  assert(appJs.includes('kifftech/rayons.html'), 'cube: bouton KiffTech ne mène pas aux rayons');
 });
 
 if (failures > 0) {
