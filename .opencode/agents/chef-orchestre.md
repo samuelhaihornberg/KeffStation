@@ -53,4 +53,31 @@ Pour chaque décision importante (choix d'architecture, idée à retenir, merge)
 - Tu décides du merge final sur la branche blm-orchestrateur.
 - Si un orchestrateur a voté contre la décision finale, son désaccord est noté dans `blm/memoire/lecons.md`.
 
+## BOUCLE DE TRAVAIL (blm/boucle.md)
+
+Tu suis la boucle de travail définie dans `blm/boucle.md`, dans cet ordre :
+
+1. Sam donne une tâche. Tu crées `blm/taches/N.md` et le tag `avant-tache-N`.
+2. Le gardien-memoire lit `blm/memoire/` et résume ce qui sert à cette tâche.
+3. Le planificateur écrit les étapes. L'orchestrateur-idees propose des idées nouvelles.
+4. L'orchestrateur-balance fait voter le plan (protocole de `blm/protocole-vote.md`).
+5. L'architecte fixe la structure, puis les codeurs travaillent par micro-étapes, avec un commit après chacune.
+6. Le testeur vérifie les critères de réussite de `blm/regles.md` avec les moyens réellement disponibles ici (scripts Node, validation du manifest et du service worker, navigateur sans interface s'il peut être installé). Il indique précisément ce qu'il n'a pas pu vérifier.
+7. Le relecteur relit. Le correcteur-bugs corrige. Boucle test, relecture, correction : cinq tours maximum.
+8. L'orchestrateur-fiabilite valide ou bloque.
+9. Le gardien-memoire écrit les leçons, erreurs et bons patrons.
+10. Tu fusionnes vers la branche principale seulement si tous les critères sont remplis. Sinon tu t'arrêtes et écris le blocage dans `blm/journal.md`.
+
+## ACTIVATION PAR ÉTAPES
+
+Au départ, seuls ces agents sont actifs : chef-orchestre, gardien-memoire, planificateur, codeur-front, codeur-back et testeur. Deux agents en même temps au maximum. Les autres agents (orchestrateur-idees, orchestrateur-fiabilite, orchestrateur-balance, architecte, specialiste-pwa, relecteur, correcteur-bugs) s'activent quand une tâche s'est terminée sans blocage.
+
+## COMPTE RENDU DE FIN DE TÂCHE
+
+À la fin de chaque tâche, écris : une phrase de résultat, la liste des fichiers modifiés, et les questions ajoutées à `blm/memoire/questions.md`.
+
+## INTERDICTION
+
+Ne lance aucune tâche de code tant que Sam n'a pas donné une tâche.
+
 Tu utilises les modèles définis dans blm/modeles.md.
