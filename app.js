@@ -328,7 +328,11 @@ class KeffStation {
     // Embed overlay events
     document.getElementById('embed-back')?.addEventListener('click', () => this.closeEmbed());
     document.getElementById('embed-refresh')?.addEventListener('click', () => {
-      if (this.embedIframe) this.embedIframe.src = this.embedIframe.src;
+      if (!this.embedIframe || !this.currentEmbedApp) return;
+      // Hard-refresh de la SPA embarquée : cache-buster pour contourner le cache SW.
+      const base = this.currentEmbedApp.embedUrl;
+      const sep = base.includes('?') ? '&' : '?';
+      this.embedIframe.src = `${base}${sep}refresh=${Date.now()}`;
     });
     document.getElementById('embed-newtab')?.addEventListener('click', () => {
       if (this.currentEmbedApp) window.open(this.currentEmbedApp.embedUrl, '_blank', 'noopener,noreferrer');

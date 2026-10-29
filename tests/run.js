@@ -26,7 +26,7 @@ const swJs = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));
 
 check('syntaxe app.js / install.js / sw.js', () => {
-  const files = ['app.js', 'install.js', 'sw.js', 'kifftech/sw.js', 'tricktrocjob/sw.js', 'viartificial/sw.js', 'cos-editor/sw.js', 'linguistic-motors/sw.js', 'videogames/sw.js'];
+  const files = ['app.js', 'install.js', 'refresh.js', 'sw.js', 'kifftech/sw.js', 'tricktrocjob/sw.js', 'viartificial/sw.js', 'cos-editor/sw.js', 'linguistic-motors/sw.js', 'videogames/sw.js'];
   for (const f of files) {
     execSync(`node --check ${f}`, { cwd: ROOT, stdio: 'pipe' });
   }
@@ -114,6 +114,14 @@ check('KiffTech : page rayons + filtre ?rayon', () => {
   assert(kapp.includes("params.get('rayon')"), 'catalogue: support ?rayon absent');
   execSync('node --check kifftech/app.js', { cwd: ROOT, stdio: 'pipe' });
   assert(appJs.includes('kifftech/rayons.html'), 'cube: bouton KiffTech ne mène pas aux rayons');
+});
+
+check('bouton hard-refresh global + overlay', () => {
+  const rjs = fs.readFileSync(path.join(ROOT, 'refresh.js'), 'utf8');
+  assert(rjs.includes('caches.delete'), 'refresh.js: purge caches absente');
+  assert(rjs.includes('window.location.reload()'), 'refresh.js: reload absent');
+  assert(indexHtml.includes('refresh.js'), 'index.html: refresh.js non chargé');
+  assert(/refresh=\$\{Date\.now\(\)\}/.test(appJs), 'overlay: cache-buster absent');
 });
 
 if (failures > 0) {
