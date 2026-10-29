@@ -86,7 +86,9 @@
   .cube-face.expanded .face-close{opacity:1;transform:translateY(0)}
   .face-close:hover{background:rgba(255,61,154,.3);border-color:#ff3d9a;transform:scale(1.1)}
   
-  .face-content{flex:1;overflow-y:auto;padding-right:8px;display:flex;flex-direction:column;gap:clamp(12px,2vw,16px);width:100%}
+  .face-content{flex:1;overflow-y:auto;overflow-x:hidden;padding-right:8px;display:flex;flex-direction:column;gap:clamp(12px,2vw,16px);width:100%;overflow-wrap:anywhere}
+  .article-card p,.face-desc{overflow-wrap:anywhere;hyphens:auto}
+  .face-content img,.face-content video,.face-content iframe{max-width:100%;height:auto}
   
   .face-desc{font-size:clamp(.9rem,2vw,1rem);color:#b9c0e6;line-height:1.5;margin-bottom:clamp(12px,2vw,16px);max-width:90%}
   

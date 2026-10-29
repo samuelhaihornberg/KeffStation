@@ -267,15 +267,17 @@ class KeffStation {
       `;
       this.cube.appendChild(face);
 
-      // Embed button event - NAVIGATE to appUrl (change URL)
+      // Embed button event - open PWA in overlay (new-tab button opens full page)
       const embedBtnEl = face.querySelector('.embed-btn');
       if (embedBtnEl) {
         embedBtnEl.addEventListener('click', (e) => {
           e.stopPropagation();
           const idx = parseInt(embedBtnEl.dataset.appIndex, 10);
           const app = this.apps[idx];
-          if (app.appUrl) {
-            window.location.href = app.appUrl;  // NAVIGATE - URL changes
+          if (app.embedUrl) {
+            this.openEmbed(app);
+          } else if (app.appUrl) {
+            window.location.href = app.appUrl;
           }
         });
       }
