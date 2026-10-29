@@ -77,7 +77,14 @@ const APPS = [
       { title: "BLM : blocs logiques réutilisables", desc: "Créer, versionner, composer blocs. Marketplace communautaire, tests auto, rollback 1-clic. Gouvernance code.", tags: ["BLM", "Blocs", "Réutilisable", "Gouvernance"] },
       { title: "BLSM : générer images/sons/3D", desc: "Prompts structurés, seeds reproductibles, variations contrôlées. Export assets jeu/web/app. Pipeline créatif.", tags: ["BLSM", "Génératif", "Assets", "Pipeline"] },
       { title: "motor.s injection : noyau partiel", desc: "MOTOR.noyau(['COS','FENETRE']) — 50KB gzippé. CDN global, cache éternel, versioning sémantique. Zéro config.", tags: ["motor.s", "Injection", "CDN", "Performance"] },
-      { title: "ERN : mémoire distribuée", desc: "Entités-Relations-Nœuds, graphe persistant, requêtes locales. Mémoire IA souveraine.", tags: ["ERN", "Mémoire", "Graphe", "Souveraineté"] }
+      { title: "ERN : mémoire distribuée", desc: "Entités-Relations-Nœuds, graphe persistant, requêtes locales. Mémoire IA souveraine.", tags: ["ERN", "Mémoire", "Graphe", "Souveraineté"] },
+      { title: "Moteurs linguistiques : NLP local", desc: "Tokenisation, embeddings, génération contrôlée, fine-tuning LoRA, quantization GGUF — le tout local-first.", tags: ["NLP", "LLM", "Local-First"] },
+      { title: "Tokenizer Visualizer", desc: "Visualisation interactive BPE/WordPiece/Unigram, vocabulaire, merges, compression ratio.", tags: ["Tokenizer", "Visualisation", "NLP"] },
+      { title: "Embedding Explorer", desc: "Projection 2D/3D (t-SNE, UMAP), similarité cosinus, analogies vectorielles, clusters.", tags: ["Embeddings", "Projection", "NLP"] },
+      { title: "Generation Playground", desc: "Sampling top-k/p, temperature, repetition penalty, logits bias, seeds reproductibles, streaming.", tags: ["Génération", "Sampling", "LLM"] },
+      { title: "LoRA/QLoRA Trainer", desc: "Fine-tuning low-rank adaptatif, quantization 4-bit NF4, gradient checkpointing, export GGML/GGUF/ONNX.", tags: ["LoRA", "Fine-tuning", "Quantization"] },
+      { title: "Quantization Lab", desc: "GPTQ, AWQ, GGUF q2_k→q8_0, calibration, perplexity eval, benchmark vitesse/mémoire.", tags: ["Quantization", "GPTQ", "Benchmark"] },
+      { title: "Local-First Runtime", desc: "WebLLM, Transformers.js, llama.cpp WASM, ONNX Runtime Web. Zero-server inference.", tags: ["Local-First", "WASM", "Zero-Server"] }
     ]
   },
   {
@@ -96,24 +103,6 @@ const APPS = [
       { title: "Débogage visuel", desc: "Inspecteur de graphe, points d'arrêt, exécution pas à pas, logs colorés.", tags: ["Debug", "Inspecteur", "cos"] },
       { title: "Playground live", desc: "Éditeur Monaco/CodeMirror, validation temps réel, coloration, autocomplétion, export JSON.", tags: ["Playground", "Live", "Export"] },
       { title: "Intégration CI/CD", desc: "GitHub Actions, GitLab CI, validation PR, tests cos unitaires, déploiement auto.", tags: ["CI/CD", "GitHub", "GitLab"] }
-    ]
-  },
-  {
-    num: "Moteurs linguistiques",
-    title: "Moteurs linguistiques",
-    desc: "Expérimentations NLP/LLM locaux : tokenisation, embeddings, génération contrôlée, fine-tuning LoRA, quantization GGUF.",
-    tags: ["NLP", "LLM", "Expérimental", "Local-First"],
-    appUrl: "https://samuelhaihornberg.github.io/keffstation/linguistic-motors/",
-    embedUrl: "https://samuelhaihornberg.github.io/keffstation/linguistic-motors/",
-    embedLabel: "Ouvrir Moteurs linguistiques",
-    color: "#00ff88",
-    subArticles: [
-      { title: "Tokenizer Visualizer", desc: "Visualisation interactive BPE/WordPiece/Unigram, vocabulaire, merges, compression ratio.", tags: ["Tokenizer", "Visualisation", "NLP"] },
-      { title: "Embedding Explorer", desc: "Projection 2D/3D (t-SNE, UMAP), similarité cosinus, analogies vectorielles, clusters.", tags: ["Embeddings", "Projection", "NLP"] },
-      { title: "Generation Playground", desc: "Sampling top-k/p, temperature, repetition penalty, logits bias, seeds reproductibles, streaming.", tags: ["Génération", "Sampling", "LLM"] },
-      { title: "LoRA/QLoRA Trainer", desc: "Fine-tuning low-rank adaptatif, quantization 4-bit NF4, gradient checkpointing, export GGML/GGUF/ONNX.", tags: ["LoRA", "Fine-tuning", "Quantization"] },
-      { title: "Quantization Lab", desc: "GPTQ, AWQ, GGUF q2_k→q8_0, calibration, perplexity eval, benchmark vitesse/mémoire.", tags: ["Quantization", "GPTQ", "Benchmark"] },
-      { title: "Local-First Runtime", desc: "WebLLM, Transformers.js, llama.cpp WASM, ONNX Runtime Web. Zero-server inference.", tags: ["Local-First", "WASM", "Zero-Server"] }
     ]
   },
   {
