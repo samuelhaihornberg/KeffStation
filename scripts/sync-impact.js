@@ -1,5 +1,5 @@
 // Sync catalogues impact.com (Partner API) -> kifftech/impact-products.json
-// Usage: IMPACT_ACCOUNT_SID=... IMPACT_AUTH_TOKEN=... node scripts/sync-impact.js [--dry-run] [--limit N] [--test-connection]
+// Usage: IMPACT_ACCOUNT_SID=... IMPACT_AUTH_TOKEN=... node scripts/sync-impact.js [--dry-run] [--limit N] [--test-connection] [--persona mediapartners|advertisers]
 // - Ne journalise JAMAIS les identifiants (ni SID, ni token).
 // - N'écrit le JSON que si >= 1 produit valide ; sinon conserve le dernier catalogue valide.
 // - Ne remplit aucun champ manquant : seules les données fournies par l'API sont importées.
@@ -13,6 +13,7 @@ const MAX_PAGES_PER_CATALOG = 50;
 
 const SID = process.env.IMPACT_ACCOUNT_SID || '';
 const TOKEN = process.env.IMPACT_AUTH_TOKEN || '';
+let PERSONA = 'Mediapartners'; // chemin API selon le type de compte (Partner par défaut)
 
 function redact(s) {
   let out = String(s);
@@ -62,7 +63,7 @@ function unwrapList(data, key) {
 }
 
 async function listCatalogs() {
-  const data = await apiGet(`/Mediapartners/${encodeURIComponent(SID)}/Catalogs?PageSize=${PAGE_SIZE}`);
+  const data = await apiGet(`/${PERSONA}/${encodeURIComponent(SID)}/Catalogs?PageSize=${PAGE_SIZE}`);
   return unwrapList(data, 'Catalogs');
 }
 
@@ -70,7 +71,7 @@ async function listCatalogItems(catalogId, limit = Infinity) {
   const items = [];
   for (let page = 1; page <= MAX_PAGES_PER_CATALOG && items.length < limit; page++) {
     const data = await apiGet(
-      `/Mediapartners/${encodeURIComponent(SID)}/Catalogs/${encodeURIComponent(catalogId)}/Items?PageSize=${PAGE_SIZE}&Page=${page}`
+      `/${PERSONA}/${encodeURIComponent(SID)}/Catalogs/${encodeURIComponent(catalogId)}/Items?PageSize=${PAGE_SIZE}&Page=${page}`
     );
     const batch = unwrapList(data, 'Items');
     if (!batch.length) break;
@@ -123,6 +124,10 @@ async function main() {
   const testOnly = args.includes('--test-connection');
   const limitArg = args.find((a) => a.startsWith('--limit'));
   const limit = limitArg ? Math.max(1, parseInt(limitArg.split('=')[1] || limitArg.split(' ')[1] || '0', 10) || Infinity) : Infinity;
+  const personaArg = args.find((a) => a.startsWith('--persona'));
+  const persona = personaArg ? (personaArg.split('=')[1] || '').trim().toLowerCase() : 'mediapartners';
+  if (!['mediapartners', 'advertisers'].includes(persona)) fail(`Persona inconnu : ${persona} (mediapartners|advertisers).`);
+  PERSONA = persona === 'advertisers' ? 'Advertisers' : 'Mediapartners';
   if (!SID || !TOKEN) fail('Secrets IMPACT_ACCOUNT_SID / IMPACT_AUTH_TOKEN absents de l environnement.');
 
   log('Connexion API impact.com (base officielle, auth Basic SID/token)…');

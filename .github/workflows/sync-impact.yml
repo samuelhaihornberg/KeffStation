@@ -13,6 +13,10 @@ on:
         description: 'Nombre max de produits (0 = sans limite)'
         required: false
         default: '20'
+      persona:
+        description: 'Type de compte (mediapartners|advertisers)'
+        required: false
+        default: 'mediapartners'
 
 permissions:
   contents: write
@@ -36,9 +40,9 @@ jobs:
           IMPACT_AUTH_TOKEN: ${{ secrets.IMPACT_AUTH_TOKEN }}
         run: |
           if [ "${{ inputs.dry_run }}" = "true" ]; then
-            node scripts/sync-impact.js --dry-run --limit=${{ inputs.limit }} >> "$GITHUB_STEP_SUMMARY"
+            node scripts/sync-impact.js --dry-run --limit=${{ inputs.limit }} --persona=${{ inputs.persona }} >> "$GITHUB_STEP_SUMMARY"
           else
-            node scripts/sync-impact.js --limit=${{ inputs.limit }} >> "$GITHUB_STEP_SUMMARY"
+            node scripts/sync-impact.js --limit=${{ inputs.limit }} --persona=${{ inputs.persona }} >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Commit JSON
