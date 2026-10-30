@@ -32,14 +32,14 @@ const LOCAL_DB = [
   {id:'cp10',brand:'Samsung',model:'Galaxy Book4 Ultra',year:2024,category:'Computers',price:{official:2799},specs:{Écran:'16" 3K AMOLED 120Hz',Processeur:'Core Ultra 9 185H',RAM:'32 Go',Stockage:'1 To SSD',GPU:'RTX 4070 8 Go',Autonomie:'14 h'}},  
 
   // --- Tablets (10) ---
-  {id:'tb1',brand:'Apple',model:'iPad Pro 13 M4',year:2024,category:'Tablets',price:{official:1599},specs:{Écran:'13" Ultra Retina XDR 120Hz',Processeur:'M4 10 cœurs',RAM:'16 Go',Stockage:'512 Go',Caméra:'12 MP + 10 MP',Autonomie:'10 h'}},  
+  {id:'tb1',images:['./img/tb1.jpg'],brand:'Apple',model:'iPad Pro 13 M4',year:2024,category:'Tablets',price:{official:1599},specs:{Écran:'13" Ultra Retina XDR 120Hz',Processeur:'M4 10 cœurs',RAM:'16 Go',Stockage:'512 Go',Caméra:'12 MP + 10 MP',Autonomie:'10 h'}},  
   {id:'tb2',brand:'Samsung',model:'Galaxy Tab S9 Ultra',year:2023,category:'Tablets',price:{official:1399},specs:{Écran:'14.6" Dynamic AMOLED 2X 120Hz',Processeur:'Snapdragon 8 Gen 2',RAM:'12 Go',Stockage:'256 Go',Caméra:'13+8 MP',Autonomie:'12 h'}},  
-  {id:'tb3',brand:'Xiaomi',model:'Pad 6S Pro 12.4',year:2024,category:'Tablets',price:{official:599},specs:{Écran:'12.4" 3K 144Hz',Processeur:'Snapdragon 8 Gen 2',RAM:'12 Go',Stockage:'256 Go',Caméra:'50 MP',Autonomie:'14 h'}},  
+  {id:'tb3',images:['./img/tb3.jpg'],brand:'Xiaomi',model:'Pad 6S Pro 12.4',year:2024,category:'Tablets',price:{official:599},specs:{Écran:'12.4" 3K 144Hz',Processeur:'Snapdragon 8 Gen 2',RAM:'12 Go',Stockage:'256 Go',Caméra:'50 MP',Autonomie:'14 h'}},  
   {id:'tb4',brand:'Lenovo',model:'Tab Extreme',year:2023,category:'Tablets',price:{official:699},specs:{Écran:'14.5" 3K OLED 120Hz',Processeur:'Dimensity 9000',RAM:'12 Go',Stockage:'256 Go',Caméra:'13 MP',Autonomie:'10 h'}},  
   {id:'tb5',brand:'OnePlus',model:'Pad 2',year:2024,category:'Tablets',price:{official:549},specs:{Écran:'12.1" 3K 144Hz',Processeur:'Snapdragon 8 Gen 3',RAM:'12 Go',Stockage:'256 Go',Caméra:'13 MP',Autonomie:'13 h'}},  
-  {id:'tb6',brand:'Google',model:'Pixel Tablet',year:2023,category:'Tablets',price:{official:599},specs:{Écran:'10.95" 2560x1600 60Hz',Processeur:'Tensor G2',RAM:'8 Go',Stockage:'128 Go',Caméra:'8 MP',Autonomie:'12 h'}},  
+  {id:'tb6',images:['./img/tb6.png'],brand:'Google',model:'Pixel Tablet',year:2023,category:'Tablets',price:{official:599},specs:{Écran:'10.95" 2560x1600 60Hz',Processeur:'Tensor G2',RAM:'8 Go',Stockage:'128 Go',Caméra:'8 MP',Autonomie:'12 h'}},  
   {id:'tb7',brand:'Microsoft',model:'Surface Pro 10',year:2024,category:'Tablets',price:{official:1199},specs:{Écran:'13" 2880x1920 120Hz',Processeur:'Core Ultra 7 165H',RAM:'16 Go',Stockage:'256 Go',Caméra:'10 MP',Autonomie:'11 h'}},  
-  {id:'tb8',brand:'Huawei',model:'MatePad Pro 13.2',year:2023,category:'Tablets',price:{official:799},specs:{Écran:'13.2" 2.8K OLED 144Hz',Processeur:'Kirin 9000S',RAM:'12 Go',Stockage:'256 Go',Caméra:'13 MP',Autonomie:'12 h'}},  
+  {id:'tb8',images:['./img/tb8.jpg'],brand:'Huawei',model:'MatePad Pro 13.2',year:2023,category:'Tablets',price:{official:799},specs:{Écran:'13.2" 2.8K OLED 144Hz',Processeur:'Kirin 9000S',RAM:'12 Go',Stockage:'256 Go',Caméra:'13 MP',Autonomie:'12 h'}},  
   {id:'tb9',brand:'OPPO',model:'Pad 3 Pro',year:2024,category:'Tablets',price:{official:499},specs:{Écran:'11.61" 2.8K 144Hz',Processeur:'Snapdragon 8 Gen 3',RAM:'12 Go',Stockage:'256 Go',Caméra:'13 MP',Autonomie:'13 h'}},  
   {id:'tb10',brand:'Nothing',model:'Tablet (rumored)',year:2024,category:'Tablets',price:{official:399},specs:{Écran:'11" 2K 120Hz',Processeur:'Dimensity 8200',RAM:'8 Go',Stockage:'128 Go',Caméra:'8 MP',Autonomie:'10 h'}},  
 
