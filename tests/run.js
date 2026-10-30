@@ -113,7 +113,7 @@ check('KiffTech : page rayons + filtre ?rayon', () => {
   const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.v2.js'), 'utf8');
   assert(kapp.includes("params.get('rayon')"), 'catalogue: support ?rayon absent');
   const kcat = fs.readFileSync(path.join(ROOT, 'kifftech/catalog.html'), 'utf8');
-  assert(kcat.includes('src="app.v2.js"'), 'catalog.html: ne charge pas app.v2.js');
+  assert(/src="app\.v2\.js(\?v=\d+)?"/.test(kcat), 'catalog.html: ne charge pas app.v2.js');
   execSync('node --check kifftech/app.v2.js', { cwd: ROOT, stdio: 'pipe' });
   assert(appJs.includes('kifftech/rayons.html'), 'cube: bouton KiffTech ne mène pas aux rayons');
 });
