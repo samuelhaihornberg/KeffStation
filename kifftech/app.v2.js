@@ -94,14 +94,14 @@ const LOCAL_DB = [
   // --- Audio & Wearables (10) ---
   {id:'aw1',brand:'Sony',model:'WH-1000XM5',year:2022,category:'Audio & Wearables',price:{official:399},specs:{Type:'Casque ANC',Transducteur:'30 mm',ANC:'Processeur V1 + QN1',Codec:'LDAC + LC3',Autonomie:'30 h (ANC)',Poids:'250 g'}},  
   {id:'aw2',brand:'Bose',model:'QuietComfort Ultra',year:2023,category:'Audio & Wearables',price:{official:449},specs:{Type:'Casque ANC',Transducteur:'40 mm',ANC:'CustomTune',Codec:'aptX Adaptive',Autonomie:'24 h (ANC)',Poids:'254 g'}},  
-  {id:'aw3',brand:'Apple',model:'AirPods Pro 2 (USB-C)',year:2023,category:'Audio & Wearables',price:{official:279},specs:{Type:'TWS ANC',Puce:'H2',ANC:'Adaptatif 2x',Codec:'AAC + LC3',Autonomie:'6 h (ANC) + 24 h étui',Audio:'Spatial + Suivi tête'}},  
+  {id:'aw3',images:['./img/aw3.jpg'],brand:'Apple',model:'AirPods Pro 2 (USB-C)',year:2023,category:'Audio & Wearables',price:{official:279},specs:{Type:'TWS ANC',Puce:'H2',ANC:'Adaptatif 2x',Codec:'AAC + LC3',Autonomie:'6 h (ANC) + 24 h étui',Audio:'Spatial + Suivi tête'}},  
   {id:'aw4',brand:'Sennheiser',model:'Momentum 4 Wireless',year:2022,category:'Audio & Wearables',price:{official:349},specs:{Type:'Casque ANC',Transducteur:'42 mm',ANC:'Adaptatif',Codec:'aptX Adaptive + LDAC',Autonomie:'60 h (ANC)',Poids:'293 g'}},  
   {id:'aw5',brand:'Technics',model:'EAH-AZ80',year:2023,category:'Audio & Wearables',price:{official:299},specs:{Type:'TWS ANC',Transducteur:'10 mm',ANC:'Hybride',Codec:'LDAC + LC3',Autonomie:'7 h (ANC) + 17.5 h étui',Multipoint:'3 appareils'}},  
   {id:'aw6',brand:'Samsung',model:'Galaxy Buds 3 Pro',year:2024,category:'Audio & Wearables',price:{official:249},specs:{Type:'TWS ANC',Transducteur:'11 mm + 6.5 mm',ANC:'Adaptatif IA',Codec:'SSC + LDAC',Autonomie:'6 h (ANC) + 18 h étui',Audio:'360° + Suivi tête'}},  
   {id:'aw7',brand:'Xiaomi',model:'Redmi Buds 6 Pro',year:2024,category:'Audio & Wearables',price:{official:99},specs:{Type:'TWS ANC',Transducteur:'11 mm',ANC:'55 dB hybride',Codec:'LDAC',Autonomie:'9 h (ANC) + 27 h étui',Audio:'Spatial'}},  
   {id:'aw8',brand:'Garmin',model:'Fenix 8 Solar',year:2024,category:'Audio & Wearables',price:{official:1099},specs:{Type:'Montre GPS multisport',Écran:'1.4" AMOLED Solar',Autonomie:'29 j (solaire)',GPS:'Multi-bande + SatIQ',Capteurs:'Cardio + SpO2 + ECG',Cartes:'TopoActive Mond'}},  
-  {id:'aw9',brand:'Apple',model:'Apple Watch Ultra 2',year:2023,category:'Audio & Wearables',price:{official:899},specs:{Type:'Montre connectée',Écran:'1.92" Retina 3000 nits',Autonomie:'36 h (72 h éco)',GPS:'Double fréquence',Capteurs:'Température + ECG + SpO2',Action:'Bouton Action'}},  
-  {id:'aw10',brand:'Samsung',model:'Galaxy Watch 7 44mm',year:2024,category:'Audio & Wearables',price:{official:329},specs:{Type:'Montre connectée',Écran:'1.47" Super AMOLED',Autonomie:'40 h',GPS:'Double fréquence',Capteurs:'BioActive 2.0 (ECG/TA)',OS:'Wear OS 5'}},  
+  {id:'aw9',images:['./img/aw9.jpg'],brand:'Apple',model:'Apple Watch Ultra 2',year:2023,category:'Audio & Wearables',price:{official:899},specs:{Type:'Montre connectée',Écran:'1.92" Retina 3000 nits',Autonomie:'36 h (72 h éco)',GPS:'Double fréquence',Capteurs:'Température + ECG + SpO2',Action:'Bouton Action'}},  
+  {id:'aw10',images:['./img/aw10.jpg'],brand:'Samsung',model:'Galaxy Watch 7 44mm',year:2024,category:'Audio & Wearables',price:{official:329},specs:{Type:'Montre connectée',Écran:'1.47" Super AMOLED',Autonomie:'40 h',GPS:'Double fréquence',Capteurs:'BioActive 2.0 (ECG/TA)',OS:'Wear OS 5'}},  
 
 ];
 
