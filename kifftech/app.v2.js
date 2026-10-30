@@ -20,15 +20,15 @@ const LOCAL_DB = [
   {id:'sp10',brand:'POCO',model:'F6 Pro',year:2024,category:'Smartphones',price:{official:579},specs:{Écran:'6.67" Flow AMOLED 120Hz',Processeur:'Snapdragon 8 Gen 2',RAM:'12 Go',Stockage:'256 Go',Appareil:'50+8+2 MP',Batterie:'5000 mAh'}},  
 
   // --- Computers (10) ---
-  {id:'cp1',brand:'Apple',model:'MacBook Pro 16 M3 Max',year:2023,category:'Computers',price:{official:3999},specs:{Écran:'16.2" Liquid Retina XDR',Processeur:'M3 Max 16 cœurs',RAM:'48 Go',Stockage:'1 To SSD',GPU:'40 cœurs',Autonomie:'22 h'}},  
+  {id:'cp1',images:['./img/cp1.jpg'],brand:'Apple',model:'MacBook Pro 16 M3 Max',year:2023,category:'Computers',price:{official:3999},specs:{Écran:'16.2" Liquid Retina XDR',Processeur:'M3 Max 16 cœurs',RAM:'48 Go',Stockage:'1 To SSD',GPU:'40 cœurs',Autonomie:'22 h'}},  
   {id:'cp2',brand:'Dell',model:'XPS 15 9530',year:2023,category:'Computers',price:{official:2499},specs:{Écran:'15.6" 3.5K OLED Touch',Processeur:'i9-13900H',RAM:'32 Go',Stockage:'1 To SSD',GPU:'RTX 4070 8 Go',Autonomie:'10 h'}},  
-  {id:'cp3',brand:'ASUS',model:'ROG Zephyrus G14',year:2024,category:'Computers',price:{official:1999},specs:{Écran:'14" 3K OLED 120Hz',Processeur:'Ryzen 9 8945HS',RAM:'32 Go',Stockage:'1 To SSD',GPU:'RTX 4070 8 Go',Autonomie:'10 h'}},  
+  {id:'cp3',images:['./img/cp3.jpg'],brand:'ASUS',model:'ROG Zephyrus G14',year:2024,category:'Computers',price:{official:1999},specs:{Écran:'14" 3K OLED 120Hz',Processeur:'Ryzen 9 8945HS',RAM:'32 Go',Stockage:'1 To SSD',GPU:'RTX 4070 8 Go',Autonomie:'10 h'}},  
   {id:'cp4',brand:'Lenovo',model:'ThinkPad X1 Carbon Gen 12',year:2024,category:'Computers',price:{official:2299},specs:{Écran:'14" 2.8K OLED 120Hz',Processeur:'Core Ultra 7 155H',RAM:'32 Go',Stockage:'1 To SSD',GPU:'Arc Graphics',Autonomie:'15 h'}},  
   {id:'cp5',brand:'HP',model:'Spectre x360 14',year:2024,category:'Computers',price:{official:1799},specs:{Écran:'13.5" 2.8K OLED 120Hz',Processeur:'Core Ultra 7 155H',RAM:'16 Go',Stockage:'1 To SSD',GPU:'Arc Graphics',Autonomie:'13 h'}},  
-  {id:'cp6',brand:'Framework',model:'Laptop 13 AMD',year:2024,category:'Computers',price:{official:1049},specs:{Écran:'13.5" 2256x1504 3:2',Processeur:'Ryzen 5 7640U',RAM:'16 Go',Stockage:'512 Go SSD',GPU:'Radeon 760M',Autonomie:'10 h'}},  
+  {id:'cp6',images:['./img/cp6.jpg'],brand:'Framework',model:'Laptop 13 AMD',year:2024,category:'Computers',price:{official:1049},specs:{Écran:'13.5" 2256x1504 3:2',Processeur:'Ryzen 5 7640U',RAM:'16 Go',Stockage:'512 Go SSD',GPU:'Radeon 760M',Autonomie:'10 h'}},  
   {id:'cp7',brand:'MSI',model:'Stealth 16 AI Studio',year:2024,category:'Computers',price:{official:2699},specs:{Écran:'16" 4K Mini LED 120Hz',Processeur:'Core Ultra 9 185H',RAM:'32 Go',Stockage:'2 To SSD',GPU:'RTX 4080 12 Go',Autonomie:'8 h'}},  
   {id:'cp8',brand:'Razer',model:'Blade 16',year:2024,category:'Computers',price:{official:3299},specs:{Écran:'16" Dual Mode Mini LED',Processeur:'i9-14900HX',RAM:'32 Go',Stockage:'2 To SSD',GPU:'RTX 4090 16 Go',Autonomie:'6 h'}},  
-  {id:'cp9',brand:'LG',model:'Gram 17',year:2024,category:'Computers',price:{official:1699},specs:{Écran:'17" WQXGA IPS 144Hz',Processeur:'Core Ultra 7 155H',RAM:'16 Go',Stockage:'1 To SSD',GPU:'Arc Graphics',Autonomie:'18 h'}},  
+  {id:'cp9',images:['./img/cp9.jpg'],brand:'LG',model:'Gram 17',year:2024,category:'Computers',price:{official:1699},specs:{Écran:'17" WQXGA IPS 144Hz',Processeur:'Core Ultra 7 155H',RAM:'16 Go',Stockage:'1 To SSD',GPU:'Arc Graphics',Autonomie:'18 h'}},  
   {id:'cp10',brand:'Samsung',model:'Galaxy Book4 Ultra',year:2024,category:'Computers',price:{official:2799},specs:{Écran:'16" 3K AMOLED 120Hz',Processeur:'Core Ultra 9 185H',RAM:'32 Go',Stockage:'1 To SSD',GPU:'RTX 4070 8 Go',Autonomie:'14 h'}},  
 
   // --- Tablets (10) ---
