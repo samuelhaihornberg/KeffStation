@@ -7,6 +7,7 @@
 <meta name="description" content="SuperBots Familliya — Geeko, Geekette, ViA, GuideoPlan, GoleMotor, B.T.B., Theo">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E🤖%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="./responsive.css">
 <title>SuperBots Familliya — ViArtificial Labs</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -51,7 +52,7 @@ footer a{color:#ffd23f}
 <h2 class="section-title">🤖 La famille</h2>
 <div class="grid" id="tribu"></div>
 </main>
-<footer><a href="../">← Retour au hub KeffStation</a> · Personnages simulés, sans conscience réelle.</footer>
+<footer><a href="../">← Retour au hub KeffStation</a> · Personnages simulés, sans conscience réelle.<br><span id="capsLine"></span><br><span>Testé : conteneur Linux (HTTP 200, contrôles statiques). Non testé sur appareils physiques — signale ton OS/appareil/navigateur en cas de souci.</span></footer>
 </div>
 <script>
 fetch('./bots.json').then(function(r){if(!r.ok)throw new Error('bots.json '+r.status);return r.json();}).then(function(cfg){
@@ -62,6 +63,7 @@ var duo='',tribu='';cfg.bots.forEach(function(b){if(b.featured)duo+=card(b,true)
 document.getElementById('duo').innerHTML=duo;document.getElementById('tribu').innerHTML=tribu;
 }).catch(function(){document.getElementById('disclaimer').textContent='Profils indisponibles hors-ligne. Recharge en ligne une fois pour mettre en cache.';});
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}
+<script src="./capabilities.js"></script><script>ViaCaps.paint('capsLine');</script>
 </script>
 </body>
 </html>

@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#b84dff">
 <meta name="description" content="xsStream — Geeko & Geekette à côté de la partie">
 <link rel="manifest" href="./manifest.json">
+<link rel="stylesheet" href="./responsive.css">
 <title>xsStream — Geeko & Geekette</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -74,9 +75,10 @@ footer a{color:#ffd23f}
 <span class="note" id="xGameMsg"></span>
 <ul><li>⛔ Pas de contrôle automatisé de WoW (EULA Blizzard l’interdit — veto documenté) ni de GeForce NOW sans intégration autorisée.</li><li>Agir n’existe que dans un jeu explicitement compatible et connecté. En attendant : discuter et observer seulement.</li></ul></section>
 </div>
-<footer><a href="./">← SuperBots Familliya</a> · xsStream : espace expérimental, capacités marquées en clair.</footer>
+<footer><a href="./">← SuperBots Familliya</a> · xsStream : espace expérimental, capacités marquées en clair.<br><span id="capsLine"></span><br><span>Testé : conteneur Linux (HTTP 200, contrôles statiques). Non testé sur appareils physiques.</span></footer>
 </div>
 <script src="./memory.js"></script>
+<script src="./capabilities.js"></script>
 <script>
 var bot=(new URLSearchParams(location.search).get('bot')||'geeko').toLowerCase();
 if(bot!=='geeko'&&bot!=='geekette')bot='geeko';
@@ -103,7 +105,7 @@ document.getElementById('xMicOn').onclick=function(){if(!navigator.mediaDevices|
 stopTracks(micStream);navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false}).then(function(s){micStream=s;badge('bMic','🟢 Micro : actif (voix en direct, niveau ci-dessus)',true);liveMsg();var AC=window.AudioContext||window.webkitAudioContext;if(!AC){return;}var ctx=new AC();var src=ctx.createMediaStreamSource(s);var an=ctx.createAnalyser();an.fftSize=256;src.connect(an);var buf=new Uint8Array(an.frequencyBinCount);var m=document.getElementById('xMeter');(function tick(){if(!micStream){try{ctx.close();}catch(e){}return;}an.getByteFrequencyData(buf);var v=0;for(var i=0;i<buf.length;i++)v+=buf[i];v=v/buf.length/255;m.style.width=Math.round(Math.min(100,v*160))+'%';micRAF=requestAnimationFrame(tick);})();}).catch(function(e){document.getElementById('xScreenMsg').textContent='Micro refusé ou impossible : '+(e&&e.message?e.message:e)+'. Voix en direct indisponible.';});};
 document.getElementById('xLiveOff').onclick=function(){stopTracks(screenStream);screenStream=null;stopTracks(camStream);camStream=null;stopTracks(micStream);micStream=null;if(micRAF)cancelAnimationFrame(micRAF);document.getElementById('xVideo').srcObject=null;document.getElementById('xCam').srcObject=null;document.getElementById('xMeter').style.width='0';badge('bScreen','🔴 Écran : non partagé',false);badge('bCam','🔴 Caméra : coupée',false);badge('bMic','🔴 Micro : coupé',false);liveMsg();};
 
-if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}ViaCaps.paint('capsLine');
 </script>
 </body>
 </html>

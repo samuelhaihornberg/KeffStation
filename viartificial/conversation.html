@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#b84dff">
 <meta name="description" content="Conversation MSN SuperBots Familliya — bulle interne PWA">
 <link rel="manifest" href="./manifest.json">
+<link rel="stylesheet" href="./responsive.css">
 <title>Conversation — SuperBots Familliya</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -69,6 +70,8 @@ body[data-min="1"] #bubble{display:inline-flex}
 <label>Clé éventuelle (session seule, jamais sauvegardée) <input id="pKey" type="password" autocomplete="off" placeholder="optionnel, mémoire vive uniquement"></label>
 <span><button id="pSave" type="button">Enregistrer</button> <button id="pTest" type="button">Tester</button></span>
 <span id="pMsg" role="status"></span>
+<span id="capsLine"></span>
+<span>Testé : conteneur Linux (HTTP 200, contrôles statiques). Non testé sur appareils physiques.</span>
 <span>Hébergement statique (GitHub Pages) : si ton endpoint exige une clé serveur, passe par un proxy adapté que tu opères — ne colle aucun secret durable : seule adresse+modèle sont enregistrés.</span>
 </details>
 <style>.enginebar{display:flex;gap:8px;align-items:center;padding:8px 12px;font-size:.8rem;color:#b9c0e6;border-top:1px solid rgba(255,255,255,.1)}#cancel{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ff3d9a;background:transparent;color:#ff3d9a}#engineCfg label{display:block;margin:6px 0}#engineCfg input,#engineCfg select{min-height:44px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#12142e;color:#fff;padding:6px 10px;width:100%}#engineCfg button{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f;margin:4px 4px 0 0}</style>
@@ -102,6 +105,7 @@ body[data-min="1"] #bubble{display:inline-flex}
 <script src="./providers.js"></script>
 <script src="./memory.js"></script>
 <script src="./actions.js"></script>
+<script src="./capabilities.js"></script>
 <script>
 var q=(new URLSearchParams(location.search).get('bot')||'geeko').toLowerCase();
 var body=document.body,thread=document.getElementById('thread');
@@ -168,7 +172,7 @@ var txt='';if(t.id==='ask'){txt=prompt('Question pour le moteur (service connect
 actCtl=new AbortController();actUI('en cours');add('bot','⚒️ Action « '+t.title+' » — objectif : '+t.desc);
 ViaActions.run(t.id,{bot:q,botObj:b,text:txt,title:b.name+' — '+t.title,key:document.getElementById('pKey').value||null,signal:actCtl.signal},function(st,msg){document.getElementById('actState').textContent='État : en cours — '+msg;}).then(function(r){actUI('terminée',r);add('bot','⚒️ « '+t.title+' » terminé : '+r);}).catch(function(e){if(e&&e.name==='AbortError')actUI('arrêtée','Arrêtée à ta demande : reprends la main.');else actUI('erreur',(e&&e.message)||'échec');}).finally(function(){actCtl=null;document.getElementById('actStop').hidden=true;document.getElementById('actTake').hidden=true;});}
 renderActs();
-renderMem();
+ViaCaps.paint('capsLine');renderMem();
 input.focus();
 }).catch(function(){document.getElementById('who').textContent='Hors-ligne : recharge en ligne une fois.';});
 </script>
