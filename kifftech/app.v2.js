@@ -68,15 +68,15 @@ const LOCAL_DB = [
   {id:'ce10',brand:'Corsair',model:'Dominator Titanium 64Go (2x32) 7200',year:2024,category:'Composant electronic & informatic',price:{official:399},specs:{Type:'DDR5',Fréquence:'7200 MHz',Latence:'CL34',Capacité:'64 Go (2x32)',Voltage:'1.45V',RGB:'Oui (Capellix)'}},  
 
   // --- Company & studying Robots (10) ---
-  {id:'rb1',brand:'Unitree',model:'Go2',year:2024,category:'Company & studying Robots',price:{official:2499},specs:{Type:'Quadrupède',Poids:'15 kg',Autonomie:'2-4 h',Vitesse:'5 m/s',Capteurs:'LiDAR 360° + caméras',API:'ROS 2 + SDK Python/C++'}},  
+  {id:'rb1',images:['./img/rb1.jpg'],brand:'Unitree',model:'Go2',year:2024,category:'Company & studying Robots',price:{official:2499},specs:{Type:'Quadrupède',Poids:'15 kg',Autonomie:'2-4 h',Vitesse:'5 m/s',Capteurs:'LiDAR 360° + caméras',API:'ROS 2 + SDK Python/C++'}},  
   {id:'rb2',images:['./img/rb2.jpg'],brand:'Boston Dynamics',model:'Spot',year:2020,category:'Company & studying Robots',price:{official:74500},specs:{Type:'Quadrupède',Poids:'32 kg',Autonomie:'1.5 h',Vitesse:'1.6 m/s',Capteurs:'5 caméras stéréo + LiDAR',API:'SDK Python + ROS'}},  
   {id:'rb3',brand:'Agility Robotics',model:'Digit',year:2023,category:'Company & studying Robots',price:{official:150000},specs:{Type:'Bipède',Poids:'65 kg',Autonomie:'3 h',Charge:'16 kg',Capteurs:'LiDAR + caméras depth',API:'ROS 2'}},  
   {id:'rb4',images:['./img/rb4.jpg'],brand:'Tesla',model:'Optimus Gen 2',year:2024,category:'Company & studying Robots',price:{official:25000},specs:{Type:'Humanoïde',Poids:'73 kg',Autonomie:'8 h',Charge:'20 kg',Capteurs:'Caméras + FSD',API:'Propriétaire'}},  
   {id:'rb5',brand:'Figure',model:'Figure 01',year:2024,category:'Company & studying Robots',price:{official:30000},specs:{Type:'Humanoïde',Poids:'60 kg',Autonomie:'5 h',Charge:'20 kg',Capteurs:'6 caméras RGB + depth',API:'ROS 2 + OpenAI'}},  
   {id:'rb6',brand:'1X Technologies',model:'EVE',year:2023,category:'Company & studying Robots',price:{official:35000},specs:{Type:'Humanoïde (roues)',Poids:'86 kg',Autonomie:'6 h',Charge:'15 kg',Capteurs:'Caméras 360°',API:'ROS 2'}},  
   {id:'rb7',brand:'Apptronik',model:'Apollo',year:2024,category:'Company & studying Robots',price:{official:50000},specs:{Type:'Humanoïde',Poids:'72 kg',Autonomie:'4 h',Charge:'25 kg',Capteurs:'Force/torque + vision',API:'ROS 2'}},  
-  {id:'rb8',brand:'ANYbotics',model:'ANYmal D',year:2023,category:'Company & studying Robots',price:{official:120000},specs:{Type:'Quadrupède',Poids:'50 kg',Autonomie:'2.5 h',Vitesse:'2.5 m/s',Capteurs:'LiDAR + 5 caméras',API:'ROS 2 + SDK'}},  
-  {id:'rb9',brand:'Ghost Robotics',model:'Vision 60',year:2022,category:'Company & studying Robots',price:{official:150000},specs:{Type:'Quadrupède militaire',Poids:'51 kg',Autonomie:'3 h',Vitesse:'3 m/s',Capteurs:'LiDAR 360 + thermiques',API:'ROS + SDK'}},  
+  {id:'rb8',images:['./img/rb8.jpg'],brand:'ANYbotics',model:'ANYmal D',year:2023,category:'Company & studying Robots',price:{official:120000},specs:{Type:'Quadrupède',Poids:'50 kg',Autonomie:'2.5 h',Vitesse:'2.5 m/s',Capteurs:'LiDAR + 5 caméras',API:'ROS 2 + SDK'}},  
+  {id:'rb9',images:['./img/rb9.jpg'],brand:'Ghost Robotics',model:'Vision 60',year:2022,category:'Company & studying Robots',price:{official:150000},specs:{Type:'Quadrupède militaire',Poids:'51 kg',Autonomie:'3 h',Vitesse:'3 m/s',Capteurs:'LiDAR 360 + thermiques',API:'ROS + SDK'}},  
   {id:'rb10',brand:'Deep Robotics',model:'Jueying X20',year:2023,category:'Company & studying Robots',price:{official:45000},specs:{Type:'Quadrupède',Poids:'38 kg',Autonomie:'2 h',Vitesse:'3 m/s',Capteurs:'LiDAR + caméras',API:'ROS 2 + Python'}},  
 
   // --- Garden & furnitures smart devices (10) ---
