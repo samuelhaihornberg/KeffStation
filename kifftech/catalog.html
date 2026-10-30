@@ -191,6 +191,13 @@ main{flex:1;padding:clamp(16px,3vw,24px);display:grid;gap:clamp(16px,2.5vw,20px)
     <div class="section-header">
       <h2 class="section-title">Catalogue</h2>
       <span class="results-count" id="results-count">0 produits</span>
+      <label style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)" for="sort-select">Trier</label>
+      <select id="sort-select" aria-label="Trier les produits" style="padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#ffd23f;font-weight:700;font-size:.8rem;cursor:pointer">
+        <option value="relevance">Pertinence</option>
+        <option value="brand">Marque A-Z</option>
+        <option value="price-asc">Prix croissant</option>
+        <option value="price-desc">Prix décroissant</option>
+      </select>
     </div>
     <div class="products-grid" id="products-grid" role="list"></div>
   </section>

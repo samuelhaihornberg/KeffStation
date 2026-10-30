@@ -8,7 +8,7 @@ document.body.appendChild(banner);
 console.log('[KiffTech] Module loaded, LOCAL_DB length:', 80);
 const LOCAL_DB = [
   // --- Smartphones (10) ---
-  {id:'sp1',images:['./img/sp1.jpg'],brand:'Samsung',model:'Galaxy S24 Ultra',year:2024,category:'Smartphones',price:{official:1469},specs:{Écran:'6.8" Dynamic AMOLED 2X 120Hz',Processeur:'Snapdragon 8 Gen 3',RAM:'12 Go',Stockage:'256 Go',Appareil:'200+50+12+10 MP',Batterie:'5000 mAh'}},  
+  {id:'sp1',images:['./img/sp1.jpg','./img/sp1b.jpg'],brand:'Samsung',model:'Galaxy S24 Ultra',year:2024,category:'Smartphones',price:{official:1469},specs:{Écran:'6.8" Dynamic AMOLED 2X 120Hz',Processeur:'Snapdragon 8 Gen 3',RAM:'12 Go',Stockage:'256 Go',Appareil:'200+50+12+10 MP',Batterie:'5000 mAh'}},  
   {id:'sp2',images:['./img/sp2.png'],brand:'Apple',model:'iPhone 15 Pro Max',year:2023,category:'Smartphones',price:{official:1479},specs:{Écran:'6.7" Super Retina XDR 120Hz',Processeur:'A17 Pro',RAM:'8 Go',Stockage:'256 Go',Appareil:'48+12+12 MP',Batterie:'4441 mAh'}},  
   {id:'sp3',brand:'Xiaomi',model:'14 Ultra',year:2024,category:'Smartphones',price:{official:1499},specs:{Écran:'6.73" LTPO AMOLED 120Hz',Processeur:'Snapdragon 8 Gen 3',RAM:'16 Go',Stockage:'512 Go',Appareil:'50+50+50+50 MP Leica',Batterie:'5300 mAh'}},  
   {id:'sp4',images:['./img/sp4.png'],brand:'Google',model:'Pixel 8 Pro',year:2023,category:'Smartphones',price:{official:1099},specs:{Écran:'6.7" LTPO OLED 120Hz',Processeur:'Tensor G3',RAM:'12 Go',Stockage:'128 Go',Appareil:'50+48+48 MP',Batterie:'5050 mAh'}},  
@@ -100,7 +100,7 @@ const LOCAL_DB = [
   {id:'aw6',brand:'Samsung',model:'Galaxy Buds 3 Pro',year:2024,category:'Audio & Wearables',price:{official:249},specs:{Type:'TWS ANC',Transducteur:'11 mm + 6.5 mm',ANC:'Adaptatif IA',Codec:'SSC + LDAC',Autonomie:'6 h (ANC) + 18 h étui',Audio:'360° + Suivi tête'}},  
   {id:'aw7',brand:'Xiaomi',model:'Redmi Buds 6 Pro',year:2024,category:'Audio & Wearables',price:{official:99},specs:{Type:'TWS ANC',Transducteur:'11 mm',ANC:'55 dB hybride',Codec:'LDAC',Autonomie:'9 h (ANC) + 27 h étui',Audio:'Spatial'}},  
   {id:'aw8',brand:'Garmin',model:'Fenix 8 Solar',year:2024,category:'Audio & Wearables',price:{official:1099},specs:{Type:'Montre GPS multisport',Écran:'1.4" AMOLED Solar',Autonomie:'29 j (solaire)',GPS:'Multi-bande + SatIQ',Capteurs:'Cardio + SpO2 + ECG',Cartes:'TopoActive Mond'}},  
-  {id:'aw9',images:['./img/aw9.jpg'],brand:'Apple',model:'Apple Watch Ultra 2',year:2023,category:'Audio & Wearables',price:{official:899},specs:{Type:'Montre connectée',Écran:'1.92" Retina 3000 nits',Autonomie:'36 h (72 h éco)',GPS:'Double fréquence',Capteurs:'Température + ECG + SpO2',Action:'Bouton Action'}},  
+  {id:'aw9',images:['./img/aw9.jpg','./img/aw9b.png'],brand:'Apple',model:'Apple Watch Ultra 2',year:2023,category:'Audio & Wearables',price:{official:899},specs:{Type:'Montre connectée',Écran:'1.92" Retina 3000 nits',Autonomie:'36 h (72 h éco)',GPS:'Double fréquence',Capteurs:'Température + ECG + SpO2',Action:'Bouton Action'}},  
   {id:'aw10',images:['./img/aw10.jpg'],brand:'Samsung',model:'Galaxy Watch 7 44mm',year:2024,category:'Audio & Wearables',price:{official:329},specs:{Type:'Montre connectée',Écran:'1.47" Super AMOLED',Autonomie:'40 h',GPS:'Double fréquence',Capteurs:'BioActive 2.0 (ECG/TA)',OS:'Wear OS 5'}},  
 
 ];
@@ -108,7 +108,7 @@ const LOCAL_DB = [
 // ============ STATE ============
 let products = [...LOCAL_DB];
 let filteredProducts = [...LOCAL_DB];
-let activeCategory = 'all', activeYear = 'all', activeBrand = 'all';
+let activeCategory = 'all', activeYear = 'all', activeBrand = 'all', activeSort = 'relevance';
 let activeSources = {official:true, social:true, reviews:true, community:true};
 let searchQuery = '', isFetching = false;
 
@@ -276,8 +276,8 @@ async function loadPartnerProducts(){
 }
 
 // ============ FILTERS ============
-function applyFilters(){filteredProducts=products.filter(p=>{if(searchQuery&&!`${p.brand} ${p.model} ${p.category}`.toLowerCase().includes(searchQuery.toLowerCase()))return false;if(activeCategory!=='all'&&p.category!==activeCategory)return false;if(activeYear!=='all'&&p.year!==parseInt(activeYear))return false;if(activeBrand!=='all'&&p.brand!==activeBrand)return false;return true;});renderProducts();}
-function renderFilters(){const cats=['all',...new Set(products.map(p=>p.category))];$('#filter-category').innerHTML=cats.map(c=>`<button class="filter-btn ${c===activeCategory?'active':''}" data-cat="${c}">${c==='all'?'Toutes':c}</button>`).join('');const years=['all',...[...new Set(products.map(p=>p.year))].sort((a,b)=>b-a)];$('#filter-year').innerHTML=years.map(y=>`<button class="filter-btn ${y===activeYear?'active':''}" data-year="${y}">${y==='all'?'Toutes':y}</button>`).join('');const brands=['all',...[...new Set(products.map(p=>p.brand))].sort()];$('#filter-brand').innerHTML=brands.map(b=>`<button class="filter-btn ${b===activeBrand?'active':''}" data-brand="${b}">${b==='all'?'Toutes':b}</button>`).join('');}
+function applyFilters(){filteredProducts=products.filter(p=>{if(searchQuery&&!`${p.brand} ${p.model} ${p.category}`.toLowerCase().includes(searchQuery.toLowerCase()))return false;if(activeCategory!=='all'&&p.category!==activeCategory)return false;if(activeYear!=='all'&&p.year!==parseInt(activeYear))return false;if(activeBrand!=='all'&&p.brand!==activeBrand)return false;return true;});if(activeSort==='brand')filteredProducts.sort((a,b)=>`${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`));else if(activeSort==='price-asc')filteredProducts.sort((a,b)=>(a.kifftech?.kifftech??a.price.official)-(b.kifftech?.kifftech??b.price.official));else if(activeSort==='price-desc')filteredProducts.sort((a,b)=>(b.kifftech?.kifftech??b.price.official)-(a.kifftech?.kifftech??a.price.official));renderProducts();}
+function renderFilters(){const cats=['all',...new Set(products.map(p=>p.category))];$('#filter-category').innerHTML=cats.map(c=>`<button class="filter-btn ${c===activeCategory?'active':''}" data-cat="${c}">${c==='all'?'Toutes':c}</button>`).join('');const ss=$('#sort-select');if(ss)ss.value=activeSort;const years=['all',...[...new Set(products.map(p=>p.year))].sort((a,b)=>b-a)];$('#filter-year').innerHTML=years.map(y=>`<button class="filter-btn ${y===activeYear?'active':''}" data-year="${y}">${y==='all'?'Toutes':y}</button>`).join('');const brands=['all',...[...new Set(products.map(p=>p.brand))].sort()];$('#filter-brand').innerHTML=brands.map(b=>`<button class="filter-btn ${b===activeBrand?'active':''}" data-brand="${b}">${b==='all'?'Toutes':b}</button>`).join('');}
 
 // ============ PARTICLES ============
 function initParticles(){const c=$('#particules')||document.body.appendChild(Object.assign(document.createElement('div'),{id:'particules',className:'particules'}));const cols=['#1e6bff','#ff3d9a','#ffd23f','#27d17f','#00d4ff','#ff6b00'];for(let i=0;i<15;i++){const p=document.createElement('div');p.className='particule';const sx=(Math.random()-.5)*innerWidth*.8,sy=(Math.random()-.5)*innerHeight*.8,ex=(Math.random()-.5)*innerWidth*.8,ey=(Math.random()-.5)*innerHeight*.8,del=Math.random()*12,dur=10+Math.random()*8,op=.1+Math.random()*.2,clr=cols[Math.floor(Math.random()*cols.length)];p.style.cssText=`left:50%;top:50%;--sx:${sx}px;--sy:${sy}px;--ex:${ex}px;--ey:${ey}px;--op:${op};background:${clr};animation-duration:${dur}s;animation-delay:${del}s`;c.appendChild(p);}}
@@ -290,12 +290,13 @@ $('#modal-desc').textContent = p.description || `${p.brand} ${p.model} (${p.year
 $('#modal-specs').innerHTML=Object.entries(p.specs||{}).map(([k,v])=>`<div class="spec-item"><span class="spec-label">${k}</span><span class="spec-value">${v}</span></div>`).join('');
 $('#modal-prices').innerHTML=`<div class="price-card"><div class="price-source">Officiel</div><div class="price-value">${has?fmtPriceCrossed(kt.official):fmtPrice(kt.official)}</div><a class="price-link" href="${p.sources?.official||'#'}" target="_blank">Voir</a></div>${has?`<div class="price-card primary"><div class="price-source">KiffTech <span class="discount-tag">-${kt.discount}%</span></div><div class="price-value">${fmtPrice(kt.kifftech)}</div><div style="color:#27d17f">Economisez ${fmtPrice(kt.savings)}</div><button class="price-link" style="margin-top:12px;background:linear-gradient(135deg,#27d17f,#1e6bff)" onclick="addToCart('${p.id}');closeModal()">Ajouter</button></div>`:''}`;
 const gallery = (p.images && p.images.length ? p.images : [previewImage(p)]);
-const m=$('#modal-media');m.innerHTML='';gallery.forEach((img,i)=>{const e=document.createElement('img');e.src=img;e.alt=`${p.brand} ${p.model} - visuel ${i + 1}`;e.style.display=i===0?'block':'none';m.appendChild(e);});
-const nav=$('#modal-media')&&$('#media-nav');if(nav){nav.innerHTML='';if(gallery.length>1)gallery.forEach((_,i)=>{const d=document.createElement('button');d.className='media-dot'+(i===0?' active':'');d.setAttribute('aria-label','Visuel '+(i+1));d.onclick=()=>showMedia(i);nav.appendChild(d);});}
+const galleryVideos = (p.videos && p.videos.length ? p.videos : []);
+const m=$('#modal-media');m.innerHTML='';gallery.forEach((img,i)=>{const e=document.createElement('img');e.src=img;e.alt=`${p.brand} ${p.model} - visuel ${i + 1}`;e.style.display=(i===0?'block':'none');m.appendChild(e);});galleryVideos.forEach((src,i)=>{const v=document.createElement('video');v.src=src;v.controls=true;v.preload='none';v.setAttribute('aria-label',`${p.brand} ${p.model} - vidéo ${i + 1}`);v.style.display='none';v.style.width='100%';m.appendChild(v);});
+const nav=$('#modal-media')&&$('#media-nav');if(nav){nav.innerHTML='';const total=gallery.length+galleryVideos.length;if(total>1){for(let i=0;i<total;i++){const d=document.createElement('button');d.className='media-dot'+(i===0?' active':'');d.setAttribute('aria-label','Média '+(i+1));d.onclick=()=>showMedia(i);nav.appendChild(d);}}}
 const mt=$('#modal-title');if(mt)mt.dataset.currentId=id;$('#modal-overlay').classList.add('visible');document.body.style.overflow='hidden';}
-function showMedia(idx){$$('#modal-media img').forEach((e,i)=>{e.style.display=i===idx?'block':'none'});$$('#media-nav button').forEach((d,i)=>{d.classList.toggle('active',i===idx)});}
+function showMedia(idx){$$('#modal-media img, #modal-media video').forEach((e,i)=>{e.style.display=i===idx?'block':'none';if(e.tagName==='VIDEO'&&i!==idx&&e.pause)e.pause();});$$('#media-nav button').forEach((d,i)=>{d.classList.toggle('active',i===idx)});}
 function closeModal(){$('#modal-overlay').classList.remove('visible');document.body.style.overflow='';}
-function showMedia(idx){$$('#modal-media img').forEach((e,i)=>{e.style.display=i===idx?'block':'none'});$$('#media-nav button').forEach((d,i)=>{d.classList.toggle('active',i===idx)});}
+function showMedia(idx){$$('#modal-media img, #modal-media video').forEach((e,i)=>{e.style.display=i===idx?'block':'none';if(e.tagName==='VIDEO'&&i!==idx&&e.pause)e.pause();});$$('#media-nav button').forEach((d,i)=>{d.classList.toggle('active',i===idx)});}
 
 // ============ SUB ============
 function toggleSub(){userContext.isSubscriber=!userContext.isSubscriber;userContext.tenureDays=userContext.isSubscriber?30:0;refreshKiffTechPrices();renderProducts();updateCartPanel();updateSubUI();toast(userContext.isSubscriber?'Abonnement active (1eur/jour)':'Desactive',userContext.isSubscriber?'success':'info');}
@@ -311,6 +312,7 @@ function initEvents(){
   $$('.filter-btn[data-brand]').forEach(b=>b.addEventListener('click',()=>{activeBrand=b.dataset.brand;$$('.filter-btn[data-brand]').forEach(x=>x.classList.toggle('active',x===b));applyFilters();}));
   on('#agent-btn', 'click', agentRender);
   on('#agent-input', 'keydown', e => { if (e.key === 'Enter') agentRender(); });
+  on('#sort-select', 'change', e => { activeSort = e.target.value; applyFilters(); });
   on('#btn-fetch', 'click', async () => { toast('Rechargement...', 'info'); await loadProducts(); });
   on('#btn-clear', 'click', () => { products = [...LOCAL_DB]; products.forEach(p => p.kifftech = calcKiffTechPrice(p.price.official)); filteredProducts = [...products]; applyFilters(); toast('Base locale restauree', 'success'); });
   const toggleSubHandler = () => { userContext.isSubscriber = !userContext.isSubscriber; userContext.tenureDays = userContext.isSubscriber ? 30 : 0; refreshKiffTechPrices(); renderProducts(); updateCartPanel(); updateSubUI(); toast(userContext.isSubscriber ? 'Abonnement active (1eur/jour)' : 'Desactive', userContext.isSubscriber ? 'success' : 'info'); };
@@ -333,6 +335,8 @@ function init(){
       const params = new URLSearchParams(window.location.search);
       const rayon = params.get('rayon');
       if (rayon && products.some(p => p.category === rayon)) activeCategory = rayon;
+      const sort = params.get('sort');
+      if (sort && ['brand', 'price-asc', 'price-desc'].includes(sort)) activeSort = sort;
     } catch (e) { console.warn('[KiffTech] rayon param ignoré:', e.message); }
     console.log('[KiffTech] products assigned, length:', products.length);
     products.forEach(p => { if (!p.kifftech) p.kifftech = calcKiffTechPrice(p.price.official); });

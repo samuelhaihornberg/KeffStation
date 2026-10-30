@@ -142,6 +142,15 @@ check('visuels produits officiels (batch smartphones)', () => {
     assert(st.size > 5000, `${img}: fichier trop petit`);
   }
 });
+check('tri catalogue + galerie multi-médias', () => {
+  const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.v2.js'), 'utf8');
+  assert(kapp.includes('price-asc') && kapp.includes('price-desc'), 'tri prix absent');
+  assert(kapp.includes("params.get('sort')"), '?sort absent');
+  assert(kapp.includes('galleryVideos'), 'support vidéo absent');
+  assert(kapp.includes('#modal-media video'), 'navigation vidéo absente');
+  const kcat = fs.readFileSync(path.join(ROOT, 'kifftech/catalog.html'), 'utf8');
+  assert(kcat.includes('id="sort-select"'), 'sélecteur tri absent');
+});
 check('bouton hard-refresh global + overlay', () => {
   const rjs = fs.readFileSync(path.join(ROOT, 'refresh.js'), 'utf8');
   assert(rjs.includes('caches.delete'), 'refresh.js: purge caches absente');
