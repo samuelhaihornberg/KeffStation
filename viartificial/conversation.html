@@ -64,11 +64,16 @@ body[data-min="1"] #bubble{display:inline-flex}
 <p class="notice">💬 Bulle interne à cette PWA — jamais hors de l’app, pas de bulle Android système.</p>
 <p class="notice" id="engineBanner" role="status">⚙️ Moteur : aucun — conversation impossible pour l’instant.</p>
 <details class="notice" id="engineCfg"><summary>⚙️ Réglages</summary>
-<label>Fournisseur <select id="pProvider"><option value="none">Aucun (désactivé)</option><option value="ollama">Ollama local (gratuit, sans clé)</option><option value="custom">Endpoint compatible OpenAI (saisi par toi)</option><option value="webllm">WebLLM navigateur (non intégré)</option></select></label>
+<label>Fournisseur <select id="pProvider"><option value="none">Aucun (désactivé)</option><option value="ollama">Ollama local (gratuit, sans clé)</option><option value="custom">Endpoint compatible OpenAI (saisi par toi)</option><option value="webllm">WebLLM local (WebGPU, ~376 Mo)</option></select></label>
 <label>Adresse <input id="pUrl" inputmode="url" placeholder="http://localhost:11434"></label>
 <label>Modèle <input id="pModel" placeholder="llama3.2"></label>
 <label>Clé éventuelle (session seule, jamais sauvegardée) <input id="pKey" type="password" autocomplete="off" placeholder="optionnel, mémoire vive uniquement"></label>
 <span><button id="pSave" type="button">Enregistrer</button> <button id="pTest" type="button">Tester</button></span>
+<label>Modèle local (WebLLM, moteur commun à tous les SuperBots) <select id="pLocalModel"><option value="SmolLM2-360M-Instruct-q4f16_1-MLC">SmolLM2 360M (~376 Mo VRAM)</option><option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B (~879 Mo VRAM)</option></select></label>
+<label><input id="pConsent" type="checkbox" style="min-height:44px;width:44px"> J’accepte le téléchargement du modèle (taille affichée, cache navigateur, rien d’envoyé).</label>
+<span><button id="pLoad" type="button">Télécharger + charger</button> <button id="pUnload" type="button">Décharger (libère la mémoire, réduit la chauffe)</button></span>
+<span id="pProg" role="status"></span>
+<span>Stratégie : WebGPU → local ; sinon moteur distant (Ollama/endpoint) ou texte seul. Pas de « CPU virtuel » : les navigateurs ne commutent pas CPU/GPU en natif. Une tentative, jamais de boucle.</span>
 <span id="pMsg" role="status"></span>
 <span id="capsLine"></span>
 <span>Testé : conteneur Linux (HTTP 200, contrôles statiques). Non testé sur appareils physiques.</span>
@@ -106,6 +111,7 @@ body[data-min="1"] #bubble{display:inline-flex}
 <script src="./memory.js"></script>
 <script src="./actions.js"></script>
 <script src="./capabilities.js"></script>
+<script src="./local-engine.js"></script>
 <script>
 var q=(new URLSearchParams(location.search).get('bot')||'geeko').toLowerCase();
 var body=document.body,thread=document.getElementById('thread');
@@ -130,9 +136,12 @@ function add(who,text){var d=document.createElement('div');d.className='msg '+(w
 var eng=ViaProviders.load();
 function paintEngine(){var s=ViaProviders.status(eng);document.getElementById('engineLine').textContent='Moteur : '+s.label;var bn=document.getElementById('engineBanner');bn.textContent=s.ok?('⚙️ '+s.label+' — vérification…'):('⚙️ Moteur : aucun — conversation impossible.');document.getElementById('pProvider').value=eng.provider;document.getElementById('pUrl').value=eng.baseUrl;document.getElementById('pModel').value=eng.model;
 if(eng.provider==='ollama'){var c=new AbortController();var t=setTimeout(function(){c.abort();},10000);ViaProviders.ping(eng,c.signal).then(function(){var d=new Date();var hh=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);bn.textContent='🟢 En ligne (vérifié '+hh+') — '+eng.model+' : les réponses viennent du moteur.';document.getElementById('engineLine').textContent='Moteur : '+eng.model+' (vérifié)';}).catch(function(e){bn.textContent='🔴 Hors ligne : '+(e&&e.message?e.message:'moteur injoignable');document.getElementById('engineLine').textContent='Moteur : injoignable';}).finally(function(){clearTimeout(t);});}
+else if(eng.provider==='webllm'){try{var sm=ViaLocalEngine.summary();if(sm.phase==='ready'||sm.phase==='generating'){bn.textContent='🟢 En ligne — '+sm.model+' (WebGPU local, moteur réellement chargé).';document.getElementById('engineLine').textContent='Moteur : '+sm.model+' (WebGPU)';}else{bn.textContent='🟡 WebLLM '+sm.phase+' ('+eng.model+') : accord + « Télécharger + charger ».';}}catch(e){bn.textContent='🟡 WebLLM configuré : moteur non chargé.';}}
 else if(eng.provider==='custom'){bn.textContent='🟡 Configuré, non vérifié — lance « Tester » dans Réglages.';}}
 paintEngine();
-document.getElementById('pSave').onclick=function(){eng={provider:document.getElementById('pProvider').value,baseUrl:document.getElementById('pUrl').value.trim(),model:document.getElementById('pModel').value.trim()||'llama3.2'};ViaProviders.save(eng);paintEngine();document.getElementById('pMsg').textContent='Config enregistrée (sans clé).';};
+document.getElementById('pSave').onclick=function(){var pv=document.getElementById('pProvider').value;eng={provider:pv,baseUrl:document.getElementById('pUrl').value.trim(),model:pv==='webllm'?document.getElementById('pLocalModel').value:(document.getElementById('pModel').value.trim()||'llama3.2')};ViaProviders.save(eng);paintEngine();document.getElementById('pMsg').textContent='Config enregistrée (sans clé).';};
+document.getElementById('pLoad').onclick=function(){if(!document.getElementById('pConsent').checked){document.getElementById('pProg').textContent='Accord requis : coche la case avant le téléchargement.';return;}var mid=document.getElementById('pLocalModel').value;eng={provider:'webllm',baseUrl:'',model:mid};ViaProviders.save(eng);document.getElementById('pProvider').value='webllm';document.getElementById('pProg').textContent='Démarrage…';ViaLocalEngine.load(mid,function(s){document.getElementById('pProg').textContent='Progression : '+s.progress+' % — '+s.detail;}).then(function(){document.getElementById('pProg').textContent='Modèle chargé en mémoire : '+mid+' (WebGPU).';paintEngine();}).catch(function(e){document.getElementById('pProg').textContent='Échec : '+(e&&e.message?e.message:e)+((e&&e.code==='NO_WEBGPU')?' Appareil non compatible avec le modèle local : utilise Ollama/endpoint ou texte seul.':'');paintEngine();});};
+document.getElementById('pUnload').onclick=function(){ViaLocalEngine.unload();document.getElementById('pProg').textContent='Modèle déchargé.';paintEngine();};
 document.getElementById('pTest').onclick=function(){var k=document.getElementById('pKey').value;document.getElementById('pMsg').textContent='Test en cours…';var c=new AbortController();var t=setTimeout(function(){c.abort();},15000);ViaProviders.chat(eng,b,[{role:'user',content:'Dis juste : test OK.'}],c.signal,k||null).then(function(r){document.getElementById('pMsg').textContent='Test réussi : '+r.slice(0,80);}).catch(function(e){document.getElementById('pMsg').textContent='Échec : '+e.message;}).finally(function(){clearTimeout(t);});};
 add('bot',b.greeting+' — '+cfg.disclaimer);
 thread.lastChild.querySelector('.meta').textContent=b.name+' — accueil prédéfini (pas une réponse IA)';

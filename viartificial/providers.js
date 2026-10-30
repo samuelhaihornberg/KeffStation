@@ -20,7 +20,7 @@
   }
   function status(cfg) {
     if (!cfg || cfg.provider === 'none') return { ok: false, label: 'Aucun moteur IA configuré' };
-    if (cfg.provider === 'webllm') return { ok: false, label: 'WebLLM non intégré (voir Moteurs linguistiques)' };
+    if (cfg.provider === 'webllm') return { ok: true, label: 'WebLLM local (WebGPU) — ' + (cfg.model || 'SmolLM2 360M') };
     if (cfg.provider === 'ollama') return { ok: true, label: 'Ollama local — ' + cfg.model };
     return { ok: true, label: 'Endpoint personnalisé — ' + cfg.model };
   }
@@ -43,7 +43,11 @@
   }
   async function chat(cfg, bot, history, signal, sessionKey) {
     if (cfg.provider === 'none') throw err('NO_ENGINE', 'Aucun moteur IA configuré. Choisis Ollama local ou un endpoint ci-dessous.');
-    if (cfg.provider === 'webllm') throw err('NOT_AVAILABLE', 'WebLLM non intégré à cette PWA. Voir la page Moteurs linguistiques.');
+    if (cfg.provider === 'webllm') {
+      if (!global.ViaLocalEngine) throw err('NOT_LOADED', 'Moteur local non chargé : recharge la page.');
+      global.ViaLocalEngine.setModel(cfg.model);
+      return await global.ViaLocalEngine.chat(bot, history, { signal: signal });
+    }
     var base = (cfg.baseUrl || '').replace(/\/$/, '');
     var messages = [{ role: 'system', content: sysPrompt(bot) }].concat(history);
     var headers = { 'Content-Type': 'application/json' };
