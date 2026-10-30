@@ -131,6 +131,8 @@ check('agent IA : référence exacte + previews + prix barrés', () => {
   assert(/let discount=10/.test(kapp), 'remise de base -10% absente');
   const kcat = fs.readFileSync(path.join(ROOT, 'kifftech/catalog.html'), 'utf8');
   assert(kcat.includes('id="agent-input"') && kcat.includes('id="agent-result"'), 'panneau agent absent du catalogue');
+  assert(kapp.includes('previewImage(p)'), 'galerie modale sans secours visuel');
+  assert(kapp.includes('p.description ||'), 'description partenaire ignorée en modale');
 });
 check('bouton hard-refresh global + overlay', () => {
   const rjs = fs.readFileSync(path.join(ROOT, 'refresh.js'), 'utf8');
