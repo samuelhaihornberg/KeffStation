@@ -16,7 +16,7 @@ on:
       persona:
         description: 'Type de compte (mediapartners|advertisers)'
         required: false
-        default: 'mediapartners'
+        default: 'advertisers'
 
 permissions:
   contents: write
