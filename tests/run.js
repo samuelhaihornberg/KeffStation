@@ -146,6 +146,8 @@ check('20 produits par rayon (smartphones)', () => {
   const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.v2.js'), 'utf8');
   const n = (kapp.match(/category:'Smartphones'/g) || []).length;
   assert(n === 20, `smartphones: ${n} != 20`);
+  const na = (kapp.match(/category:'Accessories'/g) || []).length;
+  assert(na === 100, `accessories: ${na} != 100`);
 });
 check('tri catalogue + galerie multi-médias', () => {
   const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.v2.js'), 'utf8');
