@@ -137,7 +137,7 @@ check('agent IA : référence exacte + previews + prix barrés', () => {
 check('visuels produits officiels (batch smartphones)', () => {
   const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.v2.js'), 'utf8');
   for (const [id, img] of [['sp1', 'img/sp1.jpg'], ['sp2', 'img/sp2.png'], ['sp4', 'img/sp4.png'], ['sp6', 'img/sp6.jpg'], ['sp8', 'img/sp8.jpg'], ['tb1', 'img/tb1.jpg'], ['tb3', 'img/tb3.jpg'], ['tb6', 'img/tb6.png'], ['tb8', 'img/tb8.jpg'], ['cp1', 'img/cp1.jpg'], ['cp3', 'img/cp3.jpg'], ['cp6', 'img/cp6.jpg'], ['cp9', 'img/cp9.jpg'], ['aw3', 'img/aw3.jpg'], ['aw9', 'img/aw9.jpg'], ['aw10', 'img/aw10.jpg'], ['vr1', 'img/vr1.jpg'], ['vr2', 'img/vr2.jpg'], ['vr5', 'img/vr5.jpg'], ['ce7', 'img/ce7.jpg'], ['rb2', 'img/rb2.jpg'], ['rb4', 'img/rb4.jpg']]) {
-    assert(kapp.includes(`{id:'${id}',images:['./${img}']`), `${id}: images[] absent`);
+    assert(kapp.includes(`{id:'${id}',images:['./${img}'`), `${id}: images[] absent`);
     const st = fs.statSync(path.join(ROOT, 'kifftech', img));
     assert(st.size > 5000, `${img}: fichier trop petit`);
   }
