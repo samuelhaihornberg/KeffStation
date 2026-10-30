@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#b84dff">
+<meta name="description" content="Conversation MSN SuperBots Familliya — bulle interne PWA">
+<link rel="manifest" href="./manifest.json">
+<title>Conversation — SuperBots Familliya</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{color-scheme:dark}html,body{height:100%;background:#070816;color:#f4f6ff;font:16px/1.55 system-ui,sans-serif}
+.app{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;max-width:1100px;margin:0 auto;width:100%}
+header.top{padding:12px 16px;background:rgba(10,12,34,.9);border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:20;flex-wrap:wrap}
+header.top a{color:#ffd23f;text-decoration:none;border:1px solid rgba(255,210,63,.5);border-radius:999px;padding:10px 14px;min-height:44px;display:inline-flex;align-items:center;font-size:.85rem}
+header.top h1{font-size:1rem;flex:1;min-width:140px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.toolbar button{min-height:44px;padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font-size:.85rem}
+.toolbar button[aria-pressed="true"]{border-color:#ffd23f;color:#ffd23f}
+.notice{margin:12px 16px 0;padding:10px 14px;border:1px solid rgba(255,210,63,.4);border-radius:12px;color:#d8c98a;font-size:.82rem;background:rgba(255,210,63,.06)}
+.stage{flex:1;display:flex;gap:16px;padding:16px;align-items:flex-start}
+.activity{flex:1;min-width:0;border:1px dashed rgba(255,255,255,.2);border-radius:14px;padding:16px;color:#b9c0e6}
+.activity h2{font-size:1rem;color:#fff;margin-bottom:8px}
+.msn{width:min(420px,100%);border:1px solid rgba(184,77,255,.6);border-radius:14px;overflow:hidden;background:#0d1026;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(184,77,255,.25)}
+.msn-title{display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(135deg,#2a1b4d,#4d1b3a)}
+.msn-title .avatar{font-size:1.8rem}
+.msn-title .who{flex:1;min-width:0}
+.msn-title .who strong{display:block;font-size:.95rem}
+.status{display:flex;align-items:center;gap:6px;font-size:.78rem;color:#9fe8b8}
+.dot{width:10px;height:10px;border-radius:50%;background:#27d17f;flex-shrink:0}
+.winbtns{display:flex;gap:6px}
+.winbtns button{min-width:44px;min-height:44px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font-size:1rem}
+#thread{padding:12px;display:flex;flex-direction:column;gap:8px;min-height:220px;max-height:46vh;overflow-y:auto}
+.msg{border-radius:12px;padding:10px 12px;max-width:92%;font-size:.95rem}
+.msg.bot{align-self:flex-start;background:rgba(255,255,255,.07);border:1px solid rgba(184,77,255,.4)}
+.msg.me{align-self:flex-end;background:rgba(184,77,255,.25)}
+.msg .meta{display:block;font-size:.72rem;color:#b9c0e6;margin-bottom:4px}
+form.composer{display:flex;gap:8px;padding:10px;border-top:1px solid rgba(255,255,255,.12);background:#070816}
+textarea{flex:1;min-height:48px;max-height:120px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:#12142e;color:#fff;padding:10px 12px;font-size:1rem;resize:vertical}
+.composer button{min-height:48px;min-width:56px;border-radius:12px;border:1px solid #b84dff;background:linear-gradient(135deg,#b84dff,#ff3d9a);color:#fff;font-weight:700;font-size:1.1rem}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:2px solid #ffd23f;outline-offset:2px}
+body[data-mode="fullscreen"] .activity{display:none}
+body[data-mode="fullscreen"] .msn{width:100%}
+body[data-mode="fullscreen"] #thread{max-height:60vh}
+body[data-mode="side"] .stage{flex-direction:row}
+body[data-mode="side"] .msn{position:sticky;top:70px}
+body[data-min="1"] .msn{display:none}
+#bubble{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:30;display:none;align-items:center;gap:8px;min-height:56px;padding:12px 18px;border-radius:999px;border:1px solid #ffd23f;background:#1a1440;color:#ffd23f;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+body[data-min="1"] #bubble{display:inline-flex}
+#bubble small{font-weight:400;color:#b9c0e6}
+@media (max-width:720px){.stage{flex-direction:column}body[data-mode="side"] .stage{flex-direction:column}body[data-mode="side"] .msn{position:static;width:100%}.msn{width:100%}#thread{max-height:38vh}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body data-mode="fullscreen" data-min="0">
+<div class="app">
+<header class="top"><a href="./">← Bots</a><h1 id="title">Conversation</h1><a href="../">Hub</a></header>
+<div class="toolbar" role="toolbar" aria-label="Modes d'affichage" style="padding:10px 16px 0">
+<button id="bFull" aria-pressed="true">⛶ Plein écran</button>
+<button id="bSide" aria-pressed="false">◧ Panneau latéral</button>
+<button id="bMin" aria-pressed="false">_ Réduire</button>
+</div>
+<p class="notice">💬 Bulle <strong>interne à cette PWA</strong> uniquement : visible dans ViArtificial Labs, jamais hors de l'app. Ce n'est <strong>pas</strong> une bulle Android par-dessus les autres applications (aucune superposition système, aucun contrôle d'autres apps).</p>
+<p class="notice" id="engineBanner" role="status">⚙️ Aucun moteur IA configuré — conversation impossible pour l'instant (aucune simulation).</p>
+<details class="notice" id="engineCfg"><summary>Moteur IA : configurer (local, sans abonnement — OpenAI non imposé)</summary>
+<label>Fournisseur <select id="pProvider"><option value="none">Aucun (désactivé)</option><option value="ollama">Ollama local (gratuit, sans clé)</option><option value="custom">Endpoint compatible OpenAI (saisi par toi)</option><option value="webllm">WebLLM navigateur (non intégré)</option></select></label>
+<label>Adresse <input id="pUrl" inputmode="url" placeholder="http://localhost:11434"></label>
+<label>Modèle <input id="pModel" placeholder="llama3.2"></label>
+<label>Clé éventuelle (session seule, jamais sauvegardée) <input id="pKey" type="password" autocomplete="off" placeholder="optionnel, mémoire vive uniquement"></label>
+<span><button id="pSave" type="button">Enregistrer</button> <button id="pTest" type="button">Tester</button></span>
+<span id="pMsg" role="status"></span>
+<span>Hébergement statique (GitHub Pages) : si ton endpoint exige une clé serveur, passe par un proxy adapté que tu opères — ne colle jamais de secret ici durablement, ni dans le dépôt, ni dans les logs.</span>
+</details>
+<style>.enginebar{display:flex;gap:8px;align-items:center;padding:8px 12px;font-size:.8rem;color:#b9c0e6;border-top:1px solid rgba(255,255,255,.1)}#cancel{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ff3d9a;background:transparent;color:#ff3d9a}#engineCfg label{display:block;margin:6px 0}#engineCfg input,#engineCfg select{min-height:44px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#12142e;color:#fff;padding:6px 10px;width:100%}#engineCfg button{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f;margin:4px 4px 0 0}</style>
+<details class="notice" id="actBox"><summary>⚒️ Actions (outils explicitement connectés)</summary>
+<span>Capacités réelles : fichiers PWA, diagnostic, carnet, export. Le reste exige un service/compagnon connecté et reste marqué indisponible. Sensible (achat, suppression importante, publication, message externe) : validation explicite exigée avant exécution.</span>
+<span id="actList"></span>
+<span id="actState" role="status">Aucune action en cours.</span>
+<span id="actResult"></span>
+<span><button id="actStop" type="button" hidden>■ Arrêter</button> <button id="actTake" type="button" hidden>Reprendre la main</button></span>
+</details>
+<details class="notice" id="memBox"><summary>📒 Carnet local de ce SuperBot (consulter, corriger, exporter, supprimer)</summary>
+<span>Après fermeture : carnet, préférences, projets, objectifs et réglages restent sur cet appareil (localStorage). Service actif requis : réponses IA et test moteur. Rien n’est enregistré en arrière-plan : le carnet démarre vide.</span>
+<span id="progLine" role="status"></span>
+<span id="setBox" hidden>Réglages indépendants — Compétence <select id="sSkill"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select> Initiative <select id="sInit"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select> Conseils <select id="sAdvice"><option value="rare">rares</option><option value="equilibre">équilibrés</option><option value="frequent">fréquents</option></select> <input id="sPersona" placeholder="nuance de personnalité…" style="width:100%"> <button id="sSave" type="button">Enregistrer réglages</button></span>
+<span><select id="mType"><option value="preference">préférence explicite</option><option value="project">projet</option><option value="goal">objectif</option><option value="memory">souvenir commun</option><option value="note">note</option></select> <input id="mText" placeholder="À enregistrer explicitement…" style="width:100%"></span>
+<span><button id="mAdd" type="button">Enregistrer (confirmé)</button> <button id="mExport" type="button">Exporter JSON</button> <button id="mWipe" type="button">Tout supprimer</button></span>
+<span><strong>Confirmé</strong> (vérifié par toi) :</span><span id="mConf">— vide —</span>
+<span><strong>Proposé</strong> (idée du personnage, à valider) :</span><span id="mProp">— vide —</span>
+</details>
+<div class="stage">
+<section class="activity" aria-label="Activité à côté du chat"><h2>📝 Activité en cours</h2><p id="actHint">Passe en « Panneau latéral » pour utiliser ce panneau à côté de la conversation (ex. notes, plan GuideoPlan). Tout reste dans la PWA.</p><ul><li>Note 1 : …</li><li>Note 2 : …</li></ul></section>
+<section class="msn" id="msn" aria-label="Fenêtre de conversation style MSN">
+<div class="msn-title"><span class="avatar" id="avatar">🤖</span><span class="who"><strong id="who">…</strong><span class="status"><span class="dot" aria-hidden="true"></span><span id="status">En ligne (démo locale, simulé)</span></span></span><span class="winbtns"><button id="wMin" aria-label="Réduire la fenêtre">_</button><button id="wFull" aria-label="Bascule plein écran">⛶</button></span></div>
+<div id="thread" role="log" aria-live="polite" aria-label="Historique"></div>
+<form class="composer" id="form"><textarea id="input" rows="1" placeholder="Écris ton message… (Entrée = envoyer, Maj+Entrée = ligne)" aria-label="Message"></textarea><button type="submit" aria-label="Envoyer">➤</button></form>
+<div class="enginebar"><span id="engineLine">Moteur : aucun</span><button id="cancel" type="button" hidden>✕ Annuler la réponse</button></div>
+</section>
+</div>
+</div>
+<button id="bubble" aria-label="Rouvrir la conversation">💬 <span id="bubbleName">Chat</span> <small>interne PWA</small></button>
+<script src="./providers.js"></script>
+<script src="./memory.js"></script>
+<script src="./actions.js"></script>
+<script>
+var q=(new URLSearchParams(location.search).get('bot')||'geeko').toLowerCase();
+var body=document.body,thread=document.getElementById('thread');
+function setMode(m){body.dataset.mode=m;document.getElementById('bFull').setAttribute('aria-pressed',m==='fullscreen');document.getElementById('bSide').setAttribute('aria-pressed',m==='side');try{localStorage.setItem('msn-mode',m);}catch(e){}}
+function setMin(v){body.dataset.min=v?'1':'0';document.getElementById('bMin').setAttribute('aria-pressed',!!v);if(!v)document.getElementById('input').focus();}
+document.getElementById('bFull').onclick=function(){setMin(false);setMode('fullscreen');};
+document.getElementById('bSide').onclick=function(){setMin(false);setMode('side');};
+document.getElementById('bMin').onclick=function(){setMin(true);};
+document.getElementById('wMin').onclick=function(){setMin(true);};
+document.getElementById('wFull').onclick=function(){setMin(false);setMode(body.dataset.mode==='fullscreen'?'side':'fullscreen');};
+document.getElementById('bubble').onclick=function(){setMin(false);};
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&body.dataset.min!=='1')setMin(true);});
+try{var sm=localStorage.getItem('msn-mode');if(sm==='side'||sm==='fullscreen')setMode(sm);}catch(e){}
+fetch('./bots.json').then(function(r){return r.json();}).then(function(cfg){
+var b=cfg.bots[0];cfg.bots.forEach(function(x){if(x.id===q)b=x;});
+document.getElementById('title').textContent=b.avatar+' '+b.name+' — '+b.specialty;
+document.getElementById('avatar').textContent=b.avatar;
+document.getElementById('who').textContent=b.name;
+document.getElementById('bubbleName').textContent=b.name;
+document.getElementById('status').textContent='En ligne (démo locale, personnage simulé)';
+function add(who,text){var d=document.createElement('div');d.className='msg '+(who==='me'?'me':'bot');var s=document.createElement('span');s.className='meta';s.textContent=who==='me'?'Moi':b.name+' (simulé)';d.appendChild(s);d.appendChild(document.createTextNode(text));if(who==='bot'){var t=String(text);if(t.indexOf('aucun moteur')===-1&&t.indexOf('annul')===-1&&t.indexOf('Erreur')===-1&&t.indexOf('écrit…')===-1){var pb=document.createElement('button');pb.type='button';pb.textContent='📌 Carnet';pb.setAttribute('aria-label','Proposer ce message au carnet (à valider)');pb.style.cssText='margin-left:8px;min-height:44px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f';pb.onclick=function(){ViaMemory.add(q,'memory',b.name+' : '+text,'proposed');renderMem();pb.textContent='📌 Proposé ✓';};d.appendChild(pb);}}thread.appendChild(d);thread.scrollTop=thread.scrollHeight;}
+var eng=ViaProviders.load();
+function paintEngine(){var s=ViaProviders.status(eng);document.getElementById('engineLine').textContent='Moteur : '+s.label;var bn=document.getElementById('engineBanner');bn.textContent=s.ok?('⚙️ '+s.label+' — les réponses viennent du moteur, pas d’une simulation.'):('⚙️ Aucun moteur IA configuré — conversation impossible pour l’instant (aucune simulation).');document.getElementById('pProvider').value=eng.provider;document.getElementById('pUrl').value=eng.baseUrl;document.getElementById('pModel').value=eng.model;}
+paintEngine();
+document.getElementById('pSave').onclick=function(){eng={provider:document.getElementById('pProvider').value,baseUrl:document.getElementById('pUrl').value.trim(),model:document.getElementById('pModel').value.trim()||'llama3.2'};ViaProviders.save(eng);paintEngine();document.getElementById('pMsg').textContent='Config enregistrée (sans clé).';};
+document.getElementById('pTest').onclick=function(){var k=document.getElementById('pKey').value;document.getElementById('pMsg').textContent='Test en cours…';var c=new AbortController();var t=setTimeout(function(){c.abort();},15000);ViaProviders.chat(eng,b,[{role:'user',content:'Dis juste : test OK.'}],c.signal,k||null).then(function(r){document.getElementById('pMsg').textContent='Test réussi : '+r.slice(0,80);}).catch(function(e){document.getElementById('pMsg').textContent='Échec : '+e.message;}).finally(function(){clearTimeout(t);});};
+add('bot',b.greeting+' — '+cfg.disclaimer);
+var form=document.getElementById('form'),input=document.getElementById('input'),cancelBtn=document.getElementById('cancel'),hist=[],pending=null;
+input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit();}});
+function setBusy(v){cancelBtn.hidden=!v;form.querySelector('button[type="submit"]').disabled=v;input.disabled=v;if(!v)input.focus();}
+cancelBtn.onclick=function(){if(pending)pending.abort();};
+form.addEventListener('submit',function(e){e.preventDefault();var v=input.value.trim();if(!v||pending)return;add('me',v);input.value='';
+if(!ViaProviders.status(eng).ok){add('bot','Je ne peux pas répondre : aucun moteur IA n’est configuré (et je ne simule pas de connexion). Ouvre « Moteur IA : configurer » ci-dessus — Ollama local suffit, sans abonnement.');return;}
+var wait=document.createElement('div');wait.className='msg bot';wait.textContent=b.name+' écrit… (réponse en cours — tu peux annuler)';thread.appendChild(wait);thread.scrollTop=thread.scrollHeight;setBusy(true);
+var ctl=new AbortController();pending=ctl;var key=document.getElementById('pKey').value||null;hist.push({role:'user',content:v});
+ViaProviders.chat(eng,b,hist.slice(-10),ctl.signal,key).then(function(r){wait.remove();add('bot',r);hist.push({role:'assistant',content:r});}).catch(function(err2){wait.remove();if(err2&&err2.code==='ABORTED'){add('bot','Réponse annulée à ta demande.');}else{add('bot','Erreur : '+(err2?err2.message:'moteur indisponible'));}}).finally(function(){pending=null;setBusy(false);});});
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function renderMem(){var list=ViaMemory.entries(q);var c=list.filter(function(e){return e.status==='confirmed';});var pp=list.filter(function(e){return e.status!=='confirmed';});
+function line(e){return '<div>['+e.type+'] '+esc(e.text)+' <button type="button" data-act="ok" data-id="'+e.id+'">Valider</button> <button type="button" data-act="ed" data-id="'+e.id+'">Corriger</button> <button type="button" data-act="del" data-id="'+e.id+'">Supprimer</button></div>';}
+document.getElementById('mConf').innerHTML=c.length?c.map(line).join(''):'— vide —';
+document.getElementById('mProp').innerHTML=pp.length?pp.map(line).join(''):'— vide —';
+var pr=ViaMemory.progression(q);document.getElementById('progLine').textContent='Progression fondée sur '+pr.total+' expériences enregistrées ('+pr.confirmed+' confirmées, '+pr.proposed+' proposées) — rien d’autre.';
+var isGG=(q==='geeko'||q==='geekette');document.getElementById('setBox').hidden=!isGG;
+if(isGG){var st=ViaMemory.settings(q);document.getElementById('sSkill').value=String(st.skill);document.getElementById('sInit').value=String(st.initiative);document.getElementById('sAdvice').value=st.advice;document.getElementById('sPersona').value=st.persona||'';}}
+document.getElementById('memBox').addEventListener('click',function(e){var t=e.target;if(!t.dataset||!t.dataset.act)return;var id=t.dataset.id;
+if(t.dataset.act==='del')ViaMemory.remove(q,id);
+else if(t.dataset.act==='ok')ViaMemory.confirm(q,id);
+else if(t.dataset.act==='ed'){var cur=null;ViaMemory.entries(q).forEach(function(x){if(x.id===id)cur=x;});var nv=prompt('Corriger l’entrée :',cur?cur.text:'');if(nv!==null)ViaMemory.correct(q,id,nv);}
+renderMem();});
+document.getElementById('mAdd').onclick=function(){var t=document.getElementById('mText').value;if(!t.trim())return;ViaMemory.add(q,document.getElementById('mType').value,t,'confirmed');document.getElementById('mText').value='';renderMem();};
+document.getElementById('mExport').onclick=function(){var blob=new Blob([ViaMemory.exportBot(q)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='carnet-'+q+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},2000);};
+document.getElementById('mWipe').onclick=function(){if(confirm('Supprimer tout le carnet de ce SuperBot ?')){ViaMemory.clearBot(q);renderMem();}};
+document.getElementById('sSave').onclick=function(){ViaMemory.saveSettings(q,{skill:document.getElementById('sSkill').value,initiative:document.getElementById('sInit').value,advice:document.getElementById('sAdvice').value,persona:document.getElementById('sPersona').value});renderMem();};
+var actCtl=null;
+function renderActs(){var el=document.getElementById('actList');el.innerHTML='';ViaActions.TOOLS.forEach(function(t){var d=document.createElement('div');var ok=ViaActions.available(t);d.textContent=(ok?'🟢 ':'🔴 ')+t.title+' — '+t.desc+' [accès : '+t.perms+']'+(t.sensitive?' [SENSIBLE : validation exigée]':'')+((t.needs&&!ok)?' [manquant : '+t.needs+']':'');var rb=document.createElement('button');rb.type='button';rb.textContent=ok?'Exécuter':'Indisponible';rb.style.cssText='margin-left:8px;min-height:44px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f';rb.disabled=!ok;rb.onclick=function(){execAct(t);};d.appendChild(rb);el.appendChild(d);});}
+function actUI(state,res){document.getElementById('actState').textContent='État : '+state;if(res!==undefined)document.getElementById('actResult').textContent='Résultat réel : '+res;var r=(state==='en cours');document.getElementById('actStop').hidden=!r;document.getElementById('actTake').hidden=!r;}
+document.getElementById('actStop').onclick=function(){if(actCtl)actCtl.abort();};
+document.getElementById('actTake').onclick=function(){if(actCtl)actCtl.abort();actUI('repris en main','Tu as repris la main : action stoppée, écris directement dans le champ message.');input.focus();};
+function execAct(t){if(actCtl)return;if(t.sensitive){if(!confirm('VALIDATION EXIGÉE — « '+t.title+' » est sensible (achat, suppression importante, publication ou message externe). Confirmer ?')){actUI('refusée','Validation refusée : rien exécuté.');return;}}
+var txt='';if(t.id==='ask'){txt=prompt('Question pour le moteur (service connecté requis) :','');if(!txt)return;}
+actCtl=new AbortController();actUI('en cours');add('bot','⚒️ Action « '+t.title+' » — objectif : '+t.desc);
+ViaActions.run(t.id,{bot:q,botObj:b,text:txt,title:b.name+' — '+t.title,key:document.getElementById('pKey').value||null,signal:actCtl.signal},function(st,msg){document.getElementById('actState').textContent='État : en cours — '+msg;}).then(function(r){actUI('terminée',r);add('bot','⚒️ « '+t.title+' » terminé : '+r);}).catch(function(e){if(e&&e.name==='AbortError')actUI('arrêtée','Arrêtée à ta demande : reprends la main.');else actUI('erreur',(e&&e.message)||'échec');}).finally(function(){actCtl=null;document.getElementById('actStop').hidden=true;document.getElementById('actTake').hidden=true;});}
+renderActs();
+renderMem();
+input.focus();
+}).catch(function(){document.getElementById('who').textContent='Hors-ligne : recharge en ligne une fois.';});
+</script>
+</body>
+</html>
