@@ -1,5 +1,5 @@
-const CACHE='kifftech-agent-v8';
-const ASSETS=['./','./index.html','./rayons.html','./catalog.html','./app.v2.js','./manifest.json','./img/sp1.jpg','./img/sp2.png','./img/sp4.png','./img/sp6.jpg','./img/sp8.jpg','./img/tb1.jpg','./img/tb3.jpg','./img/tb6.png','./img/tb8.jpg','./img/cp1.jpg','./img/cp3.jpg','./img/cp6.jpg','./img/cp9.jpg','./img/aw3.jpg','./img/aw9.jpg','./img/aw10.jpg'];
+const CACHE='kifftech-agent-v9';
+const ASSETS=['./','./index.html','./rayons.html','./catalog.html','./app.v2.js','./manifest.json','./img/sp1.jpg','./img/sp2.png','./img/sp4.png','./img/sp6.jpg','./img/sp8.jpg','./img/tb1.jpg','./img/tb3.jpg','./img/tb6.png','./img/tb8.jpg','./img/cp1.jpg','./img/cp3.jpg','./img/cp6.jpg','./img/cp9.jpg','./img/aw3.jpg','./img/aw9.jpg','./img/aw10.jpg','./img/vr1.jpg','./img/vr2.jpg','./img/vr5.jpg'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))));self.clients.claim()});
 self.addEventListener('fetch',e=>{
