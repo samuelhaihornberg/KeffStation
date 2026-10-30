@@ -140,6 +140,24 @@ check('bouton hard-refresh global + overlay', () => {
   assert(/refresh=\$\{Date\.now\(\)\}/.test(appJs), 'overlay: cache-buster absent');
 });
 
+check('impact.com : connecteur sans secrets exposés', () => {
+  const sync = fs.readFileSync(path.join(ROOT, 'scripts/sync-impact.js'), 'utf8');
+  assert(sync.includes('https://api.impact.com'), 'base API officielle absente');
+  assert(sync.includes('/Mediapartners/') && sync.includes('/Catalogs'), 'endpoints catalogues absents');
+  assert(sync.includes('process.env.IMPACT_ACCOUNT_SID') && sync.includes('process.env.IMPACT_AUTH_TOKEN'), 'lecture via env absente');
+  assert(sync.includes('[REDACTED]'), 'redaction logs absente');
+  assert(sync.includes('le dernier catalogue valide est conservé'), 'garde-fou catalogue vide absent');
+  assert(!/['"][A-Za-z0-9+/=]{24,}['"]/.test(sync.replace(/Basic /g, '')), 'secret potentiel en clair dans le script');
+  const wf = fs.readFileSync(path.join(ROOT, '.github/workflows/sync-impact.yml'), 'utf8');
+  assert(wf.includes('workflow_dispatch'), 'lancement manuel absent');
+  assert(wf.includes('secrets.IMPACT_ACCOUNT_SID') && wf.includes('secrets.IMPACT_AUTH_TOKEN'), 'secrets non utilisés');
+  const kapp = fs.readFileSync(path.join(ROOT, 'kifftech/app.v2.js'), 'utf8');
+  assert(kapp.includes('loadPartnerProducts'), 'fusion partenaire absente');
+  assert(kapp.includes('if(!p.partner)'), 'prix partenaires non protégés');
+  const ray = fs.readFileSync(path.join(ROOT, 'kifftech/rayons.html'), 'utf8');
+  assert(ray.includes('impact-products.json'), 'carte Partenaires absente des rayons');
+});
+
 if (failures > 0) {
   console.error(`\n${failures} test(s) en échec`);
   process.exit(1);

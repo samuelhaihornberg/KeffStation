@@ -72,6 +72,16 @@ grid.innerHTML = RAYONS.map(r => `
     <span class="rayon-desc">Tout le catalogue smart devices, tous rayons confondus.</span>
     <span class="rayon-cta">Tout explorer →</span>
   </a>`;
+fetch('./impact-products.json').then(r => r.ok ? r.json() : null).then(d => {
+  const n = d && Array.isArray(d.products) ? d.products.length : 0;
+  if (!n) return;
+  const a = document.createElement('a');
+  a.className = 'rayon-card all';
+  a.href = './catalog.html?rayon=' + encodeURIComponent('Partenaires');
+  a.setAttribute('aria-label', 'Rayon Partenaires, ' + n + ' produits');
+  a.innerHTML = `<span class="rayon-icon" aria-hidden="true">⭐</span><span class="rayon-name">Partenaires</span><span class="rayon-count">${n} produits</span><span class="rayon-desc">Offres des marques partenaires via impact.com.</span><span class="rayon-cta">Voir le catalogue →</span>`;
+  grid.appendChild(a);
+}).catch(() => {});
 </script>
 </body>
 </html>

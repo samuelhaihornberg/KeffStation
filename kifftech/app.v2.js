@@ -121,7 +121,7 @@ function fmtPrice(price, currency='EUR'){return new Intl.NumberFormat('fr-FR',{s
 function fmtPriceCrossed(price, currency='EUR'){return `<span class="price-crossed">${fmtPrice(price,currency)}</span>`}
 function toast(msg,type='info'){const t=$('#toast');t.textContent=msg;t.className='toast '+type+' visible';setTimeout(()=>t.classList.remove('visible'),3000)}
 function calcKiffTechPrice(officialPrice, context={}){const {isSubscriber=false,cartItems=[],isPromoEligible=false,tenureDays=0}=context;let discount=10,freeDelivery=false,reason='Prix KiffTech (-10%)';if(isSubscriber){discount=Math.min(10+Math.floor(tenureDays/30),21);freeDelivery=true;reason=`Abonne KiffTech (${discount}% + livraison offerte)`;}else if(isPromoEligible||cartItems.length>=10){discount=20;reason=`Promo 20% (10+ articles)`;}const final=Math.round(officialPrice*(100-discount)/100);return{official:officialPrice,kifftech:final,discount,savings:officialPrice-final,freeDelivery,reason,currency:'EUR'};}
-function refreshKiffTechPrices(){products.forEach(p=>p.kifftech=calcKiffTechPrice(p.price.official,{isSubscriber:userContext.isSubscriber,cartItems:userContext.cartItems,tenureDays:userContext.tenureDays}));filteredProducts.forEach(p=>{const o=products.find(x=>x.id===p.id);if(o)p.kifftech=o.kifftech;});}
+function refreshKiffTechPrices(){products.forEach(p=>{if(!p.partner)p.kifftech=calcKiffTechPrice(p.price.official,{isSubscriber:userContext.isSubscriber,cartItems:userContext.cartItems,tenureDays:userContext.tenureDays});});filteredProducts.forEach(p=>{const o=products.find(x=>x.id===p.id);if(o&&!p.partner)p.kifftech=o.kifftech;});}
 
 // ============ CLICKWISE API ============
 async function fetchFromClickwise() {
@@ -148,7 +148,7 @@ async function fetchFromClickwise() {
 }
 
 // ============ RENDER ============
-function generateMedia(p){const m={badges:[]};if(p.videos?.length)m.badges.push({class:'badge-video',label:'Video'});m.badges.push({class:'badge-official',label:'Officiel'});return m;}
+function generateMedia(p){const m={badges:[]};if(p.partner)m.badges.push({class:'badge-official',label:'Partenaire'});if(p.videos?.length)m.badges.push({class:'badge-video',label:'Video'});m.badges.push({class:'badge-official',label:'Officiel'});return m;}
 
 const CAT_EMOJI = {'Smartphones':'📱','Computers':'💻','Tablets':'📲','Audio & Wearables':'🎧','VR AR gadgets':'🥽','Garden & furnitures smart devices':'🪴','Composant electronic & informatic':'🔌','Company & studying Robots':'🤖'};
 function escXml(s){return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');}
@@ -253,6 +253,28 @@ function agentRender(){
   }
 }
 
+// ============ PARTENAIRE impact.com (JSON public, fusion sans altération des prix) ============
+async function loadPartnerProducts(){
+  try {
+    const res = await fetch('./impact-products.json');
+    if (!res.ok) return;
+    const data = await res.json();
+    const list = Array.isArray(data.products) ? data.products : [];
+    const ids = new Set(products.map(p => p.id));
+    let added = 0;
+    for (const it of list) {
+      const id = 'imp-' + (it.catalogId || 'x') + '-' + it.id;
+      if (ids.has(id) || !it.model) continue;
+      const raw = it.originalPrice ?? it.price;
+      const o = Number(raw);
+      if (!Number.isFinite(o)) continue;
+      products.push({ id, brand: it.brand || 'Partenaire', model: it.model, year: null, category: 'Partenaires', price: { official: o }, specs: {}, images: it.images || [], sources: { official: it.url || '#' }, description: it.description, partner: true, kifftech: { official: o, kifftech: o, discount: 0, savings: 0, freeDelivery: false, reason: 'Prix partenaire', currency: it.currency || 'EUR' } });
+      ids.add(id); added++;
+    }
+    if (added) { filteredProducts = [...products]; renderFilters(); applyFilters(); toast(`${added} produits partenaires`, 'success'); }
+  } catch (e) { console.log('Catalogue partenaire indisponible, local uniquement'); }
+}
+
 // ============ FILTERS ============
 function applyFilters(){filteredProducts=products.filter(p=>{if(searchQuery&&!`${p.brand} ${p.model} ${p.category}`.toLowerCase().includes(searchQuery.toLowerCase()))return false;if(activeCategory!=='all'&&p.category!==activeCategory)return false;if(activeYear!=='all'&&p.year!==parseInt(activeYear))return false;if(activeBrand!=='all'&&p.brand!==activeBrand)return false;return true;});renderProducts();}
 function renderFilters(){const cats=['all',...new Set(products.map(p=>p.category))];$('#filter-category').innerHTML=cats.map(c=>`<button class="filter-btn ${c===activeCategory?'active':''}" data-cat="${c}">${c==='all'?'Toutes':c}</button>`).join('');const years=['all',...[...new Set(products.map(p=>p.year))].sort((a,b)=>b-a)];$('#filter-year').innerHTML=years.map(y=>`<button class="filter-btn ${y===activeYear?'active':''}" data-year="${y}">${y==='all'?'Toutes':y}</button>`).join('');const brands=['all',...[...new Set(products.map(p=>p.brand))].sort()];$('#filter-brand').innerHTML=brands.map(b=>`<button class="filter-btn ${b===activeBrand?'active':''}" data-brand="${b}">${b==='all'?'Toutes':b}</button>`).join('');}
@@ -324,6 +346,7 @@ function init(){
     console.log('[KiffTech] applyFilters done');
     loadProducts();
     console.log('[KiffTech] loadProducts called');
+    loadPartnerProducts();
     initEvents();
     console.log('[KiffTech] initEvents done');
     initParticles();
