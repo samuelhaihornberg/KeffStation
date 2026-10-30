@@ -24,6 +24,19 @@
     if (cfg.provider === 'ollama') return { ok: true, label: 'Ollama local — ' + cfg.model };
     return { ok: true, label: 'Endpoint personnalisé — ' + cfg.model };
   }
+  async function ping(cfg, signal) {
+    if (!cfg || cfg.provider === 'none') throw err('NO_ENGINE', 'Aucun moteur IA configuré.');
+    if (cfg.provider === 'webllm') throw err('NOT_AVAILABLE', 'WebLLM non intégré.');
+    if (cfg.provider === 'ollama') {
+      var base = (cfg.baseUrl || '').replace(/\/$/, '');
+      var res;
+      try { res = await fetch(base + '/api/tags', { signal: signal }); }
+      catch (e) { if (e && e.name === 'AbortError') throw err('ABORTED', 'Vérification annulée.'); throw err('UNREACHABLE', 'Moteur injoignable (' + base + ').'); }
+      if (!res.ok) throw err('HTTP_' + res.status, 'Moteur injoignable (HTTP ' + res.status + ').');
+      return true;
+    }
+    throw err('UNVERIFIED', 'Endpoint personnalisé : lance « Tester » dans Réglages.');
+  }
   function err(code, message) { var e = new Error(message); e.code = code; return e; }
   function sysPrompt(bot) {
     return 'Tu incarnes ' + bot.name + ', personnage simulé sans conscience réelle. ' + bot.specialty + ' ' + bot.personality;
@@ -56,5 +69,5 @@
     if (!text) throw err('EMPTY', 'Réponse vide du moteur.');
     return text;
   }
-  global.ViaProviders = { load: load, save: save, status: status, chat: chat, DEFAULTS: DEFAULTS };
+  global.ViaProviders = { load: load, save: save, status: status, ping: ping, chat: chat, DEFAULTS: DEFAULTS };
 })(window);

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" content="#b84dff">
 <meta name="description" content="Conversation MSN SuperBots Familliya — bulle interne PWA">
 <link rel="manifest" href="./manifest.json">
@@ -48,7 +48,7 @@ body[data-min="1"] .msn{display:none}
 #bubble{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:30;display:none;align-items:center;gap:8px;min-height:56px;padding:12px 18px;border-radius:999px;border:1px solid #ffd23f;background:#1a1440;color:#ffd23f;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,.5)}
 body[data-min="1"] #bubble{display:inline-flex}
 #bubble small{font-weight:400;color:#b9c0e6}
-@media (max-width:720px){.stage{flex-direction:column}body[data-mode="side"] .stage{flex-direction:column}body[data-mode="side"] .msn{position:static;width:100%}.msn{width:100%}#thread{max-height:38vh}}
+@media (max-width:720px){html,body{font-size:17px}.stage{flex-direction:column;padding:10px}body[data-mode="side"] .stage{flex-direction:column}body[data-mode="side"] .msn{position:static;width:100%}.msn{width:100%}#thread{max-height:none;min-height:44dvh}.msg{font-size:1rem;max-width:96%}textarea{min-height:56px}form.composer{padding-bottom:max(10px,env(safe-area-inset-bottom))}header.top{padding:10px 12px}.notice{margin:8px 10px 0;font-size:.85rem}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -60,16 +60,16 @@ body[data-min="1"] #bubble{display:inline-flex}
 <button id="bSide" aria-pressed="false">◧ Panneau latéral</button>
 <button id="bMin" aria-pressed="false">_ Réduire</button>
 </div>
-<p class="notice">💬 Bulle <strong>interne à cette PWA</strong> uniquement : visible dans ViArtificial Labs, jamais hors de l'app. Ce n'est <strong>pas</strong> une bulle Android par-dessus les autres applications (aucune superposition système, aucun contrôle d'autres apps).</p>
-<p class="notice" id="engineBanner" role="status">⚙️ Aucun moteur IA configuré — conversation impossible pour l'instant (aucune simulation).</p>
-<details class="notice" id="engineCfg"><summary>Moteur IA : configurer (local, sans abonnement — OpenAI non imposé)</summary>
+<p class="notice">💬 Bulle interne à cette PWA — jamais hors de l’app, pas de bulle Android système.</p>
+<p class="notice" id="engineBanner" role="status">⚙️ Moteur : aucun — conversation impossible pour l’instant.</p>
+<details class="notice" id="engineCfg"><summary>⚙️ Réglages</summary>
 <label>Fournisseur <select id="pProvider"><option value="none">Aucun (désactivé)</option><option value="ollama">Ollama local (gratuit, sans clé)</option><option value="custom">Endpoint compatible OpenAI (saisi par toi)</option><option value="webllm">WebLLM navigateur (non intégré)</option></select></label>
 <label>Adresse <input id="pUrl" inputmode="url" placeholder="http://localhost:11434"></label>
 <label>Modèle <input id="pModel" placeholder="llama3.2"></label>
 <label>Clé éventuelle (session seule, jamais sauvegardée) <input id="pKey" type="password" autocomplete="off" placeholder="optionnel, mémoire vive uniquement"></label>
 <span><button id="pSave" type="button">Enregistrer</button> <button id="pTest" type="button">Tester</button></span>
 <span id="pMsg" role="status"></span>
-<span>Hébergement statique (GitHub Pages) : si ton endpoint exige une clé serveur, passe par un proxy adapté que tu opères — ne colle jamais de secret ici durablement, ni dans le dépôt, ni dans les logs.</span>
+<span>Hébergement statique (GitHub Pages) : si ton endpoint exige une clé serveur, passe par un proxy adapté que tu opères — ne colle aucun secret durable : seule adresse+modèle sont enregistrés.</span>
 </details>
 <style>.enginebar{display:flex;gap:8px;align-items:center;padding:8px 12px;font-size:.8rem;color:#b9c0e6;border-top:1px solid rgba(255,255,255,.1)}#cancel{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ff3d9a;background:transparent;color:#ff3d9a}#engineCfg label{display:block;margin:6px 0}#engineCfg input,#engineCfg select{min-height:44px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#12142e;color:#fff;padding:6px 10px;width:100%}#engineCfg button{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f;margin:4px 4px 0 0}</style>
 <details class="notice" id="actBox"><summary>⚒️ Actions (outils explicitement connectés)</summary>
@@ -124,11 +124,14 @@ document.getElementById('bubbleName').textContent=b.name;
 document.getElementById('status').textContent='En ligne (démo locale, personnage simulé)';
 function add(who,text){var d=document.createElement('div');d.className='msg '+(who==='me'?'me':'bot');var s=document.createElement('span');s.className='meta';s.textContent=who==='me'?'Moi':b.name+' (simulé)';d.appendChild(s);d.appendChild(document.createTextNode(text));if(who==='bot'){var t=String(text);if(t.indexOf('aucun moteur')===-1&&t.indexOf('annul')===-1&&t.indexOf('Erreur')===-1&&t.indexOf('écrit…')===-1){var pb=document.createElement('button');pb.type='button';pb.textContent='📌 Carnet';pb.setAttribute('aria-label','Proposer ce message au carnet (à valider)');pb.style.cssText='margin-left:8px;min-height:44px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f';pb.onclick=function(){ViaMemory.add(q,'memory',b.name+' : '+text,'proposed');renderMem();pb.textContent='📌 Proposé ✓';};d.appendChild(pb);}}thread.appendChild(d);thread.scrollTop=thread.scrollHeight;}
 var eng=ViaProviders.load();
-function paintEngine(){var s=ViaProviders.status(eng);document.getElementById('engineLine').textContent='Moteur : '+s.label;var bn=document.getElementById('engineBanner');bn.textContent=s.ok?('⚙️ '+s.label+' — les réponses viennent du moteur, pas d’une simulation.'):('⚙️ Aucun moteur IA configuré — conversation impossible pour l’instant (aucune simulation).');document.getElementById('pProvider').value=eng.provider;document.getElementById('pUrl').value=eng.baseUrl;document.getElementById('pModel').value=eng.model;}
+function paintEngine(){var s=ViaProviders.status(eng);document.getElementById('engineLine').textContent='Moteur : '+s.label;var bn=document.getElementById('engineBanner');bn.textContent=s.ok?('⚙️ '+s.label+' — vérification…'):('⚙️ Moteur : aucun — conversation impossible.');document.getElementById('pProvider').value=eng.provider;document.getElementById('pUrl').value=eng.baseUrl;document.getElementById('pModel').value=eng.model;
+if(eng.provider==='ollama'){var c=new AbortController();var t=setTimeout(function(){c.abort();},10000);ViaProviders.ping(eng,c.signal).then(function(){var d=new Date();var hh=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);bn.textContent='🟢 En ligne (vérifié '+hh+') — '+eng.model+' : les réponses viennent du moteur.';document.getElementById('engineLine').textContent='Moteur : '+eng.model+' (vérifié)';}).catch(function(e){bn.textContent='🔴 Hors ligne : '+(e&&e.message?e.message:'moteur injoignable');document.getElementById('engineLine').textContent='Moteur : injoignable';}).finally(function(){clearTimeout(t);});}
+else if(eng.provider==='custom'){bn.textContent='🟡 Configuré, non vérifié — lance « Tester » dans Réglages.';}}
 paintEngine();
 document.getElementById('pSave').onclick=function(){eng={provider:document.getElementById('pProvider').value,baseUrl:document.getElementById('pUrl').value.trim(),model:document.getElementById('pModel').value.trim()||'llama3.2'};ViaProviders.save(eng);paintEngine();document.getElementById('pMsg').textContent='Config enregistrée (sans clé).';};
 document.getElementById('pTest').onclick=function(){var k=document.getElementById('pKey').value;document.getElementById('pMsg').textContent='Test en cours…';var c=new AbortController();var t=setTimeout(function(){c.abort();},15000);ViaProviders.chat(eng,b,[{role:'user',content:'Dis juste : test OK.'}],c.signal,k||null).then(function(r){document.getElementById('pMsg').textContent='Test réussi : '+r.slice(0,80);}).catch(function(e){document.getElementById('pMsg').textContent='Échec : '+e.message;}).finally(function(){clearTimeout(t);});};
 add('bot',b.greeting+' — '+cfg.disclaimer);
+thread.lastChild.querySelector('.meta').textContent=b.name+' — accueil prédéfini (pas une réponse IA)';
 var form=document.getElementById('form'),input=document.getElementById('input'),cancelBtn=document.getElementById('cancel'),hist=[],pending=null;
 input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit();}});
 function setBusy(v){cancelBtn.hidden=!v;form.querySelector('button[type="submit"]').disabled=v;input.disabled=v;if(!v)input.focus();}
