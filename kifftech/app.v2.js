@@ -132,7 +132,7 @@ const LOCAL_DB = [
   {id:'ac68',brand:'Logitech',model:'MX Anywhere 3S',year:2023,category:'Accessories',price:{official:89},specs:{Type:'Souris compacte',Capteur:'8000 DPI verre',Connexion:'Bolt + BT + USB',Autonomie:'70 jours'}},
   {id:'ac69',brand:'Apple',model:'Magic Trackpad',year:2021,category:'Accessories',price:{official:149},specs:{Type:'Pavé tactile',Surface:'Verre Multi-Touch',Connexion:'Bluetooth + Lightning',Autonomie:'1 mois'}},
   {id:'ac70',brand:'Razer',model:'Viper V3 Pro',year:2024,category:'Accessories',price:{official:179},specs:{Type:'Souris gaming',Capteur:'35000 DPI',Polling:'8000 Hz',Poids:'54 g'}},
-  {id:'ac71',brand:'Logitech',model:'G Pro X Superlight 2',year:2023,category:'Accessories',price:{official:159},specs:{Type:'Souris gaming',Capteur:'32000 DPI',Polling:'2000 Hz',Poids:'60 g'}},
+  {id:'ac71',images:['./img/ac71.jpg'],brand:'Logitech',model:'G Pro X Superlight 2',year:2023,category:'Accessories',price:{official:159},specs:{Type:'Souris gaming',Capteur:'32000 DPI',Polling:'2000 Hz',Poids:'60 g'}},
   {id:'ac72',brand:'Dell',model:'Premier MS7421W',year:2022,category:'Accessories',price:{official:99},specs:{Type:'Souris rechargeable',Capteur:'4000 DPI',Connexion:'BT + 2.4G + USB-C',Autonomie:'6 mois'}},
   {id:'ac73',brand:'Lenovo',model:'Go Wireless',year:2022,category:'Accessories',price:{official:69},specs:{Type:'Souris sans fil',Capteur:'2400 DPI',Connexion:'BT + 2.4G',Recharge:'USB-C'}},
   {id:'ac74',brand:'Apple',model:'USB-C Digital AV Multiport',year:2021,category:'Accessories',price:{official:79},specs:{Type:'Hub USB-C',Ports:'HDMI + USB-A + USB-C',Vidéo:'4K 60Hz',Charge:'Pass-through'}},

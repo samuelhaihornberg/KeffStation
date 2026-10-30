@@ -1,6 +1,6 @@
 # KiffTech — Images officielles + Reviews complets (200 produits)
 
-## État (55 photos réelles / 216, consoles 13/16, accessoires 5 — vérif visuelle)
+## État (56 photos réelles / 216 — vérif visuelle systématique)
 - 216 produits LOCAL_DB (200 + 16 Consoles & Videogames avec era retro/modern + filtre Époque + carte Rayons)
 - Photos CC câblées : 50 (dont co5 PS1, co11 PS5*, co13 Series X, co15 Steam Deck Linux, co16 ROG Ally*) — * = rapprochée notée
 - Rejetées après contrôle visuel : Zapper pour NES, carte mère PS5, schéma Xbox, macro puce Steam Deck, carré noir Series S
