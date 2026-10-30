@@ -227,11 +227,26 @@ main{flex:1;width:100%;max-width:1400px;margin:0 auto;padding:clamp(16px,3vw,24p
     </div>
   </div>
 </div>
-<script src="app.v2.js?v=17"></script>
+<script src="app.v2.js?v=18"></script>
 <script>
 console.log('[Catalog] Inline script executed');
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').then(reg => console.log('[SW] Registered:', reg.scope)).catch(err => console.warn('[SW] Registration failed:', err));
+  let refreshing = false;
+  const forceReload = () => { if (refreshing) return; refreshing = true; window.location.reload(); };
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!sessionStorage.getItem('sw-fresh')) { sessionStorage.setItem('sw-fresh', '1'); return; }
+    forceReload();
+  });
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    console.log('[SW] Registered:', reg.scope);
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener('statechange', () => { if (nw.state === 'activated') forceReload(); });
+    });
+    if (reg.waiting) forceReload();
+  }).catch(err => console.warn('[SW] Registration failed:', err));
+  sessionStorage.setItem('sw-fresh', '1');
 }
 setTimeout(() => {
   const grid = document.getElementById('products-grid');
