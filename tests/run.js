@@ -143,7 +143,8 @@ check('bouton hard-refresh global + overlay', () => {
 check('impact.com : connecteur sans secrets exposés', () => {
   const sync = fs.readFileSync(path.join(ROOT, 'scripts/sync-impact.js'), 'utf8');
   assert(sync.includes('https://api.impact.com'), 'base API officielle absente');
-  assert(sync.includes('/Mediapartners/') && sync.includes('/Catalogs'), 'endpoints catalogues absents');
+  assert(sync.includes('/${PERSONA}/') && sync.includes('/Catalogs'), 'endpoints catalogues absents');
+  assert(sync.includes("'Mediapartners'") && sync.includes("'Advertisers'"), 'personas absents');
   assert(sync.includes('process.env.IMPACT_ACCOUNT_SID') && sync.includes('process.env.IMPACT_AUTH_TOKEN'), 'lecture via env absente');
   assert(sync.includes('[REDACTED]'), 'redaction logs absente');
   assert(sync.includes('le dernier catalogue valide est conservé'), 'garde-fou catalogue vide absent');
