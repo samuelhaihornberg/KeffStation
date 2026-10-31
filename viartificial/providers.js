@@ -1,19 +1,20 @@
 /* Fournisseurs de modèles — ViArtificial Labs (PWA statique, GitHub Pages).
    Séparation : profils (bots.json) / interface (conversation.html) / moteurs (ce fichier).
-   - Par défaut : Ollama local PRÉCHARGÉ (gratuit, sans clé, sans abonnement). L'UI vérifie
-     sa présence au chargement et affiche son état réel, jamais simulé.
-   - Endpoint compatible OpenAI en option, saisi par l'utilisateur. OpenAI non imposé.
+   - Par défaut : moteur LOCAL AUTOMATIQUE (modèle partagé téléchargé sur l'appareil,
+     accord explicite, choix auto selon l'appareil). L'UI affiche son état réel, jamais simulé.
+   - Réglage avancé : Ollama local, endpoint compatible OpenAI (saisi par l'utilisateur),
+     ou WebLLM manuel. OpenAI non imposé, aucun service payant activé automatiquement.
    - Clé éventuelle : mémoire de session uniquement, jamais persistée, loggée ni commitée.
    - Pages statiques : secret serveur requis => passer par un proxy adapté, jamais en direct. */
 (function (global) {
   'use strict';
   var KEY = 'via-engine'; // localStorage : provider/baseUrl/model uniquement, JAMAIS de clé.
-  var DEFAULTS = { provider: 'ollama', baseUrl: 'http://localhost:11434', model: 'llama3.2' };
+  var DEFAULTS = { provider: 'local', baseUrl: '', model: '' };
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(KEY) || '{}');
       if (s && s.provider) return { provider: s.provider, baseUrl: s.baseUrl || DEFAULTS.baseUrl, model: s.model || DEFAULTS.model };
-      return { provider: DEFAULTS.provider, baseUrl: DEFAULTS.baseUrl, model: DEFAULTS.model }; // préchargé : Ollama.
+      return { provider: DEFAULTS.provider, baseUrl: DEFAULTS.baseUrl, model: DEFAULTS.model }; // local automatique.
     } catch (e) { return { provider: DEFAULTS.provider, baseUrl: DEFAULTS.baseUrl, model: DEFAULTS.model }; }
   }
   function save(cfg) {
@@ -21,12 +22,19 @@
   }
   function status(cfg) {
     if (!cfg || cfg.provider === 'none') return { ok: false, label: 'Aucun moteur IA configuré' };
+    if (cfg.provider === 'local') return { ok: true, label: 'Modèle local automatique (partagé)' };
     if (cfg.provider === 'webllm') return { ok: true, label: 'WebLLM local (WebGPU) — ' + (cfg.model || 'SmolLM2 360M') };
     if (cfg.provider === 'ollama') return { ok: true, label: 'Ollama local — ' + cfg.model };
     return { ok: true, label: 'Endpoint personnalisé — ' + cfg.model };
   }
   async function ping(cfg, signal) {
     if (!cfg || cfg.provider === 'none') throw err('NO_ENGINE', 'Aucun moteur IA configuré.');
+    if (cfg.provider === 'local') {
+      if (!global.ViaLocalEngine) throw err('NOT_LOADED', 'Moteur local non chargé.');
+      var sm = global.ViaLocalEngine.summary();
+      if (sm.phase === 'ready' || sm.phase === 'generating') return true;
+      throw err('NOT_READY', 'Moteur local non prêt (' + sm.phase + ').');
+    }
     if (cfg.provider === 'webllm') throw err('NOT_AVAILABLE', 'WebLLM non intégré.');
     if (cfg.provider === 'ollama') {
       var base = (cfg.baseUrl || '').replace(/\/$/, '');
@@ -43,7 +51,11 @@
     return 'Tu incarnes ' + bot.name + ', personnage simulé sans conscience réelle. ' + bot.specialty + ' ' + bot.personality;
   }
   async function chat(cfg, bot, history, signal, sessionKey) {
-    if (cfg.provider === 'none') throw err('NO_ENGINE', 'Aucun moteur IA configuré. Choisis Ollama local ou un endpoint ci-dessous.');
+    if (cfg.provider === 'none') throw err('NO_ENGINE', 'Aucun moteur IA configuré. Autorise le modèle local ou choisis un moteur dans Réglages.');
+    if (cfg.provider === 'local') {
+      if (!global.ViaLocalEngine) throw err('NOT_LOADED', 'Moteur local non chargé : recharge la page.');
+      return await global.ViaLocalEngine.chat(bot, history, { signal: signal });
+    }
     if (cfg.provider === 'webllm') {
       if (!global.ViaLocalEngine) throw err('NOT_LOADED', 'Moteur local non chargé : recharge la page.');
       global.ViaLocalEngine.setModel(cfg.model);

@@ -50,13 +50,27 @@ body[data-min="1"] .msn{display:none}
 #settings label{display:block;margin:6px 0;font-size:.85rem}
 #settings input,#settings select{min-height:44px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#12142e;color:#fff;padding:6px 10px;width:100%}
 #settings button{min-height:48px;padding:10px 18px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f;margin:4px 4px 0 0;font-size:.9rem}
-#authBar{margin:10px 16px 0;max-width:720px}
-#authBar button{min-height:56px;width:100%;padding:12px 18px;border-radius:999px;border:none;background:linear-gradient(135deg,#b84dff,#ff3d9a);color:#fff;font-weight:700;font-size:1rem}
-@media (max-width:720px){#authBar{margin:8px 10px 0}}
+#consentBar{margin:10px 16px 0;max-width:720px;border:1px solid rgba(184,77,255,.6);border-radius:14px;padding:12px 14px;background:rgba(184,77,255,.08)}
+#consentBar p{margin:6px 0;font-size:.9rem}
+#consentSize{color:#b9c0e6;font-size:.85rem}
+.consentBtns{display:flex;gap:8px;flex-wrap:wrap}
+.consentBtns button{min-height:52px;padding:12px 20px;border-radius:999px;font-weight:700;font-size:1rem}
+#consentGo{border:none;background:linear-gradient(135deg,#b84dff,#ff3d9a);color:#fff;flex:1;min-width:200px}
+#consentLater,#consentDetails{border:1px solid #ffd23f;background:transparent;color:#ffd23f}
+#consentDetailText{font-size:.82rem;color:#b9c0e6;border-top:1px solid rgba(255,255,255,.12);margin-top:8px;padding-top:8px}
+#progWrap{margin-top:8px}
+#progBar{height:10px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden}
+#progFill{height:100%;width:0%;background:linear-gradient(90deg,#b84dff,#ff3d9a,#ffd23f);border-radius:6px}
+#progText{font-size:.8rem;color:#b9c0e6}
+#chips{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;margin:10px 16px 0;padding-bottom:4px}
+.chip{flex-shrink:0;min-height:48px;padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#b9c0e6;font-size:.85rem}
+.chip.on{border-color:#ffd23f;color:#ffd23f;background:rgba(255,210,63,.08)}
+.msg.sys{align-self:center;background:transparent;border:1px dashed rgba(255,255,255,.25);color:#b9c0e6;font-size:.82rem;max-width:96%}
+@media (max-width:720px){#consentBar{margin:8px 10px 0}#chips{margin:8px 10px 0}}
 .statusline{margin:10px 16px 0;font-size:.82rem;color:#b9c0e6}
 #gearBtn{min-width:48px;min-height:48px;border-radius:12px;border:1px solid rgba(255,210,63,.5);background:rgba(255,210,63,.08);color:#ffd23f;font-size:1.3rem}
 @media (max-width:720px){html,body{font-size:17px}.stage{flex-direction:column;padding:10px}body[data-mode="side"] .stage{flex-direction:column}body[data-mode="side"] .msn{position:static;width:100%}.msn{width:100%}#thread{max-height:none;min-height:44dvh}.msg{font-size:1rem;max-width:96%}textarea{min-height:56px}form.composer{padding-bottom:max(10px,env(safe-area-inset-bottom))}header.top{padding:10px 12px}#settings{margin:8px 10px 0}.statusline{margin:8px 10px 0}}
-.enginebar{display:flex;gap:8px;align-items:center;padding:8px 12px;font-size:.8rem;color:#b9c0e6;border-top:1px solid rgba(255,255,255,.1)}#cancel{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ff3d9a;background:transparent;color:#ff3d9a}
+.enginebar{display:flex;gap:8px;align-items:center;padding:8px 12px;font-size:.8rem;color:#b9c0e6;border-top:1px solid rgba(255,255,255,.1)}#cancel{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ff3d9a;background:transparent;color:#ff3d9a}#retryBtn{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -68,16 +82,29 @@ body[data-min="1"] .msn{display:none}
 <button id="bSide" aria-pressed="false">◧ Panneau latéral</button>
 <button id="bMin" aria-pressed="false">_ Réduire</button>
 </div>
-<p class="statusline" id="engineBanner" role="status">⚙️ Moteur : vérification d’Ollama en cours…</p>
-<div id="authBar" hidden><button id="authBtn" type="button">✅ Autoriser — parler au SuperBot</button></div>
+<p class="statusline" id="engineBanner" role="status">Moteur : en attente d’autorisation…</p>
+<section id="consentBar" hidden aria-label="Accord modèle IA">
+<p><strong>Autoriser le téléchargement du modèle IA et son stockage sur cet appareil pour discuter avec les SuperBots ?</strong></p>
+<p id="consentSize">Modèle <span id="consentModel">…</span> — ≈ <span id="consentMB">…</span> Mo à télécharger une seule fois (Wi-Fi conseillé). La progression réelle s’affiche pendant le téléchargement.</p>
+<p class="consentBtns"><button id="consentGo" type="button">Autoriser et démarrer</button><button id="consentLater" type="button">Plus tard</button><button id="consentDetails" type="button">Détails</button></p>
+<div id="consentDetailText" hidden>
+<p>Le modèle est partagé par tous les SuperBots : chacun garde sa personnalité, sa mémoire et ses conversations. Licence : <span id="consentLicense"></span>. Fichiers stockés dans le cache du navigateur, réutilisés sans re-téléchargement ; moteur rechargé automatiquement au besoin.</p>
+<p>Ceci n’est pas un bandeau cookies : aucun traceur, aucun cookie facultatif. Les autorisations micro, notifications et partage d’écran restent demandées séparément par le navigateur, uniquement si tu utilises ces fonctions. Accord retirable à tout moment dans ⚙️ Réglages (avec suppression des fichiers).</p>
+</div>
+<div id="progWrap" hidden><div id="progBar"><div id="progFill"></div></div><p id="progText" role="status"></p></div>
+</section>
+<div id="chips" role="group" aria-label="SuperBots qui répondent"></div>
 <section id="settings" hidden aria-label="Réglages">
 <h2>⚙️ Réglages</h2>
 <p id="pMsg" role="status" style="font-size:.85rem;color:#b9c0e6"></p>
-<label>Adresse <input id="pUrl" inputmode="url" placeholder="http://localhost:11434"></label>
-<label>Modèle <input id="pModel" placeholder="llama3.2"></label>
-<p style="font-size:.8rem;color:#8f96bd">Sur téléphone : remplace l’Adresse par l’IP du PC (même Wi-Fi). Sans moteur joignable, aucune réponse n’est simulée.</p>
+<p style="font-size:.85rem">Accord modèle IA : <strong id="consentState">—</strong></p>
+<p style="font-size:.8rem;color:#8f96bd">Stockage navigateur : <span id="storageInfo">—</span></p>
+<p><button id="withdrawBtn" type="button">Retirer l’accord</button> <button id="deleteModelsBtn" type="button">Supprimer les modèles téléchargés</button></p>
 <details><summary style="min-height:44px;color:#ffd23f">Avancé (autre moteur, WebLLM, actions)</summary>
-<label>Fournisseur <select id="pProvider"><option value="ollama">Ollama local (gratuit, sans clé)</option><option value="custom">Endpoint compatible OpenAI (saisi par toi)</option><option value="webllm">WebLLM local (WebGPU, ~376 Mo)</option><option value="none">Aucun (désactivé)</option></select></label>
+<label>Fournisseur <select id="pProvider"><option value="local">Modèle local automatique (partagé)</option><option value="ollama">Ollama local (gratuit, sans clé)</option><option value="custom">Endpoint compatible OpenAI (saisi par toi)</option><option value="webllm">WebLLM manuel (WebGPU)</option><option value="none">Aucun (désactivé)</option></select></label>
+<label>Adresse (Ollama/endpoint) <input id="pUrl" inputmode="url" placeholder="http://localhost:11434"></label>
+<label>Modèle (Ollama/endpoint) <input id="pModel" placeholder="llama3.2"></label>
+<p style="font-size:.8rem;color:#8f96bd">Sur téléphone avec Ollama : remplace l’Adresse par l’IP du PC (même Wi-Fi). Sans moteur joignable, aucune réponse n’est simulée.</p>
 <label>Clé éventuelle (session seule, jamais sauvegardée) <input id="pKey" type="password" autocomplete="off" placeholder="optionnel, mémoire vive uniquement"></label>
 <span><button id="pTest" type="button">Tester</button></span>
 <label>Modèle local WebLLM <select id="pLocalModel"><option value="SmolLM2-360M-Instruct-q4f16_1-MLC">SmolLM2 360M (~376 Mo VRAM)</option><option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B (~879 Mo VRAM)</option></select></label>
@@ -94,10 +121,10 @@ body[data-min="1"] .msn{display:none}
 <div class="stage">
 <section class="activity" aria-label="Activité à côté du chat"><h2>📝 Activité en cours</h2><p id="actHint">Passe en « Panneau latéral » pour utiliser ce panneau à côté de la conversation (ex. notes, plan GuideoPlan). Tout reste dans la PWA.</p><ul><li>Note 1 : …</li><li>Note 2 : …</li></ul></section>
 <section class="msn" id="msn" aria-label="Fenêtre de conversation style MSN">
-<div class="msn-title"><span class="avatar" id="avatar">🤖</span><span class="who"><strong id="who">…</strong><span class="status"><span class="dot" aria-hidden="true"></span><span id="status">En ligne (démo locale, simulé)</span></span></span><span class="winbtns"><button id="wMin" aria-label="Réduire la fenêtre">_</button><button id="wFull" aria-label="Bascule plein écran">⛶</button></span></div>
+<div class="msn-title"><span class="avatar" id="avatar">🤖</span><span class="who"><strong id="who">…</strong><span class="status"><span class="dot" aria-hidden="true"></span><span id="status">Hors ligne — en attente</span></span></span><span class="winbtns"><button id="wMin" aria-label="Réduire la fenêtre">_</button><button id="wFull" aria-label="Bascule plein écran">⛶</button></span></div>
 <div id="thread" role="log" aria-live="polite" aria-label="Historique"></div>
 <form class="composer" id="form"><textarea id="input" rows="1" placeholder="Écris ton message… (Entrée = envoyer, Maj+Entrée = ligne)" aria-label="Message"></textarea><button type="submit" aria-label="Envoyer">➤</button></form>
-<div class="enginebar"><span id="engineLine">Moteur : Ollama (vérification…)</span><button id="cancel" type="button" hidden>✕ Annuler la réponse</button></div>
+<div class="enginebar"><span id="engineLine">Moteur : en attente d’autorisation…</span><button id="cancel" type="button" hidden>✕ Annuler</button><button id="retryBtn" type="button" hidden>↻ Réessayer</button></div>
 </section>
 </div>
 </div>
@@ -123,35 +150,137 @@ var b=cfg.bots[0];cfg.bots.forEach(function(x){if(x.id===q)b=x;});
 document.getElementById('title').textContent=b.avatar+' '+b.name+' — '+b.specialty;
 document.getElementById('avatar').textContent=b.avatar;
 document.getElementById('who').textContent=b.name;
-document.getElementById('status').textContent='En ligne (démo locale, personnage simulé)';
-function add(who,text){var d=document.createElement('div');d.className='msg '+(who==='me'?'me':'bot');var s=document.createElement('span');s.className='meta';s.textContent=who==='me'?'Moi':b.name+' (simulé)';d.appendChild(s);d.appendChild(document.createTextNode(text));thread.appendChild(d);thread.scrollTop=thread.scrollHeight;}
+function add(who,text,botObj){var d=document.createElement('div');d.className='msg '+who;var s=document.createElement('span');s.className='meta';s.textContent=who==='me'?'Moi':(botObj?botObj.name+' (moteur local)':b.name+' (simulé)');if(who==='sys')s.textContent='ℹ️ info';d.appendChild(s);d.appendChild(document.createTextNode(text));thread.appendChild(d);thread.scrollTop=thread.scrollHeight;return d;}
+function addWait(bot){var d=document.createElement('div');d.className='msg bot';d.textContent=bot.name+' écrit…';thread.appendChild(d);thread.scrollTop=thread.scrollHeight;return d;}
 var eng=ViaProviders.load();
-function paintEngine(){var s=ViaProviders.status(eng);document.getElementById('engineLine').textContent='Moteur : '+s.label;var bn=document.getElementById('engineBanner');bn.textContent=s.ok?('⚙️ '+s.label+' — vérification…'):('⚙️ Moteur : aucun — conversation impossible.');document.getElementById('pProvider').value=eng.provider;document.getElementById('pUrl').value=eng.baseUrl;document.getElementById('pModel').value=eng.model;
-if(eng.provider==='ollama'){var c=new AbortController();var t=setTimeout(function(){c.abort();},10000);ViaProviders.ping(eng,c.signal).then(function(){var d=new Date();var hh=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);bn.textContent='🟢 En ligne (vérifié '+hh+') — '+eng.model+' : les réponses viennent du moteur.';document.getElementById('engineLine').textContent='Moteur : '+eng.model+' (vérifié)';document.getElementById('pMsg').textContent='Ollama chargé et vérifié ('+hh+').';}).catch(function(e){bn.textContent='🔴 Hors ligne : '+(e&&e.message?e.message:'moteur injoignable');document.getElementById('engineLine').textContent='Moteur : injoignable';document.getElementById('pMsg').textContent='Ollama injoignable : lance « ollama serve » puis « ollama pull '+eng.model+' » (ou corrige l’Adresse).';}).finally(function(){clearTimeout(t);});}
-else if(eng.provider==='webllm'){try{var sm=ViaLocalEngine.summary();if(sm.phase==='ready'||sm.phase==='generating'){bn.textContent='🟢 En ligne — '+sm.model+' (WebGPU local, moteur réellement chargé).';document.getElementById('engineLine').textContent='Moteur : '+sm.model+' (WebGPU)';}else{bn.textContent='🟡 WebLLM '+sm.phase+' ('+eng.model+') : accord + « Télécharger + charger ».';}}catch(e){bn.textContent='🟡 WebLLM configuré : moteur non chargé.';}}
-else if(eng.provider==='custom'){bn.textContent='🟡 Configuré, non vérifié — lance « Tester » dans Réglages.';}}
-paintEngine();
-document.getElementById('authBtn').onclick=function(){authorizeOllama();};
-function hasSavedEng(){try{return !!localStorage.getItem('via-engine');}catch(e){return false;}}
-function refreshAuth(){document.getElementById('authBar').hidden=hasSavedEng()&&eng.provider!=='none';}
-function authorizeOllama(){eng={provider:'ollama',baseUrl:document.getElementById('pUrl').value.trim()||'http://localhost:11434',model:document.getElementById('pModel').value.trim()||'llama3.2'};ViaProviders.save(eng);var pp=document.getElementById('pProvider');if(pp)pp.value='ollama';document.getElementById('pMsg').textContent='Chargement d’Ollama… (autorisé par ce clic)';paintEngine();refreshAuth();input.focus();}
-function syncAddr(){eng.baseUrl=document.getElementById('pUrl').value.trim()||'http://localhost:11434';eng.model=document.getElementById('pModel').value.trim()||'llama3.2';ViaProviders.save(eng);paintEngine();}
-document.getElementById('pUrl').onchange=syncAddr;document.getElementById('pModel').onchange=syncAddr;
-refreshAuth();
-document.getElementById('pLoad').onclick=function(){var mid=document.getElementById('pLocalModel').value;eng={provider:'webllm',baseUrl:'',model:mid};ViaProviders.save(eng);document.getElementById('pProvider').value='webllm';document.getElementById('pProg').textContent='Démarrage…';ViaLocalEngine.load(mid,function(s){document.getElementById('pProg').textContent='Progression : '+s.progress+' % — '+s.detail;}).then(function(){document.getElementById('pProg').textContent='Modèle chargé en mémoire : '+mid+' (WebGPU).';paintEngine();}).catch(function(e){document.getElementById('pProg').textContent='Échec : '+(e&&e.message?e.message:e)+((e&&e.code==='NO_WEBGPU')?' Appareil non compatible avec le modèle local : utilise Ollama/endpoint ou texte seul.':'');paintEngine();});};
-document.getElementById('pUnload').onclick=function(){ViaLocalEngine.unload();document.getElementById('pProg').textContent='Modèle déchargé.';paintEngine();};
+var botsById={},selectedBots=[],queue=[],working=false,lastFailed=null,enginePromise=null,genCtl=null,loadCancelled=false;
+var hists={};function H(id){if(!hists[id])hists[id]=[];return hists[id];}
+var banner=document.getElementById('engineBanner'),eline=document.getElementById('engineLine'),dotEl=document.querySelector('#msn .dot'),statusEl=document.getElementById('status');
+function setState(st,msg){
+  var map={idle:['Moteur : en attente d’autorisation…','Hors ligne — en attente','#8f96bd'],
+    'needs-consent':['Moteur : en attente d’autorisation…','Hors ligne — autorisation requise','#8f96bd'],
+    checking:['Vérification du moteur…','Vérification…','#ffd23f'],
+    downloading:['Téléchargement du modèle… '+(msg||''),'Téléchargement…','#ffd23f'],
+    loading:['Chargement du moteur en mémoire…','Chargement…','#ffd23f'],
+    ready:['Prêt — moteur local partagé','En ligne (moteur local, opérationnel)','#27d17f'],
+    responding:['Réponse en cours ('+(msg||'')+')…','En ligne — '+(msg||'')+' écrit…','#27d17f'],
+    error:['Erreur : '+(msg||'moteur indisponible'),'Hors ligne — erreur','#ff3d9a']};
+  var m=map[st]||map.idle;
+  eline.textContent=m[0];statusEl.textContent=m[1];if(dotEl)dotEl.style.background=m[2];
+  banner.textContent=(st==='ready'?'🟢 ':st==='error'?'🔴 ':st==='idle'||st==='needs-consent'?'⚪ ':'🟡 ')+m[0];
+  document.getElementById('cancel').hidden=!(st==='downloading'||st==='loading'||st==='responding');
+  document.getElementById('retryBtn').hidden=(st!=='error');
+  var pw=document.getElementById('progWrap');if(pw)pw.hidden=(st!=='downloading'&&st!=='loading');
+}
+function fillSettings(){var pp=document.getElementById('pProvider');if(pp)pp.value=eng.provider;document.getElementById('pUrl').value=eng.baseUrl||'';document.getElementById('pModel').value=eng.model||'';}
+function consentShown(v){document.getElementById('consentBar').hidden=!v;}
+function refreshConsent(){
+  var c=ViaLocalEngine.getConsent();
+  consentShown(c===null);
+  var st=document.getElementById('consentState');
+  if(st)st.textContent=c==='granted'?'accordé':c==='later'?'reporté (redemandé à l’envoi)':c==='withdrawn'?'retiré':'non demandé';
+  var info=ViaLocalEngine.modelInfo(ViaLocalEngine.MODELS[0].id);
+  document.getElementById('consentModel').textContent=info.id.split('-Instruct')[0];
+  document.getElementById('consentMB').textContent=info.downloadMB;
+  var lic=document.getElementById('consentLicense');if(lic)lic.textContent=info.license+' — usage autorisé pour discuter avec les SuperBots sur cet appareil.';
+  paintStorage();
+}
+function paintStorage(){
+  var el=document.getElementById('storageInfo');if(!el)return;el.textContent='calcul…';
+  ViaLocalEngine.storageCheck(0).then(function(s){el.textContent=s.unknown?'non mesurable sur ce navigateur':'utilisé '+s.usageMB+' / quota '+s.quotaMB+' Mo';});
+}
+document.getElementById('consentGo').onclick=function(){ViaLocalEngine.setConsent('granted');refreshConsent();ensureEngine().catch(function(){});};
+document.getElementById('consentLater').onclick=function(){ViaLocalEngine.setConsent('later');refreshConsent();setState('needs-consent');};
+document.getElementById('consentDetails').onclick=function(){var t=document.getElementById('consentDetailText');t.hidden=!t.hidden;};
+function ensureEngine(){
+  var sm=ViaLocalEngine.summary();
+  if(sm.phase==='ready')return Promise.resolve(true);
+  if(enginePromise)return enginePromise;
+  enginePromise=(async function(){
+    var c=ViaLocalEngine.getConsent();
+    if(c!=='granted'){setState('needs-consent');consentShown(true);var e1=new Error('Autorisation requise pour télécharger le modèle.');e1.code='NEEDS_CONSENT';throw e1;}
+    loadCancelled=false;setState('downloading','0 %');
+    var f=document.getElementById('progFill');if(f)f.style.width='0%';
+    await ViaLocalEngine.autoLoad(function(s){
+      if(s.phase==='downloading'){setState('downloading',(s.progress||0)+' %');var ff=document.getElementById('progFill');if(ff)ff.style.width=(s.progress||0)+'%';var pt=document.getElementById('progText');if(pt)pt.textContent='Téléchargement '+(s.progress||0)+' %'+(s.detail?' — '+s.detail:'')+' — tu peux continuer à lire, rien n’est bloqué.';}
+      else if(s.phase==='loading')setState('loading');
+    });
+    if(loadCancelled){try{await ViaLocalEngine.unload();}catch(e){}var e2=new Error('Chargement annulé à ta demande.');e2.code='ABORTED';throw e2;}
+    setState('ready');return true;
+  })();
+  enginePromise.then(function(){},function(e){enginePromise=null;if(e&&(e.code==='NEEDS_CONSENT'||e.code==='ABORTED')){if(e.code!=='NEEDS_CONSENT')setState('idle');}else{setState('error',(e&&e.message)||'échec');lastFailed='engine';}});
+  return enginePromise;
+}
+var eng=ViaProviders.load();
+fillSettings();
+document.getElementById('pProvider').onchange=function(){eng.provider=this.value;eng.baseUrl=document.getElementById('pUrl').value.trim();eng.model=document.getElementById('pModel').value.trim();ViaProviders.save(eng);fillSettings();if(eng.provider==='local'&&ViaLocalEngine.getConsent()==='granted')ensureEngine().catch(function(){});};
+document.getElementById('pUrl').onchange=function(){eng.baseUrl=this.value.trim();ViaProviders.save(eng);};
+document.getElementById('pModel').onchange=function(){eng.model=this.value.trim();ViaProviders.save(eng);};
+document.getElementById('withdrawBtn').onclick=function(){ViaLocalEngine.setConsent('withdrawn');enginePromise=null;try{ViaLocalEngine.unload();}catch(e){}setState('needs-consent');refreshConsent();document.getElementById('pMsg').textContent='Accord retiré. Les fichiers restent en cache : supprime-les ci-dessous si besoin.';};
+document.getElementById('deleteModelsBtn').onclick=function(){if(!confirm('Supprimer les fichiers du modèle téléchargé ? Ils seront re-téléchargés au prochain usage autorisé.'))return;var self=this;self.disabled=true;ViaLocalEngine.deleteModels().then(function(n){enginePromise=null;document.getElementById('pMsg').textContent='Modèles supprimés ('+n+' cache(s) vidé(s)).';setState(ViaLocalEngine.getConsent()==='granted'?'idle':'needs-consent');paintStorage();}).catch(function(e){document.getElementById('pMsg').textContent='Suppression incomplète : '+(e&&e.message?e.message:e);}).finally(function(){self.disabled=false;});};
+document.getElementById('pLoad').onclick=function(){var mid=document.getElementById('pLocalModel').value;eng={provider:'webllm',baseUrl:'',model:mid};ViaProviders.save(eng);fillSettings();enginePromise=null;document.getElementById('pProg').textContent='Démarrage…';ViaLocalEngine.load(mid,function(s){document.getElementById('pProg').textContent='Progression : '+s.progress+' % — '+s.detail;}).then(function(){document.getElementById('pProg').textContent='Modèle chargé en mémoire : '+mid+' (WebGPU).';}).catch(function(e){document.getElementById('pProg').textContent='Échec : '+(e&&e.message?e.message:e)+((e&&e.code==='NO_WEBGPU')?' Appareil non compatible avec le modèle local : Retire l’accord ou choisis un moteur distant gratuit dans Fournisseur.':(e&&e.code==='STORAGE_FULL')?' Libère de l’espace puis Réessaie (une seule tentative à la fois).':'');});};
+document.getElementById('pUnload').onclick=function(){enginePromise=null;ViaLocalEngine.unload();document.getElementById('pProg').textContent='Modèle déchargé.';setState('idle');};
 document.getElementById('pTest').onclick=function(){var k=document.getElementById('pKey').value;document.getElementById('pMsg').textContent='Test en cours…';var c=new AbortController();var t=setTimeout(function(){c.abort();},15000);ViaProviders.chat(eng,b,[{role:'user',content:'Dis juste : test OK.'}],c.signal,k||null).then(function(r){document.getElementById('pMsg').textContent='Test réussi : '+r.slice(0,80);}).catch(function(e){document.getElementById('pMsg').textContent='Échec : '+e.message;}).finally(function(){clearTimeout(t);});};
 add('bot',b.greeting+' — '+cfg.disclaimer);
 thread.lastChild.querySelector('.meta').textContent=b.name+' — accueil prédéfini (pas une réponse IA)';
-var form=document.getElementById('form'),input=document.getElementById('input'),cancelBtn=document.getElementById('cancel'),hist=[],pending=null;
+botsById={};cfg.bots.forEach(function(x){botsById[x.id]=x;});
+selectedBots=botsById[q]?[q]:[cfg.bots[0].id];
+renderChips();
+function renderChips(){var box=document.getElementById('chips');box.innerHTML='';cfg.bots.forEach(function(x){var on=selectedBots.indexOf(x.id)>-1;var c=document.createElement('button');c.type='button';c.className='chip'+(on?' on':'');c.textContent=x.avatar+' '+x.name;c.setAttribute('aria-pressed',on);c.onclick=function(){var i=selectedBots.indexOf(x.id);if(i>-1){if(selectedBots.length>1){selectedBots.splice(i,1);c.classList.remove('on');c.setAttribute('aria-pressed','false');}}else{selectedBots.push(x.id);c.classList.add('on');c.setAttribute('aria-pressed','true');}};box.appendChild(c);});}
+var form=document.getElementById('form'),input=document.getElementById('input'),cancelBtn=document.getElementById('cancel');
+cancelBtn.onclick=function(){loadCancelled=true;if(genCtl)genCtl.abort();};
+document.getElementById('retryBtn').onclick=function(){enginePromise=null;if(lastFailed&&lastFailed.text){queue.unshift({text:lastFailed.text,cancelled:false});lastFailed=null;}setState('idle');pump();};
+function pump(){
+  if(working)return;
+  var item=queue.shift();
+  if(!item)return;
+  working=true;
+  runItem(item).then(function(){working=false;pump();},function(){working=false;pump();});
+}
+function runItem(item){
+  if(eng.provider!=='local')return runRemote(item);
+  return ensureEngine().then(function(){
+    var chain=Promise.resolve();
+    selectedBots.forEach(function(id){
+      chain=chain.then(function(){
+        if(item.cancelled)return;
+        var bot=botsById[id];if(!bot)return;
+        setState('responding',bot.name);
+        var wait=addWait(bot);
+        genCtl=new AbortController();
+        var h=H(bot.id);h.push({role:'user',content:item.text});
+        return ViaLocalEngine.chat(bot,h.slice(-10),{signal:genCtl.signal}).then(function(r){
+          h.push({role:'assistant',content:r});wait.remove();add('bot',r,bot);
+        },function(e){
+          wait.remove();
+          if((e&&e.code)==='ABORTED'||(e&&e.name)==='AbortError'){add('sys','Réponse annulée à ta demande.');item.cancelled=true;}
+          else{add('sys','Erreur ('+bot.name+') : '+(e&&e.message?e.message:'moteur indisponible'));lastFailed=item;setState('error',(e&&e.message)||'échec');throw e;}
+        }).then(function(){genCtl=null;});
+      });
+    });
+    return chain.then(function(){if(!item.cancelled){setState('ready');lastFailed=null;}});
+  },function(e){
+    if(e&&e.code==='NEEDS_CONSENT'){add('sys','Autorise le téléchargement du modèle ci-dessus pour discuter (un seul accord, réutilisé ensuite).');consentShown(true);input.value=item.text;input.focus();}
+    else if(e&&e.code==='ABORTED'){add('sys','Chargement annulé.');}
+    else{lastFailed=item;}
+  });
+}
+function runRemote(item){
+  var b0=botsById[q]||botsById[selectedBots[0]];
+  setState('responding',b0.name);
+  var wait=addWait(b0);
+  genCtl=new AbortController();
+  var key=document.getElementById('pKey').value||null;var h=H(b0.id);h.push({role:'user',content:item.text});
+  return ViaProviders.chat(eng,b0,h.slice(-10),genCtl.signal,key).then(function(r){
+    h.push({role:'assistant',content:r});wait.remove();add('bot',r,b0);setState('ready');lastFailed=null;
+  },function(e){
+    wait.remove();
+    if((e&&e.code)==='ABORTED'){add('sys','Réponse annulée à ta demande.');}
+    else{add('sys','Erreur : '+(e&&e.message?e.message:'moteur indisponible'));lastFailed=item;setState('error',(e&&e.message)||'échec');}
+  }).then(function(){genCtl=null;});
+}
+form.addEventListener('submit',function(e){e.preventDefault();var v=input.value.trim();if(!v)return;add('me',v);input.value='';queue.push({text:v,cancelled:false});pump();input.focus();});
 input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit();}});
-function setBusy(v){cancelBtn.hidden=!v;form.querySelector('button[type="submit"]').disabled=v;input.disabled=v;if(!v)input.focus();}
-cancelBtn.onclick=function(){if(pending)pending.abort();};
-form.addEventListener('submit',function(e){e.preventDefault();var v=input.value.trim();if(!v||pending)return;add('me',v);input.value='';
-if(!ViaProviders.status(eng).ok){add('bot','Je ne peux pas répondre : aucun moteur IA n’est configuré (et je ne simule pas de connexion). Clique sur « ✅ Autoriser » ci-dessus pour parler au SuperBot.');return;}
-var wait=document.createElement('div');wait.className='msg bot';wait.textContent=b.name+' écrit… (réponse en cours — tu peux annuler)';thread.appendChild(wait);thread.scrollTop=thread.scrollHeight;setBusy(true);
-var ctl=new AbortController();pending=ctl;var key=document.getElementById('pKey').value||null;hist.push({role:'user',content:v});
-ViaProviders.chat(eng,b,hist.slice(-10),ctl.signal,key).then(function(r){wait.remove();add('bot',r);hist.push({role:'assistant',content:r});}).catch(function(err2){wait.remove();if(err2&&err2.code==='ABORTED'){add('bot','Réponse annulée à ta demande.');}else{add('bot','Erreur : '+(err2?err2.message:'moteur indisponible'));}}).finally(function(){pending=null;setBusy(false);});});
 var actCtl=null;
 function renderActs(){var el=document.getElementById('actList');el.innerHTML='';ViaActions.TOOLS.forEach(function(t){var d=document.createElement('div');var ok=ViaActions.available(t);d.textContent=(ok?'🟢 ':'🔴 ')+t.title+' — '+t.desc+' [accès : '+t.perms+']'+(t.sensitive?' [SENSIBLE : validation exigée]':'')+((t.needs&&!ok)?' [manquant : '+t.needs+']':'');var rb=document.createElement('button');rb.type='button';rb.textContent=ok?'Exécuter':'Indisponible';rb.style.cssText='margin-left:8px;min-height:44px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f';rb.disabled=!ok;rb.onclick=function(){execAct(t);};d.appendChild(rb);el.appendChild(d);});}
 function actUI(state,res){document.getElementById('actState').textContent='État : '+state;if(res!==undefined)document.getElementById('actResult').textContent='Résultat réel : '+res;var r=(state==='en cours');document.getElementById('actStop').hidden=!r;document.getElementById('actTake').hidden=!r;}
@@ -162,6 +291,8 @@ var txt='';if(t.id==='ask'){txt=prompt('Question pour le moteur (service connect
 actCtl=new AbortController();actUI('en cours');add('bot','⚒️ Action « '+t.title+' » — objectif : '+t.desc);
 ViaActions.run(t.id,{bot:q,botObj:b,text:txt,title:b.name+' — '+t.title,key:document.getElementById('pKey').value||null,signal:actCtl.signal},function(st,msg){document.getElementById('actState').textContent='État : en cours — '+msg;}).then(function(r){actUI('terminée',r);add('bot','⚒️ « '+t.title+' » terminé : '+r);}).catch(function(e){if(e&&e.name==='AbortError')actUI('arrêtée','Arrêtée à ta demande : reprends la main.');else actUI('erreur',(e&&e.message)||'échec');}).finally(function(){actCtl=null;document.getElementById('actStop').hidden=true;document.getElementById('actTake').hidden=true;});}
 renderActs();
+fillSettings();refreshConsent();
+if(eng.provider==='local'&&ViaLocalEngine.getConsent()==='granted'){setState('checking');ensureEngine().catch(function(){});}else{setState(eng.provider==='local'?'needs-consent':'idle');if(eng.provider!=='local')document.getElementById('pMsg').textContent='Moteur manuel actif : '+eng.provider+'. Le modèle local automatique est en pause.';}
 ViaCaps.paint('capsLine');
 input.focus();
 }).catch(function(){document.getElementById('who').textContent='Hors-ligne : recharge en ligne une fois.';});
