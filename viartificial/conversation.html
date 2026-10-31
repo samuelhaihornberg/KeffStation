@@ -18,7 +18,6 @@ header.top h1{font-size:1rem;flex:1;min-width:140px}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap}
 .toolbar button{min-height:44px;padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font-size:.85rem}
 .toolbar button[aria-pressed="true"]{border-color:#ffd23f;color:#ffd23f}
-.notice{margin:12px 16px 0;padding:10px 14px;border:1px solid rgba(255,210,63,.4);border-radius:12px;color:#d8c98a;font-size:.82rem;background:rgba(255,210,63,.06)}
 .stage{flex:1;display:flex;gap:16px;padding:16px;align-items:flex-start}
 .activity{flex:1;min-width:0;border:1px dashed rgba(255,255,255,.2);border-radius:14px;padding:16px;color:#b9c0e6}
 .activity h2{font-size:1rem;color:#fff;margin-bottom:8px}
@@ -46,69 +45,63 @@ body[data-mode="fullscreen"] #thread{max-height:60vh}
 body[data-mode="side"] .stage{flex-direction:row}
 body[data-mode="side"] .msn{position:sticky;top:70px}
 body[data-min="1"] .msn{display:none}
-#bubble{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:30;display:none;align-items:center;gap:8px;min-height:56px;padding:12px 18px;border-radius:999px;border:1px solid #ffd23f;background:#1a1440;color:#ffd23f;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,.5)}
-body[data-min="1"] #bubble{display:inline-flex}
-#bubble small{font-weight:400;color:#b9c0e6}
-@media (max-width:720px){html,body{font-size:17px}.stage{flex-direction:column;padding:10px}body[data-mode="side"] .stage{flex-direction:column}body[data-mode="side"] .msn{position:static;width:100%}.msn{width:100%}#thread{max-height:none;min-height:44dvh}.msg{font-size:1rem;max-width:96%}textarea{min-height:56px}form.composer{padding-bottom:max(10px,env(safe-area-inset-bottom))}header.top{padding:10px 12px}.notice{margin:8px 10px 0;font-size:.85rem}}
+#settings{margin:12px 16px 0;border:1px solid rgba(184,77,255,.5);border-radius:12px;padding:12px 14px;background:rgba(184,77,255,.07)}
+#settings h2{font-size:1rem;color:#ffd23f;margin-bottom:8px}
+#settings label{display:block;margin:6px 0;font-size:.85rem}
+#settings input,#settings select{min-height:44px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#12142e;color:#fff;padding:6px 10px;width:100%}
+#settings button{min-height:48px;padding:10px 18px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f;margin:4px 4px 0 0;font-size:.9rem}
+#authBar{margin:10px 16px 0;max-width:720px}
+#authBar button{min-height:56px;width:100%;padding:12px 18px;border-radius:999px;border:none;background:linear-gradient(135deg,#b84dff,#ff3d9a);color:#fff;font-weight:700;font-size:1rem}
+@media (max-width:720px){#authBar{margin:8px 10px 0}}
+.statusline{margin:10px 16px 0;font-size:.82rem;color:#b9c0e6}
+#gearBtn{min-width:48px;min-height:48px;border-radius:12px;border:1px solid rgba(255,210,63,.5);background:rgba(255,210,63,.08);color:#ffd23f;font-size:1.3rem}
+@media (max-width:720px){html,body{font-size:17px}.stage{flex-direction:column;padding:10px}body[data-mode="side"] .stage{flex-direction:column}body[data-mode="side"] .msn{position:static;width:100%}.msn{width:100%}#thread{max-height:none;min-height:44dvh}.msg{font-size:1rem;max-width:96%}textarea{min-height:56px}form.composer{padding-bottom:max(10px,env(safe-area-inset-bottom))}header.top{padding:10px 12px}#settings{margin:8px 10px 0}.statusline{margin:8px 10px 0}}
+.enginebar{display:flex;gap:8px;align-items:center;padding:8px 12px;font-size:.8rem;color:#b9c0e6;border-top:1px solid rgba(255,255,255,.1)}#cancel{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ff3d9a;background:transparent;color:#ff3d9a}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body data-mode="fullscreen" data-min="0">
 <div class="app">
-<header class="top"><a href="./">← Bots</a><h1 id="title">Conversation</h1><a href="../">Hub</a></header>
+<header class="top"><a href="./">← Bots</a><h1 id="title">Conversation</h1><button id="gearBtn" type="button" aria-label="Réglages">⚙️</button><a href="../">Hub</a></header>
 <div class="toolbar" role="toolbar" aria-label="Modes d'affichage" style="padding:10px 16px 0">
 <button id="bFull" aria-pressed="true">⛶ Plein écran</button>
 <button id="bSide" aria-pressed="false">◧ Panneau latéral</button>
 <button id="bMin" aria-pressed="false">_ Réduire</button>
 </div>
-<p class="notice">💬 Bulle interne à cette PWA — jamais hors de l’app, pas de bulle Android système.</p>
-<p class="notice" id="engineBanner" role="status">⚙️ Moteur : aucun — conversation impossible pour l’instant.</p>
-<details class="notice" id="engineCfg"><summary>⚙️ Réglages</summary>
-<label>Fournisseur <select id="pProvider"><option value="none">Aucun (désactivé)</option><option value="ollama">Ollama local (gratuit, sans clé)</option><option value="custom">Endpoint compatible OpenAI (saisi par toi)</option><option value="webllm">WebLLM local (WebGPU, ~376 Mo)</option></select></label>
+<p class="statusline" id="engineBanner" role="status">⚙️ Moteur : vérification d’Ollama en cours…</p>
+<div id="authBar" hidden><button id="authBtn" type="button">✅ Autoriser — parler au SuperBot</button></div>
+<section id="settings" hidden aria-label="Réglages">
+<h2>⚙️ Réglages</h2>
+<p id="pMsg" role="status" style="font-size:.85rem;color:#b9c0e6"></p>
 <label>Adresse <input id="pUrl" inputmode="url" placeholder="http://localhost:11434"></label>
 <label>Modèle <input id="pModel" placeholder="llama3.2"></label>
+<p style="font-size:.8rem;color:#8f96bd">Sur téléphone : remplace l’Adresse par l’IP du PC (même Wi-Fi). Sans moteur joignable, aucune réponse n’est simulée.</p>
+<details><summary style="min-height:44px;color:#ffd23f">Avancé (autre moteur, WebLLM, actions)</summary>
+<label>Fournisseur <select id="pProvider"><option value="ollama">Ollama local (gratuit, sans clé)</option><option value="custom">Endpoint compatible OpenAI (saisi par toi)</option><option value="webllm">WebLLM local (WebGPU, ~376 Mo)</option><option value="none">Aucun (désactivé)</option></select></label>
 <label>Clé éventuelle (session seule, jamais sauvegardée) <input id="pKey" type="password" autocomplete="off" placeholder="optionnel, mémoire vive uniquement"></label>
-<span><button id="pSave" type="button">Enregistrer</button> <button id="pTest" type="button">Tester</button></span>
-<label>Modèle local (WebLLM, moteur commun à tous les SuperBots) <select id="pLocalModel"><option value="SmolLM2-360M-Instruct-q4f16_1-MLC">SmolLM2 360M (~376 Mo VRAM)</option><option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B (~879 Mo VRAM)</option></select></label>
-<label><input id="pConsent" type="checkbox" style="min-height:44px;width:44px"> J’accepte le téléchargement du modèle (taille affichée, cache navigateur, rien d’envoyé).</label>
-<span><button id="pLoad" type="button">Télécharger + charger</button> <button id="pUnload" type="button">Décharger (libère la mémoire, réduit la chauffe)</button></span>
-<span id="pProg" role="status"></span>
-<span>Stratégie : WebGPU → local ; sinon moteur distant (Ollama/endpoint) ou texte seul. Pas de « CPU virtuel » : les navigateurs ne commutent pas CPU/GPU en natif. Une tentative, jamais de boucle.</span>
-<span id="pMsg" role="status"></span>
-<span id="capsLine"></span>
-<span>Testé : conteneur Linux (HTTP 200, contrôles statiques). Non testé sur appareils physiques.</span>
-<span>Hébergement statique (GitHub Pages) : si ton endpoint exige une clé serveur, passe par un proxy adapté que tu opères — ne colle aucun secret durable : seule adresse+modèle sont enregistrés.</span>
-</details>
-<style>.enginebar{display:flex;gap:8px;align-items:center;padding:8px 12px;font-size:.8rem;color:#b9c0e6;border-top:1px solid rgba(255,255,255,.1)}#cancel{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ff3d9a;background:transparent;color:#ff3d9a}#engineCfg label{display:block;margin:6px 0}#engineCfg input,#engineCfg select{min-height:44px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#12142e;color:#fff;padding:6px 10px;width:100%}#engineCfg button{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f;margin:4px 4px 0 0}</style>
-<details class="notice" id="actBox"><summary>⚒️ Actions (outils explicitement connectés)</summary>
-<span>Capacités réelles : fichiers PWA, diagnostic, carnet, export. Le reste exige un service/compagnon connecté et reste marqué indisponible. Sensible (achat, suppression importante, publication, message externe) : validation explicite exigée avant exécution.</span>
-<span id="actList"></span>
-<span id="actState" role="status">Aucune action en cours.</span>
-<span id="actResult"></span>
+<span><button id="pTest" type="button">Tester</button></span>
+<label>Modèle local WebLLM <select id="pLocalModel"><option value="SmolLM2-360M-Instruct-q4f16_1-MLC">SmolLM2 360M (~376 Mo VRAM)</option><option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B (~879 Mo VRAM)</option></select></label>
+<span><button id="pLoad" type="button">Télécharger + charger</button> <button id="pUnload" type="button">Décharger</button></span>
+<span id="pProg" role="status" style="font-size:.8rem"></span>
+<h3 style="font-size:.9rem;color:#fff;margin-top:8px">⚒️ Actions (outils explicitement connectés)</h3>
+<span id="actList" style="font-size:.8rem"></span>
+<span id="actState" role="status" style="font-size:.8rem">Aucune action en cours.</span>
+<span id="actResult" style="font-size:.8rem"></span>
 <span><button id="actStop" type="button" hidden>■ Arrêter</button> <button id="actTake" type="button" hidden>Reprendre la main</button></span>
+<span id="capsLine" style="font-size:.78rem;color:#8f96bd"></span>
 </details>
-<details class="notice" id="memBox"><summary>📒 Carnet local de ce SuperBot (consulter, corriger, exporter, supprimer)</summary>
-<span>Après fermeture : carnet, préférences, projets, objectifs et réglages restent sur cet appareil (localStorage). Service actif requis : réponses IA et test moteur. Rien n’est enregistré en arrière-plan : le carnet démarre vide.</span>
-<span id="progLine" role="status"></span>
-<span id="setBox" hidden>Réglages indépendants — Compétence <select id="sSkill"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select> Initiative <select id="sInit"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select> Conseils <select id="sAdvice"><option value="rare">rares</option><option value="equilibre">équilibrés</option><option value="frequent">fréquents</option></select> <input id="sPersona" placeholder="nuance de personnalité…" style="width:100%"> <button id="sSave" type="button">Enregistrer réglages</button></span>
-<span><select id="mType"><option value="preference">préférence explicite</option><option value="project">projet</option><option value="goal">objectif</option><option value="memory">souvenir commun</option><option value="note">note</option></select> <input id="mText" placeholder="À enregistrer explicitement…" style="width:100%"></span>
-<span><button id="mAdd" type="button">Enregistrer (confirmé)</button> <button id="mExport" type="button">Exporter JSON</button> <button id="mWipe" type="button">Tout supprimer</button></span>
-<span><strong>Confirmé</strong> (vérifié par toi) :</span><span id="mConf">— vide —</span>
-<span><strong>Proposé</strong> (idée du personnage, à valider) :</span><span id="mProp">— vide —</span>
-</details>
+</section>
 <div class="stage">
 <section class="activity" aria-label="Activité à côté du chat"><h2>📝 Activité en cours</h2><p id="actHint">Passe en « Panneau latéral » pour utiliser ce panneau à côté de la conversation (ex. notes, plan GuideoPlan). Tout reste dans la PWA.</p><ul><li>Note 1 : …</li><li>Note 2 : …</li></ul></section>
 <section class="msn" id="msn" aria-label="Fenêtre de conversation style MSN">
 <div class="msn-title"><span class="avatar" id="avatar">🤖</span><span class="who"><strong id="who">…</strong><span class="status"><span class="dot" aria-hidden="true"></span><span id="status">En ligne (démo locale, simulé)</span></span></span><span class="winbtns"><button id="wMin" aria-label="Réduire la fenêtre">_</button><button id="wFull" aria-label="Bascule plein écran">⛶</button></span></div>
 <div id="thread" role="log" aria-live="polite" aria-label="Historique"></div>
 <form class="composer" id="form"><textarea id="input" rows="1" placeholder="Écris ton message… (Entrée = envoyer, Maj+Entrée = ligne)" aria-label="Message"></textarea><button type="submit" aria-label="Envoyer">➤</button></form>
-<div class="enginebar"><span id="engineLine">Moteur : aucun</span><button id="cancel" type="button" hidden>✕ Annuler la réponse</button></div>
+<div class="enginebar"><span id="engineLine">Moteur : Ollama (vérification…)</span><button id="cancel" type="button" hidden>✕ Annuler la réponse</button></div>
 </section>
 </div>
 </div>
-<button id="bubble" aria-label="Rouvrir la conversation">💬 <span id="bubbleName">Chat</span> <small>interne PWA</small></button>
 <script src="./providers.js"></script>
-<script src="./memory.js"></script>
 <script src="./actions.js"></script>
 <script src="./capabilities.js"></script>
 <script src="./local-engine.js"></script>
@@ -119,10 +112,10 @@ function setMode(m){body.dataset.mode=m;document.getElementById('bFull').setAttr
 function setMin(v){body.dataset.min=v?'1':'0';document.getElementById('bMin').setAttribute('aria-pressed',!!v);if(!v)document.getElementById('input').focus();}
 document.getElementById('bFull').onclick=function(){setMin(false);setMode('fullscreen');};
 document.getElementById('bSide').onclick=function(){setMin(false);setMode('side');};
-document.getElementById('bMin').onclick=function(){setMin(true);};
+document.getElementById('bMin').onclick=function(){setMin(body.dataset.min!=='1');};
 document.getElementById('wMin').onclick=function(){setMin(true);};
 document.getElementById('wFull').onclick=function(){setMin(false);setMode(body.dataset.mode==='fullscreen'?'side':'fullscreen');};
-document.getElementById('bubble').onclick=function(){setMin(false);};
+document.getElementById('gearBtn').onclick=function(){var s=document.getElementById('settings');s.hidden=!s.hidden;};
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&body.dataset.min!=='1')setMin(true);});
 try{var sm=localStorage.getItem('msn-mode');if(sm==='side'||sm==='fullscreen')setMode(sm);}catch(e){}
 fetch('./bots.json').then(function(r){return r.json();}).then(function(cfg){
@@ -130,17 +123,22 @@ var b=cfg.bots[0];cfg.bots.forEach(function(x){if(x.id===q)b=x;});
 document.getElementById('title').textContent=b.avatar+' '+b.name+' — '+b.specialty;
 document.getElementById('avatar').textContent=b.avatar;
 document.getElementById('who').textContent=b.name;
-document.getElementById('bubbleName').textContent=b.name;
 document.getElementById('status').textContent='En ligne (démo locale, personnage simulé)';
-function add(who,text){var d=document.createElement('div');d.className='msg '+(who==='me'?'me':'bot');var s=document.createElement('span');s.className='meta';s.textContent=who==='me'?'Moi':b.name+' (simulé)';d.appendChild(s);d.appendChild(document.createTextNode(text));if(who==='bot'){var t=String(text);if(t.indexOf('aucun moteur')===-1&&t.indexOf('annul')===-1&&t.indexOf('Erreur')===-1&&t.indexOf('écrit…')===-1){var pb=document.createElement('button');pb.type='button';pb.textContent='📌 Carnet';pb.setAttribute('aria-label','Proposer ce message au carnet (à valider)');pb.style.cssText='margin-left:8px;min-height:44px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f';pb.onclick=function(){ViaMemory.add(q,'memory',b.name+' : '+text,'proposed');renderMem();pb.textContent='📌 Proposé ✓';};d.appendChild(pb);}}thread.appendChild(d);thread.scrollTop=thread.scrollHeight;}
+function add(who,text){var d=document.createElement('div');d.className='msg '+(who==='me'?'me':'bot');var s=document.createElement('span');s.className='meta';s.textContent=who==='me'?'Moi':b.name+' (simulé)';d.appendChild(s);d.appendChild(document.createTextNode(text));thread.appendChild(d);thread.scrollTop=thread.scrollHeight;}
 var eng=ViaProviders.load();
 function paintEngine(){var s=ViaProviders.status(eng);document.getElementById('engineLine').textContent='Moteur : '+s.label;var bn=document.getElementById('engineBanner');bn.textContent=s.ok?('⚙️ '+s.label+' — vérification…'):('⚙️ Moteur : aucun — conversation impossible.');document.getElementById('pProvider').value=eng.provider;document.getElementById('pUrl').value=eng.baseUrl;document.getElementById('pModel').value=eng.model;
-if(eng.provider==='ollama'){var c=new AbortController();var t=setTimeout(function(){c.abort();},10000);ViaProviders.ping(eng,c.signal).then(function(){var d=new Date();var hh=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);bn.textContent='🟢 En ligne (vérifié '+hh+') — '+eng.model+' : les réponses viennent du moteur.';document.getElementById('engineLine').textContent='Moteur : '+eng.model+' (vérifié)';}).catch(function(e){bn.textContent='🔴 Hors ligne : '+(e&&e.message?e.message:'moteur injoignable');document.getElementById('engineLine').textContent='Moteur : injoignable';}).finally(function(){clearTimeout(t);});}
+if(eng.provider==='ollama'){var c=new AbortController();var t=setTimeout(function(){c.abort();},10000);ViaProviders.ping(eng,c.signal).then(function(){var d=new Date();var hh=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);bn.textContent='🟢 En ligne (vérifié '+hh+') — '+eng.model+' : les réponses viennent du moteur.';document.getElementById('engineLine').textContent='Moteur : '+eng.model+' (vérifié)';document.getElementById('pMsg').textContent='Ollama chargé et vérifié ('+hh+').';}).catch(function(e){bn.textContent='🔴 Hors ligne : '+(e&&e.message?e.message:'moteur injoignable');document.getElementById('engineLine').textContent='Moteur : injoignable';document.getElementById('pMsg').textContent='Ollama injoignable : lance « ollama serve » puis « ollama pull '+eng.model+' » (ou corrige l’Adresse).';}).finally(function(){clearTimeout(t);});}
 else if(eng.provider==='webllm'){try{var sm=ViaLocalEngine.summary();if(sm.phase==='ready'||sm.phase==='generating'){bn.textContent='🟢 En ligne — '+sm.model+' (WebGPU local, moteur réellement chargé).';document.getElementById('engineLine').textContent='Moteur : '+sm.model+' (WebGPU)';}else{bn.textContent='🟡 WebLLM '+sm.phase+' ('+eng.model+') : accord + « Télécharger + charger ».';}}catch(e){bn.textContent='🟡 WebLLM configuré : moteur non chargé.';}}
 else if(eng.provider==='custom'){bn.textContent='🟡 Configuré, non vérifié — lance « Tester » dans Réglages.';}}
 paintEngine();
-document.getElementById('pSave').onclick=function(){var pv=document.getElementById('pProvider').value;eng={provider:pv,baseUrl:document.getElementById('pUrl').value.trim(),model:pv==='webllm'?document.getElementById('pLocalModel').value:(document.getElementById('pModel').value.trim()||'llama3.2')};ViaProviders.save(eng);paintEngine();document.getElementById('pMsg').textContent='Config enregistrée (sans clé).';};
-document.getElementById('pLoad').onclick=function(){if(!document.getElementById('pConsent').checked){document.getElementById('pProg').textContent='Accord requis : coche la case avant le téléchargement.';return;}var mid=document.getElementById('pLocalModel').value;eng={provider:'webllm',baseUrl:'',model:mid};ViaProviders.save(eng);document.getElementById('pProvider').value='webllm';document.getElementById('pProg').textContent='Démarrage…';ViaLocalEngine.load(mid,function(s){document.getElementById('pProg').textContent='Progression : '+s.progress+' % — '+s.detail;}).then(function(){document.getElementById('pProg').textContent='Modèle chargé en mémoire : '+mid+' (WebGPU).';paintEngine();}).catch(function(e){document.getElementById('pProg').textContent='Échec : '+(e&&e.message?e.message:e)+((e&&e.code==='NO_WEBGPU')?' Appareil non compatible avec le modèle local : utilise Ollama/endpoint ou texte seul.':'');paintEngine();});};
+document.getElementById('authBtn').onclick=function(){authorizeOllama();};
+function hasSavedEng(){try{return !!localStorage.getItem('via-engine');}catch(e){return false;}}
+function refreshAuth(){document.getElementById('authBar').hidden=hasSavedEng()&&eng.provider!=='none';}
+function authorizeOllama(){eng={provider:'ollama',baseUrl:document.getElementById('pUrl').value.trim()||'http://localhost:11434',model:document.getElementById('pModel').value.trim()||'llama3.2'};ViaProviders.save(eng);var pp=document.getElementById('pProvider');if(pp)pp.value='ollama';document.getElementById('pMsg').textContent='Chargement d’Ollama… (autorisé par ce clic)';paintEngine();refreshAuth();input.focus();}
+function syncAddr(){eng.baseUrl=document.getElementById('pUrl').value.trim()||'http://localhost:11434';eng.model=document.getElementById('pModel').value.trim()||'llama3.2';ViaProviders.save(eng);paintEngine();}
+document.getElementById('pUrl').onchange=syncAddr;document.getElementById('pModel').onchange=syncAddr;
+refreshAuth();
+document.getElementById('pLoad').onclick=function(){var mid=document.getElementById('pLocalModel').value;eng={provider:'webllm',baseUrl:'',model:mid};ViaProviders.save(eng);document.getElementById('pProvider').value='webllm';document.getElementById('pProg').textContent='Démarrage…';ViaLocalEngine.load(mid,function(s){document.getElementById('pProg').textContent='Progression : '+s.progress+' % — '+s.detail;}).then(function(){document.getElementById('pProg').textContent='Modèle chargé en mémoire : '+mid+' (WebGPU).';paintEngine();}).catch(function(e){document.getElementById('pProg').textContent='Échec : '+(e&&e.message?e.message:e)+((e&&e.code==='NO_WEBGPU')?' Appareil non compatible avec le modèle local : utilise Ollama/endpoint ou texte seul.':'');paintEngine();});};
 document.getElementById('pUnload').onclick=function(){ViaLocalEngine.unload();document.getElementById('pProg').textContent='Modèle déchargé.';paintEngine();};
 document.getElementById('pTest').onclick=function(){var k=document.getElementById('pKey').value;document.getElementById('pMsg').textContent='Test en cours…';var c=new AbortController();var t=setTimeout(function(){c.abort();},15000);ViaProviders.chat(eng,b,[{role:'user',content:'Dis juste : test OK.'}],c.signal,k||null).then(function(r){document.getElementById('pMsg').textContent='Test réussi : '+r.slice(0,80);}).catch(function(e){document.getElementById('pMsg').textContent='Échec : '+e.message;}).finally(function(){clearTimeout(t);});};
 add('bot',b.greeting+' — '+cfg.disclaimer);
@@ -150,27 +148,10 @@ input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.
 function setBusy(v){cancelBtn.hidden=!v;form.querySelector('button[type="submit"]').disabled=v;input.disabled=v;if(!v)input.focus();}
 cancelBtn.onclick=function(){if(pending)pending.abort();};
 form.addEventListener('submit',function(e){e.preventDefault();var v=input.value.trim();if(!v||pending)return;add('me',v);input.value='';
-if(!ViaProviders.status(eng).ok){add('bot','Je ne peux pas répondre : aucun moteur IA n’est configuré (et je ne simule pas de connexion). Ouvre « Moteur IA : configurer » ci-dessus — Ollama local suffit, sans abonnement.');return;}
+if(!ViaProviders.status(eng).ok){add('bot','Je ne peux pas répondre : aucun moteur IA n’est configuré (et je ne simule pas de connexion). Clique sur « ✅ Autoriser » ci-dessus pour parler au SuperBot.');return;}
 var wait=document.createElement('div');wait.className='msg bot';wait.textContent=b.name+' écrit… (réponse en cours — tu peux annuler)';thread.appendChild(wait);thread.scrollTop=thread.scrollHeight;setBusy(true);
 var ctl=new AbortController();pending=ctl;var key=document.getElementById('pKey').value||null;hist.push({role:'user',content:v});
 ViaProviders.chat(eng,b,hist.slice(-10),ctl.signal,key).then(function(r){wait.remove();add('bot',r);hist.push({role:'assistant',content:r});}).catch(function(err2){wait.remove();if(err2&&err2.code==='ABORTED'){add('bot','Réponse annulée à ta demande.');}else{add('bot','Erreur : '+(err2?err2.message:'moteur indisponible'));}}).finally(function(){pending=null;setBusy(false);});});
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
-function renderMem(){var list=ViaMemory.entries(q);var c=list.filter(function(e){return e.status==='confirmed';});var pp=list.filter(function(e){return e.status!=='confirmed';});
-function line(e){return '<div>['+e.type+'] '+esc(e.text)+' <button type="button" data-act="ok" data-id="'+e.id+'">Valider</button> <button type="button" data-act="ed" data-id="'+e.id+'">Corriger</button> <button type="button" data-act="del" data-id="'+e.id+'">Supprimer</button></div>';}
-document.getElementById('mConf').innerHTML=c.length?c.map(line).join(''):'— vide —';
-document.getElementById('mProp').innerHTML=pp.length?pp.map(line).join(''):'— vide —';
-var pr=ViaMemory.progression(q);document.getElementById('progLine').textContent='Progression fondée sur '+pr.total+' expériences enregistrées ('+pr.confirmed+' confirmées, '+pr.proposed+' proposées) — rien d’autre.';
-var isGG=(q==='geeko'||q==='geekette');document.getElementById('setBox').hidden=!isGG;
-if(isGG){var st=ViaMemory.settings(q);document.getElementById('sSkill').value=String(st.skill);document.getElementById('sInit').value=String(st.initiative);document.getElementById('sAdvice').value=st.advice;document.getElementById('sPersona').value=st.persona||'';}}
-document.getElementById('memBox').addEventListener('click',function(e){var t=e.target;if(!t.dataset||!t.dataset.act)return;var id=t.dataset.id;
-if(t.dataset.act==='del')ViaMemory.remove(q,id);
-else if(t.dataset.act==='ok')ViaMemory.confirm(q,id);
-else if(t.dataset.act==='ed'){var cur=null;ViaMemory.entries(q).forEach(function(x){if(x.id===id)cur=x;});var nv=prompt('Corriger l’entrée :',cur?cur.text:'');if(nv!==null)ViaMemory.correct(q,id,nv);}
-renderMem();});
-document.getElementById('mAdd').onclick=function(){var t=document.getElementById('mText').value;if(!t.trim())return;ViaMemory.add(q,document.getElementById('mType').value,t,'confirmed');document.getElementById('mText').value='';renderMem();};
-document.getElementById('mExport').onclick=function(){var blob=new Blob([ViaMemory.exportBot(q)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='carnet-'+q+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},2000);};
-document.getElementById('mWipe').onclick=function(){if(confirm('Supprimer tout le carnet de ce SuperBot ?')){ViaMemory.clearBot(q);renderMem();}};
-document.getElementById('sSave').onclick=function(){ViaMemory.saveSettings(q,{skill:document.getElementById('sSkill').value,initiative:document.getElementById('sInit').value,advice:document.getElementById('sAdvice').value,persona:document.getElementById('sPersona').value});renderMem();};
 var actCtl=null;
 function renderActs(){var el=document.getElementById('actList');el.innerHTML='';ViaActions.TOOLS.forEach(function(t){var d=document.createElement('div');var ok=ViaActions.available(t);d.textContent=(ok?'🟢 ':'🔴 ')+t.title+' — '+t.desc+' [accès : '+t.perms+']'+(t.sensitive?' [SENSIBLE : validation exigée]':'')+((t.needs&&!ok)?' [manquant : '+t.needs+']':'');var rb=document.createElement('button');rb.type='button';rb.textContent=ok?'Exécuter':'Indisponible';rb.style.cssText='margin-left:8px;min-height:44px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f';rb.disabled=!ok;rb.onclick=function(){execAct(t);};d.appendChild(rb);el.appendChild(d);});}
 function actUI(state,res){document.getElementById('actState').textContent='État : '+state;if(res!==undefined)document.getElementById('actResult').textContent='Résultat réel : '+res;var r=(state==='en cours');document.getElementById('actStop').hidden=!r;document.getElementById('actTake').hidden=!r;}
@@ -181,9 +162,10 @@ var txt='';if(t.id==='ask'){txt=prompt('Question pour le moteur (service connect
 actCtl=new AbortController();actUI('en cours');add('bot','⚒️ Action « '+t.title+' » — objectif : '+t.desc);
 ViaActions.run(t.id,{bot:q,botObj:b,text:txt,title:b.name+' — '+t.title,key:document.getElementById('pKey').value||null,signal:actCtl.signal},function(st,msg){document.getElementById('actState').textContent='État : en cours — '+msg;}).then(function(r){actUI('terminée',r);add('bot','⚒️ « '+t.title+' » terminé : '+r);}).catch(function(e){if(e&&e.name==='AbortError')actUI('arrêtée','Arrêtée à ta demande : reprends la main.');else actUI('erreur',(e&&e.message)||'échec');}).finally(function(){actCtl=null;document.getElementById('actStop').hidden=true;document.getElementById('actTake').hidden=true;});}
 renderActs();
-ViaCaps.paint('capsLine');renderMem();
+ViaCaps.paint('capsLine');
 input.focus();
 }).catch(function(){document.getElementById('who').textContent='Hors-ligne : recharge en ligne une fois.';});
 </script>
+<script src="../refresh.js"></script>
 </body>
 </html>

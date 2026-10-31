@@ -36,8 +36,11 @@
     btn.textContent = '⟳';
     btn.title = 'Recharger (vide les caches)';
     btn.setAttribute('aria-label', 'Recharger la page et vider les caches');
+    // Adaptatif : à gauche si un champ d'envoi vit en bas à droite (ex. conversation),
+    // pour ne jamais masquer le contenu ni le bouton d'envoi.
+    const side = document.querySelector('form.composer, .composer') ? 'left:1rem' : 'right:1rem';
     btn.style.cssText = [
-      'position:fixed', 'bottom:1rem', 'right:1rem', 'z-index:9998',
+      'position:fixed', 'bottom:1rem', side, 'z-index:9998',
       'width:48px', 'height:48px', 'border-radius:50%',
       'border:1px solid rgba(255,255,255,.2)', 'background:rgba(10,12,34,.9)',
       'color:#ffd23f', 'font-size:22px', 'cursor:pointer',

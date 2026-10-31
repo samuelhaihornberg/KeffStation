@@ -1,19 +1,20 @@
 /* Fournisseurs de modèles — ViArtificial Labs (PWA statique, GitHub Pages).
    Séparation : profils (bots.json) / interface (conversation.html) / moteurs (ce fichier).
-   - Par défaut : AUCUN moteur configuré. L'UI doit afficher son absence, jamais simuler.
-   - Local/économique d'abord : Ollama local (gratuit, sans clé, sans abonnement).
+   - Par défaut : Ollama local PRÉCHARGÉ (gratuit, sans clé, sans abonnement). L'UI vérifie
+     sa présence au chargement et affiche son état réel, jamais simulé.
    - Endpoint compatible OpenAI en option, saisi par l'utilisateur. OpenAI non imposé.
    - Clé éventuelle : mémoire de session uniquement, jamais persistée, loggée ni commitée.
    - Pages statiques : secret serveur requis => passer par un proxy adapté, jamais en direct. */
 (function (global) {
   'use strict';
   var KEY = 'via-engine'; // localStorage : provider/baseUrl/model uniquement, JAMAIS de clé.
-  var DEFAULTS = { provider: 'none', baseUrl: 'http://localhost:11434', model: 'llama3.2' };
+  var DEFAULTS = { provider: 'ollama', baseUrl: 'http://localhost:11434', model: 'llama3.2' };
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(KEY) || '{}');
-      return { provider: s.provider || 'none', baseUrl: s.baseUrl || DEFAULTS.baseUrl, model: s.model || DEFAULTS.model };
-    } catch (e) { return { provider: 'none', baseUrl: DEFAULTS.baseUrl, model: DEFAULTS.model }; }
+      if (s && s.provider) return { provider: s.provider, baseUrl: s.baseUrl || DEFAULTS.baseUrl, model: s.model || DEFAULTS.model };
+      return { provider: DEFAULTS.provider, baseUrl: DEFAULTS.baseUrl, model: DEFAULTS.model }; // préchargé : Ollama.
+    } catch (e) { return { provider: DEFAULTS.provider, baseUrl: DEFAULTS.baseUrl, model: DEFAULTS.model }; }
   }
   function save(cfg) {
     try { localStorage.setItem(KEY, JSON.stringify({ provider: cfg.provider, baseUrl: cfg.baseUrl, model: cfg.model })); } catch (e) {}
