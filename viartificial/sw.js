@@ -1,4 +1,4 @@
-const CACHE = 'viartificial-v13';
+const CACHE = 'viartificial-v14';
 const ASSETS = ['./', './index.html', './xsstream.html', './conversation.html', './bots.json', './providers.js', './memory.js', './actions.js', './local-engine.js', './responsive.css', './capabilities.js', './manifest.json'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });
@@ -8,6 +8,10 @@ self.addEventListener('fetch', e => {
   if (url.origin !== self.location.origin) return;
   if (e.request.mode === 'navigate') {
     e.respondWith(fetch(e.request).then(res => { if (res.ok) { const c = res.clone(); caches.open(CACHE).then(cache => cache.put(e.request, c)); } return res; }).catch(() => caches.match(e.request).then(r => r || caches.match('./index.html'))));
+    return;
+  }
+  if (url.pathname.endsWith('/bots.json') || url.pathname.endsWith('bots.json')) {
+    e.respondWith(fetch(e.request, { cache: 'no-store' }).then(res => { if (res.ok) { const c = res.clone(); caches.open(CACHE).then(cache => cache.put(e.request, c)); } return res; }).catch(() => caches.match(e.request)));
     return;
   }
   if (/\.(js|css|png|jpg|jpeg|gif|svg|webp|woff2?|ttf|ico|json)$/.test(url.pathname)) {
