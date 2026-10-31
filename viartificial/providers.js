@@ -1,9 +1,11 @@
 /* Fournisseurs de modèles — ViArtificial Labs (PWA statique, GitHub Pages).
    Séparation : profils (bots.json) / interface (conversation.html) / moteurs (ce fichier).
-   - Par défaut : moteur LOCAL AUTOMATIQUE (modèle partagé téléchargé sur l'appareil,
-     accord explicite, choix auto selon l'appareil). L'UI affiche son état réel, jamais simulé.
-   - Réglage avancé : Ollama local, endpoint compatible OpenAI (saisi par l'utilisateur),
-     ou WebLLM manuel. OpenAI non imposé, aucun service payant activé automatiquement.
+   - Par défaut : moteur local CPU/WASM (modèle partagé téléchargé sur l'appareil,
+     accord explicite, choix auto selon l'appareil, Web Worker monothread sans
+     SharedArrayBuffer). L'UI affiche son état réel, jamais simulé.
+   - Réglage avancé : Ollama local, endpoint compatible OpenAI (saisi par l'utilisateur).
+     AUCUNE exécution WebGPU/WebLLM : l'ancien réglage 'webllm' est migré vers 'local'.
+   - Clé éventuelle : mémoire de session uniquement, jamais persistée, loggée ni commitée.
    - Clé éventuelle : mémoire de session uniquement, jamais persistée, loggée ni commitée.
    - Pages statiques : secret serveur requis => passer par un proxy adapté, jamais en direct. */
 (function (global) {
@@ -22,8 +24,8 @@
   }
   function status(cfg) {
     if (!cfg || cfg.provider === 'none') return { ok: false, label: 'Aucun moteur IA configuré' };
-    if (cfg.provider === 'local') return { ok: true, label: 'Modèle local automatique (partagé)' };
-    if (cfg.provider === 'webllm') return { ok: true, label: 'WebLLM local (WebGPU) — ' + (cfg.model || 'SmolLM2 360M') };
+    if (cfg.provider === 'local') return { ok: true, label: 'Modèle local CPU/WASM partagé (worker monothread)' };
+    if (cfg.provider === 'webllm') return { ok: true, label: 'Ancien réglage WebLLM (migré vers CPU/WASM) — choisis « local »' };
     if (cfg.provider === 'ollama') return { ok: true, label: 'Ollama local — ' + cfg.model };
     return { ok: true, label: 'Endpoint personnalisé — ' + cfg.model };
   }
@@ -35,7 +37,7 @@
       if (sm.phase === 'ready' || sm.phase === 'generating') return true;
       throw err('NOT_READY', 'Moteur local non prêt (' + sm.phase + ').');
     }
-    if (cfg.provider === 'webllm') throw err('NOT_AVAILABLE', 'WebLLM non intégré.');
+    if (cfg.provider === 'webllm') throw err('MIGRATED', 'Ancien réglage WebLLM/WebGPU supprimé : moteur CPU/WASM seul. Bascule sur « local ».');
     if (cfg.provider === 'ollama') {
       var base = (cfg.baseUrl || '').replace(/\/$/, '');
       var res;
@@ -58,7 +60,6 @@
     }
     if (cfg.provider === 'webllm') {
       if (!global.ViaLocalEngine) throw err('NOT_LOADED', 'Moteur local non chargé : recharge la page.');
-      global.ViaLocalEngine.setModel(cfg.model);
       return await global.ViaLocalEngine.chat(bot, history, { signal: signal });
     }
     var base = (cfg.baseUrl || '').replace(/\/$/, '');

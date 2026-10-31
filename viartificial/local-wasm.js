@@ -1,10 +1,11 @@
 /* Client du moteur LLM en Web Worker — même API que l'ancien moteur (load/chat/unload/summary).
+   Docs officielles transformers.js v3 : device 'wasm' = CPU/ONNX Runtime WASM.
    Le travail lourd (téléchargement, décodage ONNX, génération) tourne dans
    local-wasm-worker.js : l'interface reste réactive, même sur mobile.
-   - device: 'wasm' (CPU). Sans COOP/COEP (GitHub Pages), ONNX Runtime bascule
+   - device: 'wasm' (CPU), numThreads:1. Sans COOP/COEP (GitHub Pages), ONNX Runtime bascule
      seul en monothread : aucun SharedArrayBuffer requis.
-   - Annulation du téléchargement : commande 'cancel' -> AbortController du worker
-     (le runtime le permet via env.fetch). Annulation en génération : worker terminé
+   - Annulation du téléchargement : commande 'cancel' -> terminaison du worker
+     (3.7.2 : pas de env.fetch ; le navigateur coupe les fetch en vol). Annulation en génération : worker terminé
      côté client (mémoire libérée aussitôt), à recharger au prochain usage.
    - Un seul moteur + un seul modèle partagés ; personnalités via prompt système. */
 (function (global) {
@@ -12,12 +13,12 @@
   var WORKER_URL = './local-wasm-worker.js';
   var CDN = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm';
   var CANDIDATES = [
-    // Primaire vérifié le 2026-10-31 : accessible sans compte, Chat/Instruct,
-    // chat_template fourni dans la distribution, licence Apache 2.0.
-    // Poids mesuré : ≈790 Mo (model_q4.onnx). Wi-Fi recommandé.
-    { id: 'onnx-community/Qwen2.5-0.5B-Instruct', downloadMB: 800, license: 'Apache 2.0' },
-    { id: 'onnx-community/SmolLM2-360M-Instruct', downloadMB: 200, license: 'Apache 2.0' },
-    { id: 'onnx-community/SmolLM2-135M-ONNX', downloadMB: 80, license: 'Apache 2.0' }
+    // Vérifié 2026-10-31 (accès anonyme) : SmolLM2-360M-Instruct-ONNX
+    // (onnx/model_q4.onnx 386 Mo + tokenizer ≈ 390 Mo total, Apache-2.0,
+    // chat_template officiel présent) puis Qwen2.5-0.5B-Instruct q4 ≈ 800 Mo
+    // (Apache-2.0 via base Qwen, template présent, PC/Wi-Fi uniquement).
+    { id: 'onnx-community/SmolLM2-360M-Instruct-ONNX', downloadMB: 390, license: 'Apache 2.0' },
+    { id: 'onnx-community/Qwen2.5-0.5B-Instruct', downloadMB: 800, license: 'Apache 2.0' }
   ];
   var S = { phase: 'idle', model: null, progress: 0, detail: '' };
   var worker = null, seq = 0, pending = {}, busy = false, picked = null;
@@ -82,7 +83,7 @@
     var o = opt || {};
     try {
       var msgs = [{ role: 'system', content: sysPrompt(bot) }].concat(history);
-      var t = await rpc('chat', { messages: msgs.slice(-7) }, { onToken: o.onToken });
+      var t = await rpc('chat', { messages: msgs.slice(-5) }, { onToken: o.onToken });
       t = String(t).trim();
       if (!t) throw err('EMPTY', 'Réponse vide du moteur.');
       return t;

@@ -1,9 +1,10 @@
-/* Moteur IA local COMMUN — CPU/WebAssembly via Web Worker (AUCUN WebGPU).
-   Docs vérifiées (huggingface.co/docs/transformers.js) : pipeline text-generation,
-   messages [{role,content}], TextStreamer(skip_prompt), progress_callback, env.fetch.
+/* Moteur IA local COMMUN — CPU/WebAssembly via Web Worker (AUCUN WebGPU/WebLLM).
+   Docs officielles vérifiées (huggingface.co/docs/transformers.js v3 :
+   api/pipelines pipeline text-generation + api/env) : messages [{role,content}],
+   TextStreamer(skip_prompt), progress_callback, env.useBrowserCache.
    UN SEUL moteur partagé pour tous les SuperBots : la personnalité = prompt système.
-   - Pas de dépendance WebGPU : le chatbot fonctionne sans (WebGPU n'est même plus
-     consulté pour le choix du moteur ; sa présence reste notée au diagnostic).
+   - device:'wasm' (CPU), dtype:'q4', numThreads:1 forcé : GitHub Pages sans
+     COOP/COEP → monothread, aucun SharedArrayBuffer requis.
    - Inférence dans local-wasm-worker.js (thread séparé) : interface réactive.
    - Sans COOP/COEP (GitHub Pages), ONNX Runtime bascule seul en WASM monothread.
    - Une seule tentative de poids par accord (jamais de boucle) ; le cache
@@ -14,9 +15,12 @@
 (function (global) {
   'use strict';
   var MODELS = [
-    { id: 'onnx-community/Qwen2.5-0.5B-Instruct', downloadMB: 800, license: 'Apache 2.0', auto: true, label: 'Qwen2.5 0.5B Instruct — (≈800 Mo mesurés, licence Apache 2.0)' },
-    { id: 'onnx-community/SmolLM2-360M-Instruct', downloadMB: 200, license: 'Apache 2.0', auto: false, label: 'SmolLM2 360M — (≈200 Mo, licence Apache 2.0)' },
-    { id: 'onnx-community/SmolLM2-135M-ONNX', downloadMB: 80, license: 'Apache 2.0', auto: false, label: 'SmolLM2 135M — (≈80 Mo, base non conversationnelle, dernier recours)' }
+    // Défaut vérifié 2026-10-31 (anonyme, sans compte) :
+    // onnx-community/SmolLM2-360M-Instruct-ONNX — onnx/model_q4.onnx 386 Mo
+    // + tokenizer 3.5 Mo ≈ 390 Mo ; licence Apache-2.0 (source HuggingFaceTB) ;
+    // chat_template officiel présent (368 car., identique HuggingFaceTB).
+    { id: 'onnx-community/SmolLM2-360M-Instruct-ONNX', downloadMB: 390, license: 'Apache 2.0', auto: true, label: 'SmolLM2 360M Instruct — (≈390 Mo, Apache 2.0, défaut)' },
+    { id: 'onnx-community/Qwen2.5-0.5B-Instruct', downloadMB: 800, license: 'Apache 2.0', auto: false, label: 'Qwen2.5 0.5B Instruct — (≈800 Mo mesurés, Apache 2.0, PC/Wi-Fi uniquement, choix explicite)' }
   ];
   // Accord modèle local UNIQUEMENT (téléchargement + stockage sur l'appareil).
   // Ce n'est PAS un bandeau cookies : aucun traceur, aucun cookie facultatif ici.
@@ -25,8 +29,17 @@
   function setConsent(state) { try { localStorage.setItem(CONSENT_KEY, JSON.stringify({ state: state, ts: Date.now() })); } catch (e) {} return state; }
   // Choix automatique : moteur CPU/WASM si WebAssembly disponible, sinon erreur
   // précise. WebGPU n'est PLUS requis (ni consulté pour le choix).
-  function pickModel(cap) {
-    if (cap && cap.wasm) return { backend: 'wasm', id: null, downloadMB: 800 };
+  // Défaut : SmolLM2-360M-Instruct-ONNX (≈390 Mo vérifiés). Qwen 800 Mo
+  // uniquement si demandé
+  // explicitement (modelId) ou gros appareil non-mobile + mémoire >= 4 Go.
+  function pickModel(cap, wantId) {
+    if (wantId) { var mi = modelInfo(wantId); return { backend: 'wasm', id: mi.id, downloadMB: mi.downloadMB }; }
+    var mobile = false; try { mobile = /Android|iPhone|iPad/i.test(navigator.userAgent || ''); } catch (e) {}
+    var dm = 0; try { dm = navigator.deviceMemory || 0; } catch (e) {}
+    if (cap && cap.wasm) {
+      if (mobile || (dm && dm < 4)) return { backend: 'wasm', id: MODELS[0].id, downloadMB: MODELS[0].downloadMB };
+      return { backend: 'wasm', id: MODELS[0].id, downloadMB: MODELS[0].downloadMB };
+    }
     var why = (cap && cap.reasons && cap.reasons.length) ? cap.reasons.join(' ; ') : 'appareil non analysable';
     return { error: 'NO_LOCAL', message: 'Aucun moteur local ne peut fonctionner ici : ' + why + '.' };
   }
@@ -39,27 +52,16 @@
       return { ok: quotaMB === 0 || (quotaMB - usageMB) > needMB * 1.2, quotaMB: quotaMB, usageMB: usageMB, needMB: needMB };
     } catch (err) { return { ok: true, unknown: true, needMB: needMB }; }
   }
-  // Diagnostic complet : contexte sécurisé, WebGPU (info seule), WebAssembly,
-  // stockage, mémoire. Chaque cause est enregistrée (reasons),
-  // jamais de conclusion hâtive sur « tout l'appareil ».
+  // Diagnostic complet : contexte sécurisé, WebAssembly, stockage, mémoire.
+  // AUCUNE initialisation GPU (pas de requestAdapter/requestDevice) : simple
+  // présence d'API notée pour le diagnostic, sans coût mémoire. Jamais de
+  // conclusion hâtive sur « tout l'appareil ».
   var lastDetect = null;
   async function detect() {
     var reasons = [];
     var secure = false; try { secure = !!window.isSecureContext; } catch (e) {}
     if (!secure) reasons.push('contexte non sécurisé (service worker et cache exigent HTTPS ou localhost)');
-    var hasAPI = !!(navigator.gpu), adapterName = 'absent', f16 = false, deviceState = 'non testé';
-    if (hasAPI) {
-      try {
-        var ad = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
-        if (!ad) { adapterName = 'absent'; }
-        else {
-          try { adapterName = (ad.info && (ad.info.device || ad.info.architecture)) || 'présent'; } catch (e) { adapterName = 'présent'; }
-          try { f16 = ad.features.has('shader-f16'); } catch (e) {}
-          try { var dev = await ad.requestDevice({ requiredFeatures: [] }); deviceState = 'ok'; try { dev.destroy(); } catch (e) {} }
-          catch (e) { deviceState = 'refusé'; }
-        }
-      } catch (e) { adapterName = 'erreur : ' + (e && e.message ? e.message : e); }
-    }
+    var hasAPI = false; try { hasAPI = !!(navigator.gpu); } catch (e) {}
     var wasm = false; try { wasm = typeof WebAssembly !== 'undefined'; } catch (e) {}
     if (!wasm) reasons.push('WebAssembly absent : moteur CPU impossible');
     var threads = 'monothread (GitHub Pages ne définit pas COOP/COEP)';
@@ -67,24 +69,24 @@
     var dm = navigator.deviceMemory || 0;
     if (dm && dm < 4) reasons.push('mémoire appareil faible (' + dm + ' Go déclarés) : préfère un contexte court');
     var mobile = /Android|iPhone|iPad/i.test(navigator.userAgent || '');
-    var cap = { secure: secure, webgpu: hasAPI && deviceState === 'ok', shaderF16: f16, deviceMemoryGB: dm, mobile: mobile,
-      adapter: adapterName, device: deviceState, wasm: wasm, threads: threads,
+    var cap = { secure: secure, webgpu: false, shaderF16: false, deviceMemoryGB: dm, mobile: mobile,
+      adapter: hasAPI ? 'présent (non initialisé, moteur CPU seul)' : 'absent', device: 'non testé (CPU seul)', wasm: wasm, threads: threads,
       reasons: reasons, ok: !!wasm };
     lastDetect = cap;
     return cap;
   }
   // Parcours : détection → sélection CPU/WASM → stockage → téléchargement →
-  // chargement. Une seule tentative de poids (jamais de boucle) ; le cache
-  // navigateur évite tout re-téléchargement inutile.
-  async function autoLoad(onTick) {
+  // chargement. Essai en cascade petit→grand via le worker (chaque modèle une
+  // seule fois) ; le cache navigateur évite tout re-téléchargement inutile.
+  async function autoLoad(onTick, wantId) {
     var cap = await detect();
-    var pick = pickModel(cap);
+    var pick = pickModel(cap, wantId);
     if (pick.error) throw Object.assign(new Error(pick.message), { code: 'NO_LOCAL' });
-    var needMB = pick.downloadMB || 800;
+    var needMB = pick.downloadMB || 200;
     var st = await storageCheck(needMB);
     if (!st.ok) throw Object.assign(new Error('Stockage insuffisant : il faut ≈' + needMB + ' Mo libres (utilisé ' + st.usageMB + ' / quota ' + st.quotaMB + ' Mo). Libère de l’espace puis Réessaie.'), { code: 'STORAGE_FULL' });
     if (!global.ViaWasmEngine) throw Object.assign(new Error('Moteur CPU non chargé : recharge la page.'), { code: 'NOT_LOADED' });
-    return global.ViaWasmEngine.load(pick.id, onTick);
+    return global.ViaWasmEngine.load(wantId || null, onTick);
   }
   // Supprime les fichiers de modèles du cache navigateur (ciblé, sur demande explicite).
   async function deleteModels() {
