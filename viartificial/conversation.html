@@ -93,10 +93,10 @@ body[data-min="1"] .msn{display:none}
 <section id="consentBar" hidden aria-label="Accord modèle IA">
 <p><strong>Autoriser le téléchargement du modèle IA et son stockage sur cet appareil pour discuter avec les SuperBots ?</strong></p>
 <p id="consentSize">Modèle <span id="consentModel">…</span> — ≈ <span id="consentMB">…</span> Mo à télécharger une seule fois (Wi-Fi conseillé). La progression réelle s’affiche pendant le téléchargement.</p>
-<p class="consentBtns"><button id="consentGo" type="button">Autoriser et démarrer</button><button id="consentLater" type="button">Plus tard</button><button id="consentDetails" type="button">Détails</button></p>
+<p class="consentBtns"><button id="consentGo" type="button">Autoriser</button><button id="consentLater" type="button">Plus tard</button><button id="consentDetails" type="button">Détails</button></p>
 <p id="consentNoLocal" hidden style="font-size:.85rem;color:#ff9db1"></p>
 <div id="consentDetailText" hidden>
-<p>Le modèle est partagé par tous les SuperBots : chacun garde sa personnalité, sa mémoire et ses conversations. Licence : <span id="consentLicense"></span>. Fichiers stockés dans le cache du navigateur, réutilisés sans re-téléchargement ; moteur rechargé automatiquement au besoin.</p>
+<p>Le modèle est partagé par tous les SuperBots : chacun garde sa personnalité, sa mémoire et ses conversations. Licence : <span id="consentLicense"></span>. Fichiers stockés dans le cache du navigateur, réutilisés sans re-téléchargement ; moteur chargé uniquement quand tu appuies sur Charger (jamais en arrière-plan, jamais sans ton appui).</p>
 <h4 style="font-size:.85rem;color:#fff">Autorisations de la plateforme KeffStation (KiffTech, Tricktrocjob, ViArtificial, Videogames)</h4>
 <ul id="permList">
 <li>🧠 Modèle IA local (≈ <span id="pmMB">…</span> Mo) : <strong id="psModel">—</strong></li>
@@ -106,11 +106,13 @@ body[data-min="1"] .msn{display:none}
 <li>📴 Hors-ligne (service workers des 4 PWA) : <strong id="psSW">—</strong></li>
 <li>🍪 Cookies / traceurs : <strong>aucun</strong></li>
 </ul>
-<p>Ceci n’est pas un bandeau cookies : aucun traceur, aucun cookie facultatif. Le bouton « Autoriser et démarrer » accorde le modèle + stockage persistant + notifications ; micro, caméra, partage d’écran et position restent demandés séparément par le navigateur, uniquement par la fonction qui en a besoin. Accord retirable à tout moment dans ⚙️ Réglages (avec suppression des fichiers).</p>
+<p>Ceci n’est pas un bandeau cookies : aucun traceur, aucun cookie facultatif. Le bouton « Autoriser » accorde le modèle + stockage persistant + notifications ; micro, caméra, partage d’écran et position restent demandés séparément par le navigateur, uniquement par la fonction qui en a besoin. Accord retirable à tout moment dans ⚙️ Réglages (avec suppression des fichiers).</p>
+<p style="font-size:.82rem;color:#8f96bd">WASM réduit le risque de fermeture par manque de mémoire mais ne le garantit pas : si le navigateur ferme l’onglet, relance la page — le cache évite de tout retélécharger.</p>
 </div>
 <div id="progWrap" hidden><div class="term" id="termLog" aria-hidden="true"></div><div id="progBar"><div id="progFill"></div></div><p id="progText" class="term" role="status"></p></div>
 </section>
 <div id="chips" role="group" aria-label="SuperBots qui répondent"></div>
+<div id="loadBar" hidden style="margin:10px 16px 0;max-width:720px"><button id="loadBtn" type="button" style="min-height:56px;width:100%;padding:12px 18px;border-radius:999px;border:none;background:linear-gradient(135deg,#27d17f,#1e6bff);color:#fff;font-weight:700;font-size:1rem">📥 Charger le modèle local (≈800 Mo, Wi-Fi recommandé)</button><p style="font-size:.8rem;color:#8f96bd;margin-top:6px">Un seul moteur partagé, conservé en cache. Aucun téléchargement sans ton appui.</p></div>
 <section id="settings" hidden aria-label="Réglages">
 <h2>⚙️ Réglages</h2>
 <p id="pMsg" role="status" style="font-size:.85rem;color:#b9c0e6"></p>
@@ -124,15 +126,14 @@ body[data-min="1"] .msn{display:none}
 </div>
 <p style="font-size:.8rem;color:#8f96bd">Stockage navigateur : <span id="storageInfo">—</span></p>
 <p><button id="withdrawBtn" type="button">Retirer l’accord</button> <button id="deleteModelsBtn" type="button">Supprimer les modèles téléchargés</button></p>
-<details><summary style="min-height:44px;color:#ffd23f">Avancé (autre moteur, WebLLM, actions)</summary>
-<label>Fournisseur <select id="pProvider"><option value="local">Modèle local automatique (partagé)</option><option value="ollama">Ollama local (gratuit, sans clé)</option><option value="custom">Endpoint compatible OpenAI (saisi par toi)</option><option value="webllm">WebLLM manuel (WebGPU)</option><option value="none">Aucun (désactivé)</option></select></label>
+<details><summary style="min-height:44px;color:#ffd23f">Avancé (autre moteur, actions)</summary>
+<label>Fournisseur <select id="pProvider"><option value="local">Modèle local automatique (partagé)</option><option value="ollama">Ollama local (gratuit, sans clé)</option><option value="custom">Endpoint compatible OpenAI (saisi par toi)</option><option value="none">Aucun (désactivé)</option></select></label>
 <label>Adresse (Ollama/endpoint) <input id="pUrl" inputmode="url" placeholder="http://localhost:11434"></label>
 <label>Modèle (Ollama/endpoint) <input id="pModel" placeholder="llama3.2"></label>
 <p style="font-size:.8rem;color:#8f96bd">Sur téléphone avec Ollama : remplace l’Adresse par l’IP du PC (même Wi-Fi). Sans moteur joignable, aucune réponse n’est simulée.</p>
 <label>Clé éventuelle (session seule, jamais sauvegardée) <input id="pKey" type="password" autocomplete="off" placeholder="optionnel, mémoire vive uniquement"></label>
 <span><button id="pTest" type="button">Tester</button></span>
-<label>Modèle local WebLLM <select id="pLocalModel"><option value="SmolLM2-360M-Instruct-q4f16_1-MLC">SmolLM2 360M (~376 Mo VRAM)</option><option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B (~879 Mo VRAM)</option></select></label>
-<span><button id="pLoad" type="button">Télécharger + charger</button> <button id="pUnload" type="button">Décharger</button></span>
+<span><button id="pUnload" type="button">Décharger le moteur (libère la mémoire)</button></span>
 <span id="pProg" role="status" style="font-size:.8rem"></span>
 <h3 style="font-size:.9rem;color:#fff;margin-top:8px">⚒️ Actions (outils explicitement connectés)</h3>
 <span id="actList" style="font-size:.8rem"></span>
@@ -178,6 +179,7 @@ document.getElementById('avatar').textContent=b.avatar;
 document.getElementById('who').textContent=b.name;
 function add(who,text,botObj){var d=document.createElement('div');d.className='msg '+who;var s=document.createElement('span');s.className='meta';s.textContent=who==='me'?'Moi':(botObj?botObj.name+' (moteur local)':b.name+' (simulé)');if(who==='sys')s.textContent='ℹ️ info';d.appendChild(s);d.appendChild(document.createTextNode(text));thread.appendChild(d);thread.scrollTop=thread.scrollHeight;return d;}
 function addWait(bot){var d=document.createElement('div');d.className='msg bot';d.textContent=bot.name+' écrit… ';var c=document.createElement('span');c.className='blink';c.textContent='▊';c.setAttribute('aria-hidden','true');d.appendChild(c);thread.appendChild(d);thread.scrollTop=thread.scrollHeight;return d;}
+function addStream(bot){var d=document.createElement('div');d.className='msg bot';var s=document.createElement('span');s.className='meta';s.textContent=bot.name+' (moteur local)';d.appendChild(s);var body=document.createElement('span');d.appendChild(body);thread.appendChild(d);thread.scrollTop=thread.scrollHeight;return{box:d,body:body};}
 // Ajoute un message système sauf s'il est identique au dernier (pas de répétitions).
 function addOnce(kind,text){try{var ms=thread.querySelectorAll('.msg');if(ms.length&&ms[ms.length-1].textContent.indexOf(text)!==-1)return;}catch(e){}add(kind,text);}
 function pulseOn(){try{return localStorage.getItem('via-pulse')!=='off';}catch(e){return true;}}
@@ -197,6 +199,7 @@ function addPulsed(bot,text){
   return d;
 }
 var eng=ViaProviders.load();
+var loadArmed=false; // vrai uniquement après appui explicite sur « Charger le modèle » (jamais auto)
 // Migration : un ancien réglage manuel « webllm » ne doit plus bloquer le parcours
 // automatique. Bascule vers le mode local automatique (une seule fois) SANS
 // supprimer conversations ni fichiers en cache (réutilisés par le moteur).
@@ -215,7 +218,7 @@ var botsById={},selectedBots=[],queue=[],working=false,lastFailure=null,enginePr
 var hists={};function H(id){if(!hists[id])hists[id]=[];return hists[id];}
 var banner=document.getElementById('engineBanner'),eline=document.getElementById('engineLine'),dotEl=document.querySelector('#msn .dot'),statusEl=document.getElementById('status');
 function setState(st,msg){
-  var map={idle:['Moteur : en attente d’autorisation…','Hors ligne — en attente','#8f96bd'],
+  var map={idle:['Moteur : non chargé — appuie sur « Charger le modèle local ».','Hors ligne — non chargé','#8f96bd'],
     'needs-consent':['Moteur : en attente d’autorisation…','Hors ligne — autorisation requise','#8f96bd'],
     checking:['Vérification du moteur…','Vérification…','#ffd23f'],
     downloading:['Téléchargement du modèle… '+(msg||''),'Téléchargement…','#ffd23f'],
@@ -229,11 +232,15 @@ function setState(st,msg){
   document.getElementById('cancel').hidden=!(st==='downloading'||st==='loading'||st==='responding');
   document.getElementById('retryBtn').hidden=(st!=='error');
   var pw=document.getElementById('progWrap');if(pw)pw.hidden=(st!=='downloading'&&st!=='loading');
+  var lb=document.getElementById('loadBar'),lbtn=document.getElementById('loadBtn');
+  if(lb){var show=eng.provider==='local'&&ViaLocalEngine.getConsent()==='granted'&&(st==='idle'||st==='error');lb.hidden=!show;
+    if(lbtn)lbtn.innerHTML=(st==='error'?'↻ Recharger le modèle':'📥 Charger le modèle local')+' (≈800 Mo conservés en cache après le 1er chargement)';}
 }
 // Cause réelle, en clair : jamais de message générique quand le code est connu.
 function explain(e){
   var code=e&&e.code,msg=e&&e.message?e.message:'moteur indisponible';
   if(code==='NEEDS_CONSENT')return 'Autorisation requise : autorise le téléchargement ci-dessus (un seul accord).';
+  if(code==='NEEDS_LOAD')return 'Modèle non chargé : appuie sur « Charger le modèle local » ci-dessus — ton message partira juste après.';
   if(code==='NOT_LOADED')return 'Modèle non chargé : autorise le téléchargement ci-dessus (un seul accord), ou recharge-le dans Réglages (Avancé).';
   if(code==='NO_WEBGPU'||code==='NO_F16')return 'Appareil incompatible : '+msg+' Solution sans boucle ni payant : choisis Ollama gratuit dans Réglages (Avancé), ou reviens sur un appareil avec WebGPU.';
   if(code==='NO_LOCAL')return msg+' Aucun service distant ne sera configuré sans ton accord : choisis-en un explicitement dans Réglages (Avancé) ou reviens sur un appareil compatible.';
@@ -287,13 +294,15 @@ function paintDiag(cap){
   try{var pk=ViaLocalEngine.pickModel(cap);L.push('moteur sélectionné : '+(pk.error?('aucun ('+pk.error+')'):pk.backend+' / '+(pk.id||'auto')));}catch(e){}
   try{var sm=ViaLocalEngine.summary();if(sm){L.push('moteur actif : '+(sm.backend||'?')+' / modèle : '+(sm.model||'—'));if(sm.tokenizer)L.push('tokenizer : '+sm.tokenizer);if(sm.mode&&sm.mode!=='—')L.push('mode : '+sm.mode);} }catch(e){}
   if(cap.reasons&&cap.reasons.length)L.push('causes : '+cap.reasons.join(' | '));
+  else L.push('causes : aucune (appareil compatible)');
+  try{var sm2=ViaLocalEngine.summary();if(sm2){if(sm2.backend)L.push('moteur actif : '+sm2.backend+(sm2.model?' / '+sm2.model:''));if(sm2.threads)L.push('threads : '+sm2.threads);if(sm2.tokenizer)L.push('tokenizer : '+sm2.tokenizer);}}catch(e){}
   el.textContent=L.join('\n');
 }
 function paintStorage(){
   var el=document.getElementById('storageInfo');if(!el)return;el.textContent='calcul…';
   ViaLocalEngine.storageCheck(0).then(function(s){el.textContent=s.unknown?'non mesurable sur ce navigateur':'utilisé '+s.usageMB+' / quota '+s.quotaMB+' Mo';});
 }
-document.getElementById('consentGo').onclick=function(){ViaLocalEngine.setConsent('granted');refreshConsent();requestPlatformPerms().then(function(){paintPerms();});ensureEngine().then(function(){updateIdCard();}).catch(function(){});};
+document.getElementById('consentGo').onclick=function(){ViaLocalEngine.setConsent('granted');refreshConsent();requestPlatformPerms().then(function(){paintPerms();});setState('idle');};
 document.getElementById('consentLater').onclick=function(){ViaLocalEngine.setConsent('later');refreshConsent();setState('needs-consent');};
 document.getElementById('consentDetails').onclick=function(){var t=document.getElementById('consentDetailText');t.hidden=!t.hidden;if(!t.hidden)paintPerms();};
 // Autorisations réellement accordables en un geste : stockage persistant + notifications.
@@ -338,6 +347,8 @@ function ensureEngine(){
   var sm=ViaLocalEngine.summary();
   if(sm.phase==='ready')return Promise.resolve(true);
   if(enginePromise)return enginePromise;
+  // JAMAIS de démarrage automatique : seul le bouton « Charger » arme le chargement.
+  if(!loadArmed){var e0=new Error('Chargement non demandé : appuie sur « Charger le modèle local ».');e0.code='NEEDS_LOAD';return Promise.reject(e0);}
   enginePromise=(async function(){
     var c=ViaLocalEngine.getConsent();
     if(c!=='granted'){setState('needs-consent');consentShown(true);var e1=new Error('Autorisation requise pour télécharger le modèle.');e1.code='NEEDS_CONSENT';throw e1;}
@@ -356,29 +367,46 @@ function ensureEngine(){
     orchSet('personnalite','OK');orchSet('regles','OK');
     setState('ready');return true;
   })();
-  enginePromise.then(function(){},function(e){enginePromise=null;if(e&&(e.code==='NEEDS_CONSENT'||e.code==='ABORTED')){if(e.code!=='NEEDS_CONSENT')setState('idle');}else{setState('error',explain(e));for(var k in orch){if(orch[k][1]==='>>'||orch[k][1]==='…')orch[k][1]='ERREUR';}paintTerm();paintDiag();lastFailure={stage:'engine',item:null};}});
+  enginePromise.then(function(){},function(e){enginePromise=null;if(e&&(e.code==='NEEDS_CONSENT'||e.code==='ABORTED'||e.code==='NEEDS_LOAD')){setState(e.code==='NEEDS_CONSENT'?'needs-consent':'idle');}else{setState('error',explain(e));for(var k in orch){if(orch[k][1]==='>>'||orch[k][1]==='…')orch[k][1]='ERREUR';}paintTerm();paintDiag();lastFailure={stage:'engine',item:null};}});
   return enginePromise;
 }
+// Bouton unique de chargement : armé par l'utilisateur, jamais automatique.
+// Double-clic sans effet (promesse partagée + bouton désactivé pendant le chargement).
+document.getElementById('loadBtn').onclick=function(){
+  var b=this;var ph='';try{ph=ViaLocalEngine.summary().phase;}catch(e){}
+  if(ph==='downloading'||ph==='loading'||ph==='generating'||ph==='ready')return;
+  if(enginePromise)return;
+  loadArmed=true;b.disabled=true;setState('checking');
+  ensureEngine().then(function(){updateIdCard();pump();},function(){}).then(function(){b.disabled=false;});
+};
 fillSettings();
-document.getElementById('pProvider').onchange=function(){eng.provider=this.value;eng.baseUrl=document.getElementById('pUrl').value.trim();eng.model=document.getElementById('pModel').value.trim();ViaProviders.save(eng);fillSettings();if(eng.provider==='local'&&ViaLocalEngine.getConsent()==='granted')ensureEngine().catch(function(){});};
+document.getElementById('pProvider').onchange=function(){eng.provider=this.value;eng.baseUrl=document.getElementById('pUrl').value.trim();eng.model=document.getElementById('pModel').value.trim();ViaProviders.save(eng);fillSettings();};
 document.getElementById('pUrl').onchange=function(){eng.baseUrl=this.value.trim();ViaProviders.save(eng);};
 document.getElementById('pModel').onchange=function(){eng.model=this.value.trim();ViaProviders.save(eng);};
 document.getElementById('withdrawBtn').onclick=function(){ViaLocalEngine.setConsent('withdrawn');enginePromise=null;lastFailure=null;try{ViaLocalEngine.unload();}catch(e){}setState('needs-consent');refreshConsent();document.getElementById('pMsg').textContent='Accord retiré. Les fichiers restent en cache : supprime-les ci-dessous si besoin.';};
 document.getElementById('deleteModelsBtn').onclick=function(){if(!confirm('Supprimer les fichiers du modèle téléchargé ? Ils seront re-téléchargés au prochain usage autorisé.'))return;var self=this;self.disabled=true;ViaLocalEngine.deleteModels().then(function(n){enginePromise=null;document.getElementById('pMsg').textContent='Modèles supprimés ('+n+' cache(s) vidé(s)).';setState(ViaLocalEngine.getConsent()==='granted'?'idle':'needs-consent');paintStorage();}).catch(function(e){document.getElementById('pMsg').textContent='Suppression incomplète : '+(e&&e.message?e.message:e);}).finally(function(){self.disabled=false;});};
-document.getElementById('pLoad').onclick=function(){var mid=document.getElementById('pLocalModel').value;eng={provider:'webllm',baseUrl:'',model:mid};ViaProviders.save(eng);fillSettings();enginePromise=null;document.getElementById('pProg').textContent='Démarrage…';ViaLocalEngine.load(mid,function(s){document.getElementById('pProg').textContent='Progression : '+s.progress+' % — '+s.detail;}).then(function(){document.getElementById('pProg').textContent='Modèle chargé en mémoire : '+mid+' (WebGPU).';}).catch(function(e){document.getElementById('pProg').textContent='Échec : '+(e&&e.message?e.message:e)+((e&&e.code==='NO_WEBGPU')?' Appareil non compatible avec le modèle local : Retire l’accord ou choisis un moteur distant gratuit dans Fournisseur.':(e&&e.code==='STORAGE_FULL')?' Libère de l’espace puis Réessaie (une seule tentative à la fois).':'');});};
-document.getElementById('pUnload').onclick=function(){enginePromise=null;lastFailure=null;ViaLocalEngine.unload();document.getElementById('pProg').textContent='Modèle déchargé.';setState('idle');};
+document.getElementById('pUnload').onclick=function(){enginePromise=null;lastFailure=null;loadArmed=false;ViaLocalEngine.unload();document.getElementById('pProg').textContent='Modèle déchargé.';setState('idle');};
 document.getElementById('pTest').onclick=function(){var k=document.getElementById('pKey').value;document.getElementById('pMsg').textContent='Test en cours…';var c=new AbortController();var t=setTimeout(function(){c.abort();},15000);ViaProviders.chat(eng,b,[{role:'user',content:'Dis juste : test OK.'}],c.signal,k||null).then(function(r){document.getElementById('pMsg').textContent='Test réussi : '+r.slice(0,80);}).catch(function(e){document.getElementById('pMsg').textContent='Échec : '+e.message;}).finally(function(){clearTimeout(t);});};
 add('bot',b.greeting+' — '+cfg.disclaimer);
 thread.lastChild.querySelector('.meta').textContent=b.name+' — accueil prédéfini (pas une réponse IA)';
 botsById={};cfg.bots.forEach(function(x){botsById[x.id]=x;});
 selectedBots=botsById[q]?[q]:[cfg.bots[0].id];
 renderChips();
+var restoredN=restoreConvs();
+if(restoredN>0)addOnce('sys',restoredN+' message(s) précédent(s) restauré(s) pour le contexte.');
+try{window.addEventListener('pagehide',function(){try{for(var k in hists)saveConv(k);}catch(e){}});}catch(e){}
 function renderChips(){var box=document.getElementById('chips');box.innerHTML='';cfg.bots.forEach(function(x){var on=selectedBots.indexOf(x.id)>-1;var c=document.createElement('button');c.type='button';c.className='chip'+(on?' on':'');c.textContent=x.avatar+' '+x.name;c.setAttribute('aria-pressed',on);c.onclick=function(){var i=selectedBots.indexOf(x.id);if(i>-1){if(selectedBots.length>1){selectedBots.splice(i,1);c.classList.remove('on');c.setAttribute('aria-pressed','false');}}else{selectedBots.push(x.id);c.classList.add('on');c.setAttribute('aria-pressed','true');}};box.appendChild(c);});}
 var form=document.getElementById('form'),input=document.getElementById('input'),cancelBtn=document.getElementById('cancel');
-cancelBtn.onclick=function(){loadCancelled=true;if(genCtl)genCtl.abort();};
+cancelBtn.onclick=function(){loadCancelled=true;if(genCtl)genCtl.abort();var ph='';try{ph=ViaLocalEngine.summary().phase;}catch(e){}if(ph==='downloading'||ph==='loading'||ph==='generating'){try{ViaWasmEngine.cancel();}catch(e){}loadArmed=false;}};
 document.getElementById('retryBtn').onclick=function(){enginePromise=null;var f=lastFailure;lastFailure=null;if(f&&f.item){queue.unshift({text:f.item.text,cancelled:false});}setState('idle');pump();};
 function pump(){
-  if(working)return;
+  if(working||!queue.length)return;
+  var sm={phase:'idle'};try{sm=ViaLocalEngine.summary();}catch(e){}
+  if(eng.provider!=='local'){var it0=queue.shift();if(!it0)return;working=true;runItem(it0).then(function(){working=false;pump();},function(){working=false;pump();});return;}
+  if(sm.phase!=='ready'){
+    if(!enginePromise)addOnce('sys','Modèle non chargé : appuie sur « Charger le modèle local » ci-dessus — ton message partira juste après.');
+    return;
+  }
   var item=queue.shift();
   if(!item)return;
   working=true;
@@ -393,15 +421,14 @@ function runItem(item){
         if(item.cancelled)return;
         var bot=botsById[id];if(!bot)return;
         setState('responding',bot.name);
-        var wait=addWait(bot);
+        var sd=addStream(bot);
         genCtl=new AbortController();
         var h=H(bot.id);h.push({role:'user',content:item.text});
-        return ViaLocalEngine.chat(bot,h.slice(-10),{signal:genCtl.signal}).then(function(r){
-          h.push({role:'assistant',content:r});wait.remove();addPulsed(bot,r);
+        return ViaLocalEngine.chat(bot,h.slice(-6),{signal:genCtl.signal,onToken:function(t){sd.body.textContent+=t;thread.scrollTop=thread.scrollHeight;}}).then(function(r){
+          sd.body.textContent=r;h.push({role:'assistant',content:r});saveConv(bot.id);
         },function(e){
-          wait.remove();
-          if((e&&e.code)==='ABORTED'||(e&&e.name)==='AbortError'){add('sys','Réponse annulée à ta demande.');item.cancelled=true;}
-          else{addOnce('sys','Erreur ('+bot.name+') : '+explain(e));lastFailure={stage:'response',item:item};setState('error',explain(e));throw e;}
+          if((e&&e.code)==='ABORTED'||(e&&e.name)==='AbortError'){sd.body.textContent+=' ⏹';addOnce('sys','Réponse interrompue : moteur déchargé pour libérer la mémoire. Recharge pour continuer.');item.cancelled=true;}
+          else{sd.box.remove();addOnce('sys','Erreur ('+bot.name+') : '+explain(e));lastFailure={stage:'response',item:item};setState('error',explain(e));throw e;}
         }).then(function(){genCtl=null;});
       });
     });
@@ -411,10 +438,13 @@ function runItem(item){
     }).then(function(){if(!item.cancelled){setState('ready');lastFailure=null;}});
   },function(e){
     if(e&&e.code==='NEEDS_CONSENT'){addOnce('sys','Autorise le téléchargement du modèle ci-dessus pour discuter (un seul accord, réutilisé ensuite).');consentShown(true);input.value=item.text;input.focus();}
+    else if(e&&e.code==='NEEDS_LOAD'){queue.unshift(item);addOnce('sys',explain(e));}
     else if(e&&e.code==='ABORTED'){addOnce('sys','Chargement annulé.');}
     else{lastFailure={stage:'engine',item:item};}
   });
 }
+function saveConv(id){try{var h=hists[id];if(h&&h.length)localStorage.setItem('via-conv-'+id,JSON.stringify(h.slice(-20)));}catch(e){}}
+function restoreConvs(){var n=0;try{cfg.bots.forEach(function(x){try{var sv=JSON.parse(localStorage.getItem('via-conv-'+x.id)||'null');if(sv&&sv.length){hists[x.id]=sv.slice(-20);n+=sv.length;}}catch(e){}});}catch(e){}return n;}
 function xreadOn(){try{return localStorage.getItem('via-xread')!=='off';}catch(e){return true;}}
 // Synergetizer minimal : le binôme Geeko↔Geekette se relit (une phrase max).
 // Strict : une seule intervention par message, jamais de réponse à une réponse,
@@ -432,9 +462,9 @@ function xreadTouch(item){
   var h=H(pid);h.push({role:'user',content:item.text});
   var rb={};for(var k in bot)rb[k]=bot[k];
   rb.specialty=bot.specialty+' Consigne stricte : une seule phrase en réaction à ce que vient de dire '+aname+'. Complète ou contredis avec humour, sans répéter ses mots.';
-  return ViaLocalEngine.chat(rb,h.slice(-10),{signal:genCtl.signal}).then(function(r){
+  return ViaLocalEngine.chat(rb,h.slice(-6),{signal:genCtl.signal}).then(function(r){
     var m=String(r).match(/^[^.!?…]+[.!?…]/);var one=m?m[0]:r;
-    h.push({role:'assistant',content:one});wait.remove();addPulsed({name:bot.name+' (relecture)'},one);
+    h.push({role:'assistant',content:one});wait.remove();addPulsed({name:bot.name+' (relecture)'},one);saveConv(bot.id);
   },function(e){
     wait.remove();
     if((e&&e.code)==='ABORTED'||(e&&e.name)==='AbortError'){item.cancelled=true;}
@@ -498,7 +528,7 @@ document.getElementById('xreadChk').onchange=function(){try{localStorage.setItem
 document.getElementById('gearBtn').onclick=function(){var s=document.getElementById('settings');s.hidden=!s.hidden;if(!s.hidden){refreshConsent();paintPerms();paintDiag();}};
 refreshConsent();paintDiag();
 try{ViaLocalEngine.detect().then(function(c){window.__viaCap=c;paintPick(c);paintDiag(c);}).catch(function(){});}catch(e){}
-if(eng.provider==='local'&&ViaLocalEngine.getConsent()==='granted'){setState('checking');ensureEngine().then(function(){updateIdCard();}).catch(function(){});}else{setState(eng.provider==='local'?'needs-consent':'idle');if(eng.provider!=='local')document.getElementById('pMsg').textContent='Moteur manuel actif : '+eng.provider+'. Le modèle local automatique est en pause.';}
+if(eng.provider==='local'&&ViaLocalEngine.getConsent()==='granted'){setState('idle');}else{setState(eng.provider==='local'?'needs-consent':'idle');if(eng.provider!=='local')document.getElementById('pMsg').textContent='Moteur manuel actif : '+eng.provider+'. Le modèle local automatique est en pause.';}
 ViaCaps.paint('capsLine');
 input.focus();
 }).catch(function(){document.getElementById('who').textContent='Hors-ligne : recharge en ligne une fois.';});

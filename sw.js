@@ -1,4 +1,4 @@
-const CACHE = 'keffstation-cube-v5';
+const CACHE = 'keffstation-cube-v6';
 const ASSETS = ['./', './index.html', './manifest.json', './app.js', './refresh.js'];
 
 self.addEventListener('install', e => {
@@ -6,8 +6,11 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
+// Ne JAMAIS purger les caches de modèles IA (transformers/onnx/webllm/mlc) :
+// ils sont partagés à l'échelle de l'origine et re-téléchargés à grand coût.
+var KEEP_RE = /transformers|onnx|webllm|mlc/i;
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE && !KEEP_RE.test(k)).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 
 self.addEventListener('fetch', e => {

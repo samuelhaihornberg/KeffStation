@@ -1,87 +1,73 @@
-/* Moteur IA local CPU/WebAssembly (repli sans WebGPU) — Transformers.js v3, docs :
-   huggingface.co/docs/transformers.js (pipeline text-generation, messages + TextStreamer,
-   cache navigateur natif). AUCUN serveur, AUCUN abonnement : 100 % local.
-   Modèles ONNX quantifiés, licence Apache 2.0 (famille SmolLM2). Candidats essayés
-   dans l'ordre ; seul le manifeste est testé avant chaque tentative (quelques Ko) :
-   aucun poids n'est téléchargé deux fois. Une seule tentative de poids par accord. */
+/* Client du moteur LLM en Web Worker — même API que l'ancien moteur (load/chat/unload/summary).
+   Le travail lourd (téléchargement, décodage ONNX, génération) tourne dans
+   local-wasm-worker.js : l'interface reste réactive, même sur mobile.
+   - device: 'wasm' (CPU). Sans COOP/COEP (GitHub Pages), ONNX Runtime bascule
+     seul en monothread : aucun SharedArrayBuffer requis.
+   - Annulation du téléchargement : commande 'cancel' -> AbortController du worker
+     (le runtime le permet via env.fetch). Annulation en génération : worker terminé
+     côté client (mémoire libérée aussitôt), à recharger au prochain usage.
+   - Un seul moteur + un seul modèle partagés ; personnalités via prompt système. */
 (function (global) {
   'use strict';
+  var WORKER_URL = './local-wasm-worker.js';
   var CDN = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2/+esm';
   var CANDIDATES = [
     // Primaire vérifié le 2026-10-31 : accessible sans compte, Chat/Instruct,
     // chat_template fourni dans la distribution, licence Apache 2.0.
-    // Poids mesuré : ≈790 Mo (model_q4.onnx).
+    // Poids mesuré : ≈790 Mo (model_q4.onnx). Wi-Fi recommandé.
     { id: 'onnx-community/Qwen2.5-0.5B-Instruct', downloadMB: 800, license: 'Apache 2.0' },
     { id: 'onnx-community/SmolLM2-360M-Instruct', downloadMB: 200, license: 'Apache 2.0' },
     { id: 'onnx-community/SmolLM2-135M-ONNX', downloadMB: 80, license: 'Apache 2.0' }
   ];
   var S = { phase: 'idle', model: null, progress: 0, detail: '' };
-  var pipe = null, busy = false, T = null, picked = null;
+  var worker = null, seq = 0, pending = {}, busy = false, picked = null;
   var tokInfo = { source: 'inconnu', hasTemplate: false };
-  // Template de conversation OFFICIEL SmolLM2 — source exacte :
-  // HuggingFaceTB/SmolLM2-360M-Instruct, fichier tokenizer_config.json (licence Apache 2.0),
-  // vérifié le 2026-10-31 (chat_template présent, bos <|im_start|>, eos <|im_end|>).
-  // Restauré ici UNIQUEMENT parce que la distribution ONNX utilisée ne le fournit pas
-  // (tokenizer.chat_template absent → apply_chat_template() échoue). Rien d'inventé.
-  var OFFICIAL_SMOLLM2_TEMPLATE = "{% for message in messages %}{% if loop.first and messages[0]['role'] != 'system' %}{{ '<|im_start|>system\nYou are a helpful AI assistant named SmolLM, trained by Hugging Face<|im_end|>\n' }}{% endif %}{{'<|im_start|>' + message['role'] + '\n' + message['content'] + '<|im_end|>' + '\n'}}{% endfor %}{% if add_generation_prompt %}{{ '<|im_start|>assistant\n' }}{% endif %}";
   function set(p, d, g) { S.phase = p; if (d !== undefined) S.detail = d; if (g !== undefined) S.progress = g; }
   function err(code, message) { var e = new Error(message); e.code = code; return e; }
-  function aggregate(seen) { var L = 0, Tt = 0; for (var k in seen) { L += seen[k].loaded; Tt += seen[k].total; } return { loaded: L, total: Tt }; }
+  function onMsg(e) {
+    var m = e.data || {}, id = m.id, h = pending[id];
+    if (!h) return;
+    try {
+      if (m.type === 'progress' || m.type === 'stage') { if (h.onTick) h.onTick({ group: m.group, phase: S.phase, progress: m.progress, text: m.detail, detail: m.detail }); }
+      else if (m.type === 'token') { if (h.onToken) h.onToken(m.text); }
+      else if (m.type === 'ready') { picked = m.model; if (m.tokenizer) tokInfo = { source: m.tokenizer, hasTemplate: true }; delete pending[id]; h.resolve({ model: picked, tokenizer: tokInfo.source }); }
+      else if (m.type === 'done') { delete pending[id]; h.resolve(m.text !== undefined ? m.text : true); }
+      else if (m.type === 'cancelled') { delete pending[id]; h.reject(err('ABORTED', 'Annulé à ta demande.')); }
+      else if (m.type === 'error') { delete pending[id]; h.reject(err(m.code || 'ERROR', m.message || 'échec')); }
+    } catch (ex) {}
+  }
+  function onErr(e) {
+    var ids = Object.keys(pending);
+    for (var i = 0; i < ids.length; i++) { try { pending[ids[i]].reject(err('WORKER_FAIL', 'Moteur interrompu : ' + ((e && e.message) || 'erreur worker'))); } catch (ex) {} delete pending[ids[i]]; }
+    worker = null; busy = false; set('error', 'moteur interrompu');
+  }
+  function getWorker() {
+    if (!worker) {
+      worker = new global.Worker(WORKER_URL, { type: 'module' });
+      worker.onmessage = onMsg;
+      worker.onerror = onErr;
+    }
+    return worker;
+  }
+  function rpc(cmd, payload, cbs) {
+    var id = ++seq;
+    return new Promise(function (resolve, reject) {
+      pending[id] = { resolve: resolve, reject: reject, onTick: cbs && cbs.onTick, onToken: cbs && cbs.onToken };
+      try { getWorker().postMessage({ id: id, cmd: cmd, payload: payload || {} }); }
+      catch (e) { delete pending[id]; reject(err('WORKER_FAIL', 'Worker indisponible : ' + (e && e.message ? e.message : e))); }
+    });
+  }
   async function load(modelId, onTick) {
     if (busy) throw err('BUSY', 'Moteur occupé : une opération est déjà en cours (pas de boucle).');
-    function tick(group, phase, progress, text) { if (onTick) { try { onTick({ group: group, phase: phase, progress: progress, text: text, detail: text }); } catch (e) {} } }
     busy = true; set('downloading', 'runtime…', 0);
     try {
-      // Groupe RUNTIME : bibliothèque Transformers.js (mise en cache navigateur).
-      tick('runtime', 'downloading', 5, 'runtime Transformers.js (CPU/WASM)…');
-      if (!T) { try { T = await import(CDN); } catch (e) { throw err('NO_RUNTIME', 'Bibliothèque IA non téléchargée (' + (e && e.message ? e.message : 'réseau indisponible') + '). Vérifie la connexion, puis Réessaie.'); } }
-      T.env.allowLocalModels = false;
-      tick('runtime', 'downloading', 100, 'runtime OK (mise en cache navigateur)');
-      // Groupe POIDS : fichiers ONNX du premier candidat dont le manifeste répond.
-      var ids = modelId ? [modelId] : CANDIDATES.map(function (c) { return c.id; });
-      var lastErr = null, downloadedAny = false;
-      for (var i = 0; i < ids.length; i++) {
-        var seen = {};
-        try {
-          tick('poids', 'downloading', 0, 'modèle ' + ids[i] + '…');
-          var p = await T.pipeline('text-generation', ids[i], {
-            device: 'wasm', dtype: 'q4',
-            progress_callback: function (r) {
-              if (!r) return;
-              if (r.status === 'progress') {
-                var key = r.file || 'fichier'; seen[key] = { loaded: r.loaded || 0, total: r.total || 0 };
-                if ((r.loaded || 0) > 0) downloadedAny = true;
-                var a = aggregate(seen);
-                var pct = a.total > 0 ? Math.round(a.loaded / a.total * 100) : (typeof r.progress === 'number' ? Math.round(r.progress * 100) : S.progress);
-                S.progress = pct; S.detail = key + ' ' + pct + ' %';
-                tick('poids', 'downloading', pct, 'poids du modèle…', key + ' ' + pct + ' %');
-              } else if (r.status === 'done') { tick('poids', 'downloading', S.progress, (r.file || 'fichier') + ' OK'); }
-            }
-          });
-          pipe = p; picked = ids[i]; S.model = picked; lastErr = null; break;
-        } catch (e) {
-          lastErr = e; pipe = null;
-          // Poids déjà reçus = vrai problème réseau : on n'essaie PAS un autre
-          // modèle (aucun double téléchargement). Seul un manifeste introuvable
-          // (dépôt renommé) justifie le candidat suivant.
-          if (downloadedAny) break;
-        }
-      }
-      if (!pipe) throw err('LOAD_FAIL', 'Modèle CPU indisponible (' + CANDIDATES.map(function (c) { return c.id; }).join(', ') + ') : ' + ((lastErr && lastErr.message) || 'échec') + '. Vérifie la connexion, puis Réessaie (une seule tentative à la fois).');
-      // Restauration du template officiel SmolLM2 (voir commentaire OFFICIAL_SMOLLM2_TEMPLATE).
-      // UNIQUEMENT pour SmolLM2 : tout autre modèle sans template distribué est refusé
-      // (aucun template générique/inventé, jamais).
-      try {
-        if (pipe.tokenizer && pipe.tokenizer.chat_template) { tokInfo = { source: 'distribué avec le modèle', hasTemplate: true }; }
-        else if (pipe.tokenizer && /SmolLM2/i.test(picked || '')) { pipe.tokenizer.chat_template = OFFICIAL_SMOLLM2_TEMPLATE; tokInfo = { source: 'officiel restauré (HuggingFaceTB/SmolLM2-360M-Instruct)', hasTemplate: !!pipe.tokenizer.chat_template }; }
-        else if (pipe.tokenizer) { tokInfo = { source: 'absent de la distribution (' + picked + ')', hasTemplate: false }; }
-        else { tokInfo = { source: 'tokenizer introuvable', hasTemplate: false }; }
-      } catch (e) { tokInfo = { source: 'restauration impossible : ' + (e && e.message), hasTemplate: false }; }
-      if (!tokInfo.hasTemplate) throw err('NO_CHAT_TEMPLATE', 'Template de conversation absent pour ' + picked + ' : génération impossible sans inventer de format. Choisis un autre modèle ou signale la distribution.');
+      if (onTick) onTick({ group: 'runtime', phase: 'downloading', progress: 5, text: 'runtime…', detail: 'runtime…' });
+      var r = await rpc('load', { modelId: modelId || null, candidates: CANDIDATES.map(function (c) { return c.id; }) }, { onTick: onTick });
+      S.model = r.model;
       set('loading', 'chargement en mémoire…');
-      tick('poids', 'loading', 100, 'chargement en mémoire…');
+      if (onTick) onTick({ group: 'poids', phase: 'loading', progress: 100, text: 'chargement en mémoire…', detail: 'chargement en mémoire…' });
       set('ready', 'prêt (CPU)');
-      tick('poids', 'ready', 100, 'moteur prêt');
+      if (onTick) onTick({ group: 'poids', phase: 'ready', progress: 100, text: 'moteur prêt', detail: 'moteur prêt' });
       return true;
     } catch (e) { set('error', (e && e.message) || 'échec'); throw e; }
     finally { busy = false; }
@@ -90,31 +76,37 @@
     return 'Tu es ' + bot.name + ', personnage simulé sans conscience réelle. ' + bot.specialty + ' ' + bot.personality + ' Réponds en français, court.';
   }
   async function chat(bot, history, opt) {
-    if (!pipe || S.phase !== 'ready') throw err('NOT_LOADED', 'Modèle CPU non chargé : autorise le téléchargement puis réessaie.');
+    if (!worker || S.phase !== 'ready') throw err('NOT_LOADED', 'Modèle non chargé : appuie sur « Charger le modèle local », puis réessaie.');
     if (busy) throw err('BUSY', 'Génération déjà en cours : attends ou annule.');
-    // Vérification avant génération : le template manquant faisait répéter
-    // l'erreur à chaque message. On bloque ici, une fois, avec la cause exacte.
-    if (!pipe.tokenizer || !pipe.tokenizer.chat_template) throw err('NO_CHAT_TEMPLATE', 'Template de conversation absent pour ' + (picked || S.model || 'ce modèle') + ' : recharge le modèle (le template officiel sera restauré).');
     busy = true; set('generating', 'génération…');
-    var o = opt || {}, aborted = false, onAbort = function () { aborted = true; };
+    var o = opt || {};
     try {
-      if (o.signal) {
-        if (o.signal.aborted) throw err('ABORTED', 'Requête annulée.');
-        o.signal.addEventListener('abort', onAbort, { once: true });
-      }
       var msgs = [{ role: 'system', content: sysPrompt(bot) }].concat(history);
-      var out = await pipe(msgs, { max_new_tokens: 256, temperature: 0.7, do_sample: true, top_p: 0.9 });
-      if (aborted) throw err('ABORTED', 'Réponse annulée.');
-      var g = out && out[0] && out[0].generated_text, t = '';
-      if (Array.isArray(g)) { var last = g[g.length - 1]; t = (last && (last.content || last.text)) || ''; }
-      else if (typeof g === 'string') { t = g; }
+      var t = await rpc('chat', { messages: msgs.slice(-7) }, { onToken: o.onToken });
       t = String(t).trim();
       if (!t) throw err('EMPTY', 'Réponse vide du moteur.');
       return t;
-    } finally { busy = false; if (o.signal) { try { o.signal.removeEventListener('abort', onAbort); } catch (e) {} } if (S.phase === 'generating') set('ready', 'prêt (CPU)'); }
+    } finally { busy = false; if (S.phase === 'generating') set('ready', 'prêt (CPU)'); }
   }
-  async function unload() { try { if (pipe && pipe.dispose) await pipe.dispose(); } catch (e) {} pipe = null; set('idle', 'déchargé (mémoire libérée)'); }
-  function summary() { return { phase: S.phase, model: S.model || picked, progress: S.progress, detail: S.detail, mode: S.phase === 'ready' || S.phase === 'generating' ? 'CPU/WASM local' : '—', backend: 'wasm', tokenizer: tokInfo.hasTemplate ? ('chat_template ' + tokInfo.source) : 'chat_template ABSENT', lib: (T && T.env && T.env.version) || '?' }; }
-  function info() { return { candidates: CANDIDATES.map(function (c) { return c.id; }), picked: picked, tokenizer: tokInfo, lib: (T && T.env && T.env.version) || '?', cdn: CDN }; }
-  global.ViaWasmEngine = { CANDIDATES: CANDIDATES, load: load, chat: chat, unload: unload, summary: summary, info: info, CDN: CDN };
+  // Annulation : téléchargement -> le worker interrompt ses fetch (le runtime le
+  // permet) ; génération -> worker terminé côté client (mémoire libérée aussitôt,
+  // rechargement nécessaire au prochain usage). Les promesses en vol sont rejetées.
+  function cancel() {
+    var ids = Object.keys(pending);
+    try { if (worker) worker.postMessage({ id: 0, cmd: 'cancel', payload: {} }); } catch (e) {}
+    try { if (worker) worker.terminate(); } catch (e) {}
+    worker = null;
+    for (var i = 0; i < ids.length; i++) { try { pending[ids[i]].reject(err('ABORTED', 'Annulé à ta demande.')); } catch (e) {} delete pending[ids[i]]; }
+    busy = false; set('idle', 'annulé (moteur déchargé, mémoire libérée)');
+  }
+  async function unload() {
+    try { if (worker) worker.terminate(); } catch (e) {}
+    worker = null;
+    var ids = Object.keys(pending);
+    for (var i = 0; i < ids.length; i++) { try { pending[ids[i]].reject(err('ABORTED', 'Moteur déchargé.')); } catch (e) {} delete pending[ids[i]]; }
+    busy = false; S.model = null; set('idle', 'déchargé (mémoire libérée)');
+  }
+  function summary() { return { phase: S.phase, model: S.model || picked, progress: S.progress, detail: S.detail, mode: S.phase === 'ready' || S.phase === 'generating' ? 'CPU/WASM local (worker)' : '—', backend: 'wasm', tokenizer: tokInfo.hasTemplate ? ('chat_template ' + tokInfo.source) : 'chat_template non chargé', threads: (typeof crossOriginIsolated !== 'undefined' && crossOriginIsolated) ? 'multithread' : 'monothread (Pages sans COOP/COEP)' }; }
+  function info() { return { candidates: CANDIDATES.map(function (c) { return c.id; }), picked: picked, tokenizer: tokInfo, device: 'wasm (CPU), monothread sans COOP/COEP', lib: '3.7.2', cdn: CDN, worker: WORKER_URL }; }
+  global.ViaWasmEngine = { CANDIDATES: CANDIDATES, load: load, chat: chat, cancel: cancel, unload: unload, summary: summary, info: info, CDN: CDN, WORKER_URL: WORKER_URL };
 })(window);

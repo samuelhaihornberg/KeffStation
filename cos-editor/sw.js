@@ -1,7 +1,10 @@
-const CACHE = 'cos-editor-v3';
+const CACHE = 'cos-editor-v4';
 const ASSETS = ['./', './index.html', './manifest.json'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))); self.skipWaiting(); });
-self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });
+// Ne JAMAIS purger les caches de modèles IA (transformers/onnx/webllm/mlc) :
+// ils sont partagés à l'échelle de l'origine et re-téléchargés à grand coût.
+var KEEP_RE = /transformers|onnx|webllm|mlc/i;
+self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE && !KEEP_RE.test(k)).map(k => caches.delete(k))))); self.clients.claim(); });
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
