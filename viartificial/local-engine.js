@@ -70,14 +70,21 @@
     var cap = await detect();
     if (!cap.webgpu) throw Object.assign(new Error('WebGPU indisponible ici : modèle local impossible. Choisis Ollama/endpoint ou reste en texte seul.'), { code: 'NO_WEBGPU' });
     if (!cap.shaderF16) throw Object.assign(new Error('shader-f16 requis par le modèle, absent de ce GPU.'), { code: 'NO_F16' });
-    busy = true; set('downloading', 'téléchargement…', 0);
+    function tick(group, phase, progress, text, detail) { if (onTick) { try { onTick({ group: group, phase: phase, progress: progress, text: text, detail: detail || text }); } catch (e) {} } }
+    busy = true; set('downloading', 'runtime…', 0);
     try {
+      // Groupe RUNTIME : bibliothèque d'exécution WebLLM (mise en cache navigateur).
+      tick('runtime', 'downloading', 5, 'runtime WebLLM…');
       if (!WebLLM) WebLLM = await import(CDN);
       S.model = modelId;
-      var eng = new WebLLM.MLCEngine({ initProgressCallback: function (r) { S.progress = Math.round((r.progress || 0) * 100); S.detail = r.text || ''; if (onTick) onTick(S); } });
+      tick('runtime', 'downloading', 100, 'runtime OK (mise en cache navigateur)');
+      // Groupe POIDS : fichiers du modèle (progression réelle du moteur).
+      var eng = new WebLLM.MLCEngine({ initProgressCallback: function (r) { S.progress = Math.round((r.progress || 0) * 100); S.detail = r.text || ''; tick('poids', 'downloading', S.progress, 'poids du modèle…', S.detail); } });
       set('loading', 'chargement en mémoire…');
+      tick('poids', 'loading', 100, 'chargement en mémoire…');
       await eng.reload(modelId, undefined, undefined);
       engine = eng; set('ready', 'prêt');
+      tick('poids', 'ready', 100, 'moteur prêt');
       return true;
     } catch (e) { set('error', (e && e.message) || 'échec'); throw e; }
     finally { busy = false; }

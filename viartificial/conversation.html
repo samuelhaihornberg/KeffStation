@@ -58,10 +58,17 @@ body[data-min="1"] .msn{display:none}
 #consentGo{border:none;background:linear-gradient(135deg,#b84dff,#ff3d9a);color:#fff;flex:1;min-width:200px}
 #consentLater,#consentDetails{border:1px solid #ffd23f;background:transparent;color:#ffd23f}
 #consentDetailText{font-size:.82rem;color:#b9c0e6;border-top:1px solid rgba(255,255,255,.12);margin-top:8px;padding-top:8px}
-#progWrap{margin-top:8px}
-#progBar{height:10px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden}
-#progFill{height:100%;width:0%;background:linear-gradient(90deg,#b84dff,#ff3d9a,#ffd23f);border-radius:6px}
-#progText{font-size:.8rem;color:#b9c0e6}
+#progWrap{margin-top:8px;border-radius:10px;background:#020604;border:1px solid #1f8f3f;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+#progWrap .term{color:#39ff6a;font-size:.78rem;line-height:1.7;white-space:pre-wrap}
+#progBar{height:14px;border-radius:4px;background:#06130a;border:1px solid #1f8f3f;overflow:hidden;margin-top:6px}
+#progFill{height:100%;width:0%;background:repeating-linear-gradient(90deg,#39ff6a 0 8px,#0a3d1c 8px 10px)}
+#progText{font-size:.8rem;color:#39ff6a;margin:6px 0 0}
+.blink{animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.blink{animation:none}}
+#permList{list-style:none;margin:8px 0;padding:0;font-size:.82rem;color:#b9c0e6}
+#permList li{margin:4px 0}
+#permList strong{color:#ffd23f}
 #chips{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;margin:10px 16px 0;padding-bottom:4px}
 .chip{flex-shrink:0;min-height:48px;padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#b9c0e6;font-size:.85rem}
 .chip.on{border-color:#ffd23f;color:#ffd23f;background:rgba(255,210,63,.08)}
@@ -89,9 +96,18 @@ body[data-min="1"] .msn{display:none}
 <p class="consentBtns"><button id="consentGo" type="button">Autoriser et démarrer</button><button id="consentLater" type="button">Plus tard</button><button id="consentDetails" type="button">Détails</button></p>
 <div id="consentDetailText" hidden>
 <p>Le modèle est partagé par tous les SuperBots : chacun garde sa personnalité, sa mémoire et ses conversations. Licence : <span id="consentLicense"></span>. Fichiers stockés dans le cache du navigateur, réutilisés sans re-téléchargement ; moteur rechargé automatiquement au besoin.</p>
-<p>Ceci n’est pas un bandeau cookies : aucun traceur, aucun cookie facultatif. Les autorisations micro, notifications et partage d’écran restent demandées séparément par le navigateur, uniquement si tu utilises ces fonctions. Accord retirable à tout moment dans ⚙️ Réglages (avec suppression des fichiers).</p>
+<h4 style="font-size:.85rem;color:#fff">Autorisations de la plateforme KeffStation (KiffTech, Tricktrocjob, ViArtificial, Videogames)</h4>
+<ul id="permList">
+<li>🧠 Modèle IA local (≈ <span id="pmMB">…</span> Mo) : <strong id="psModel">—</strong></li>
+<li>💾 Stockage persistant (évite la purge par le navigateur) : <strong id="psPersist">—</strong></li>
+<li>🔔 Notifications (fin de réponse, actions) : <strong id="psNotify">—</strong></li>
+<li>🎙️ Micro · 📷 Caméra · 🖥️ Partage d’écran · 📍 Position : <strong>à l’usage uniquement</strong> <span id="psMediaState"></span></li>
+<li>📴 Hors-ligne (service workers des 4 PWA) : <strong id="psSW">—</strong></li>
+<li>🍪 Cookies / traceurs : <strong>aucun</strong></li>
+</ul>
+<p>Ceci n’est pas un bandeau cookies : aucun traceur, aucun cookie facultatif. Le bouton « Autoriser et démarrer » accorde le modèle + stockage persistant + notifications ; micro, caméra, partage d’écran et position restent demandés séparément par le navigateur, uniquement par la fonction qui en a besoin. Accord retirable à tout moment dans ⚙️ Réglages (avec suppression des fichiers).</p>
 </div>
-<div id="progWrap" hidden><div id="progBar"><div id="progFill"></div></div><p id="progText" role="status"></p></div>
+<div id="progWrap" hidden><div class="term" id="termLog" aria-hidden="true"></div><div id="progBar"><div id="progFill"></div></div><p id="progText" class="term" role="status"></p></div>
 </section>
 <div id="chips" role="group" aria-label="SuperBots qui répondent"></div>
 <section id="settings" hidden aria-label="Réglages">
@@ -142,7 +158,6 @@ document.getElementById('bSide').onclick=function(){setMin(false);setMode('side'
 document.getElementById('bMin').onclick=function(){setMin(body.dataset.min!=='1');};
 document.getElementById('wMin').onclick=function(){setMin(true);};
 document.getElementById('wFull').onclick=function(){setMin(false);setMode(body.dataset.mode==='fullscreen'?'side':'fullscreen');};
-document.getElementById('gearBtn').onclick=function(){var s=document.getElementById('settings');s.hidden=!s.hidden;};
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&body.dataset.min!=='1')setMin(true);});
 try{var sm=localStorage.getItem('msn-mode');if(sm==='side'||sm==='fullscreen')setMode(sm);}catch(e){}
 fetch('./bots.json').then(function(r){return r.json();}).then(function(cfg){
@@ -189,9 +204,47 @@ function paintStorage(){
   var el=document.getElementById('storageInfo');if(!el)return;el.textContent='calcul…';
   ViaLocalEngine.storageCheck(0).then(function(s){el.textContent=s.unknown?'non mesurable sur ce navigateur':'utilisé '+s.usageMB+' / quota '+s.quotaMB+' Mo';});
 }
-document.getElementById('consentGo').onclick=function(){ViaLocalEngine.setConsent('granted');refreshConsent();ensureEngine().catch(function(){});};
+document.getElementById('consentGo').onclick=function(){ViaLocalEngine.setConsent('granted');refreshConsent();requestPlatformPerms().then(function(){paintPerms();});ensureEngine().catch(function(){});};
 document.getElementById('consentLater').onclick=function(){ViaLocalEngine.setConsent('later');refreshConsent();setState('needs-consent');};
-document.getElementById('consentDetails').onclick=function(){var t=document.getElementById('consentDetailText');t.hidden=!t.hidden;};
+document.getElementById('consentDetails').onclick=function(){var t=document.getElementById('consentDetailText');t.hidden=!t.hidden;if(!t.hidden)paintPerms();};
+// Autorisations réellement accordables en un geste : stockage persistant + notifications.
+// Micro, caméra, partage d'écran, position : JAMAIS demandés ici, uniquement à l'usage.
+async function requestPlatformPerms(){
+  try{if(navigator.storage&&navigator.storage.persist){await navigator.storage.persist();}}catch(e){}
+  try{
+    if('Notification' in window&&Notification.permission==='default'){
+      if(Notification.requestPermission.length>0){await Notification.requestPermission();}
+      else{await new Promise(function(res){Notification.requestPermission(function(){res();});});}
+    }
+  }catch(e){}
+}
+async function permState(name){
+  try{
+    if(!navigator.permissions||!navigator.permissions.query)return 'état non lisible ici';
+    var r=await navigator.permissions.query({name:name});
+    return r.state==='granted'?'accordée':r.state==='denied'?'refusée':'à demander à l’usage';
+  }catch(e){return 'non supportée ici';}
+}
+async function paintPerms(){
+  var c=ViaLocalEngine.getConsent();
+  var info=ViaLocalEngine.modelInfo(ViaLocalEngine.MODELS[0].id);
+  var mm=document.getElementById('pmMB');if(mm)mm.textContent=info.downloadMB;
+  var sm=document.getElementById('psModel');if(sm)sm.textContent=c==='granted'?'accordé':c==='later'?'reporté':c==='withdrawn'?'retiré':'non demandé';
+  var sp=document.getElementById('psPersist');
+  if(sp){try{if(navigator.storage&&navigator.storage.persisted){sp.textContent=await navigator.storage.persisted()?'accordé (persistant)':'standard (purge possible)';}else sp.textContent='inconnu ici';}catch(e){sp.textContent='inconnu ici';}}
+  var sn=document.getElementById('psNotify');
+  if(sn)sn.textContent=('Notification' in window)?(Notification.permission==='granted'?'accordée':Notification.permission==='denied'?'refusée (fonction indisponible)':'en attente (demandée au clic Autoriser)'):'non supportée ici';
+  var md=document.getElementById('psMediaState');
+  if(md){var parts=[];var names=[['microphone','micro'],['camera','caméra'],['display-capture','écran'],['geolocation','position']];for(var i=0;i<names.length;i++){parts.push(names[i][1]+' : '+await permState(names[i][0]));}md.textContent='('+parts.join(' · ')+')';}
+  var sw=document.getElementById('psSW');
+  if(sw){var on=false;try{on=!!(navigator.serviceWorker&&navigator.serviceWorker.controller);}catch(e){}sw.textContent=on?'actif':'enregistrement… (recharge si absent)';}
+}
+// Orchestrateur rétro : groupes de tâches du chargement, pilotés par ce que le
+// SuperBot doit assembler pour répondre (runtime → poids → personnalité → règles).
+var orch={};
+function orchReset(modelShort){orch={runtime:['RUNTIME WebLLM','…',''],poids:['POIDS '+modelShort,'…',''],personnalite:['PERSONNALITE','…',''],regles:['REGLES reponse','…','']};paintTerm();}
+function orchSet(g,st,extra){if(orch[g]){orch[g][1]=st;if(extra!==undefined)orch[g][2]=extra;paintTerm();}}
+function paintTerm(){var el=document.getElementById('termLog');if(!el)return;var L='';for(var k in orch){var g=orch[k];var mark=g[1]==='OK'?'[OK]':g[1]==='ERREUR'? '[!!]':g[1]==='…'?'[..]':'[>>]';L+='&gt; '+g[0]+' '+mark+(g[2]?' '+g[2]:'')+'<br>';}el.innerHTML=L+'<span class="blink">▊</span>';}
 function ensureEngine(){
   var sm=ViaLocalEngine.summary();
   if(sm.phase==='ready')return Promise.resolve(true);
@@ -200,15 +253,21 @@ function ensureEngine(){
     var c=ViaLocalEngine.getConsent();
     if(c!=='granted'){setState('needs-consent');consentShown(true);var e1=new Error('Autorisation requise pour télécharger le modèle.');e1.code='NEEDS_CONSENT';throw e1;}
     loadCancelled=false;setState('downloading','0 %');
+    var info0=ViaLocalEngine.modelInfo(ViaLocalEngine.MODELS[0].id);
+    orchReset(info0.id.split('-Instruct')[0]);
     var f=document.getElementById('progFill');if(f)f.style.width='0%';
     await ViaLocalEngine.autoLoad(function(s){
-      if(s.phase==='downloading'){setState('downloading',(s.progress||0)+' %');var ff=document.getElementById('progFill');if(ff)ff.style.width=(s.progress||0)+'%';var pt=document.getElementById('progText');if(pt)pt.textContent='Téléchargement '+(s.progress||0)+' %'+(s.detail?' — '+s.detail:'')+' — tu peux continuer à lire, rien n’est bloqué.';}
-      else if(s.phase==='loading')setState('loading');
+      if(s.group==='runtime'){orchSet('runtime',s.progress>=100?'OK':'>>');}
+      else if(s.group==='poids'){
+        if(s.phase==='downloading'){orchSet('runtime','OK');orchSet('poids','>>',(s.progress||0)+' %');setState('downloading',(s.progress||0)+' %');var ff=document.getElementById('progFill');if(ff)ff.style.width=(s.progress||0)+'%';var pt=document.getElementById('progText');if(pt)pt.textContent='LOAD poids '+(s.progress||0)+' %'+(s.detail?' — '+s.detail:'')+' — tu peux continuer à lire, rien n’est bloqué.';}
+        else{orchSet('poids','OK');setState('loading');}
+      }
     });
     if(loadCancelled){try{await ViaLocalEngine.unload();}catch(e){}var e2=new Error('Chargement annulé à ta demande.');e2.code='ABORTED';throw e2;}
+    orchSet('personnalite','OK');orchSet('regles','OK');
     setState('ready');return true;
   })();
-  enginePromise.then(function(){},function(e){enginePromise=null;if(e&&(e.code==='NEEDS_CONSENT'||e.code==='ABORTED')){if(e.code!=='NEEDS_CONSENT')setState('idle');}else{setState('error',(e&&e.message)||'échec');lastFailed='engine';}});
+  enginePromise.then(function(){},function(e){enginePromise=null;if(e&&(e.code==='NEEDS_CONSENT'||e.code==='ABORTED')){if(e.code!=='NEEDS_CONSENT')setState('idle');}else{setState('error',(e&&e.message)||'échec');for(var k in orch){if(orch[k][1]==='>>'||orch[k][1]==='…')orch[k][1]='ERREUR';}paintTerm();lastFailed='engine';}});
   return enginePromise;
 }
 var eng=ViaProviders.load();
@@ -291,7 +350,9 @@ var txt='';if(t.id==='ask'){txt=prompt('Question pour le moteur (service connect
 actCtl=new AbortController();actUI('en cours');add('bot','⚒️ Action « '+t.title+' » — objectif : '+t.desc);
 ViaActions.run(t.id,{bot:q,botObj:b,text:txt,title:b.name+' — '+t.title,key:document.getElementById('pKey').value||null,signal:actCtl.signal},function(st,msg){document.getElementById('actState').textContent='État : en cours — '+msg;}).then(function(r){actUI('terminée',r);add('bot','⚒️ « '+t.title+' » terminé : '+r);}).catch(function(e){if(e&&e.name==='AbortError')actUI('arrêtée','Arrêtée à ta demande : reprends la main.');else actUI('erreur',(e&&e.message)||'échec');}).finally(function(){actCtl=null;document.getElementById('actStop').hidden=true;document.getElementById('actTake').hidden=true;});}
 renderActs();
-fillSettings();refreshConsent();
+fillSettings();
+document.getElementById('gearBtn').onclick=function(){var s=document.getElementById('settings');s.hidden=!s.hidden;if(!s.hidden){refreshConsent();paintPerms();}};
+refreshConsent();
 if(eng.provider==='local'&&ViaLocalEngine.getConsent()==='granted'){setState('checking');ensureEngine().catch(function(){});}else{setState(eng.provider==='local'?'needs-consent':'idle');if(eng.provider!=='local')document.getElementById('pMsg').textContent='Moteur manuel actif : '+eng.provider+'. Le modèle local automatique est en pause.';}
 ViaCaps.paint('capsLine');
 input.focus();
