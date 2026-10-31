@@ -1,5 +1,5 @@
-const CACHE = 'viartificial-v19';
-const ASSETS = ['./', './index.html', './xsstream.html', './conversation.html', './bots.json', './providers.js', './memory.js', './actions.js', './local-engine.js', './responsive.css', './capabilities.js', './manifest.json'];
+const CACHE = 'viartificial-v21';
+const ASSETS = ['./', './index.html', './xsstream.html', './conversation.html', './bots.json', './providers.js', './memory.js', './actions.js', './local-engine.js', './local-wasm.js', './responsive.css', './capabilities.js', './manifest.json'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });
 self.addEventListener('fetch', e => {
