@@ -285,6 +285,7 @@ function paintDiag(cap){
     'shader-f16 : '+(cap.shaderF16?'oui':'non'),
     'WebAssembly (repli CPU) : '+(cap.wasm?'oui':'non')];
   try{var pk=ViaLocalEngine.pickModel(cap);L.push('moteur sélectionné : '+(pk.error?('aucun ('+pk.error+')'):pk.backend+' / '+(pk.id||'auto')));}catch(e){}
+  try{var sm=ViaLocalEngine.summary();if(sm){L.push('moteur actif : '+(sm.backend||'?')+' / modèle : '+(sm.model||'—'));if(sm.tokenizer)L.push('tokenizer : '+sm.tokenizer);if(sm.mode&&sm.mode!=='—')L.push('mode : '+sm.mode);} }catch(e){}
   if(cap.reasons&&cap.reasons.length)L.push('causes : '+cap.reasons.join(' | '));
   el.textContent=L.join('\n');
 }

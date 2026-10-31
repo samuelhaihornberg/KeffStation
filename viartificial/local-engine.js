@@ -24,7 +24,7 @@
   // aucun service payant, aucun PC imposé.
   function pickModel(cap) {
     if (cap && cap.ok) return { backend: 'webllm', id: MODELS[0].id, downloadMB: MODELS[0].downloadMB };
-    if (cap && cap.wasm) return { backend: 'wasm', id: null, downloadMB: 200 };
+    if (cap && cap.wasm) return { backend: 'wasm', id: null, downloadMB: 800 };
     var why = (cap && cap.reasons && cap.reasons.length) ? cap.reasons.join(' ; ') : 'appareil non analysable';
     return { error: 'NO_LOCAL', message: 'Aucun moteur local ne peut fonctionner ici : ' + why + '.' };
   }
