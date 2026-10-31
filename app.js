@@ -169,8 +169,9 @@ class KeffStation {
       this.setProgress(5, '🔄 Initialisation...');
       
       this.setProgress(15, '🔍 Vérification endpoints...');
-      await this.validateEndpoints();
-      this.setProgress(25, '✅ Endpoints validés');
+      // Non bloquant : le cube reste utilisable même si le réseau est lent (mobile).
+      this.validateEndpoints().then(() => this.setProgress(25, '✅ Endpoints validés'))
+        .catch(() => this.setProgress(25, '⚠️ Vérification écourtée'));
 
       this.setProgress(35, '🏗️ Construction du cube...');
       this.buildCube();
@@ -201,12 +202,19 @@ class KeffStation {
   }
 
   async validateEndpoints() {
+    // Best-effort et borné : ne doit JAMAIS bloquer l'initialisation (réseau mobile lent).
     const endpoints = this.apps.map(app => app.appUrl).filter(Boolean);
-    const results = await Promise.allSettled(
-      endpoints.map(url => fetch(url, { method: 'HEAD', mode: 'no-cors' }).catch(() => true))
-    );
-    const failed = endpoints.filter((_, i) => results[i].status === 'rejected');
-    if (failed.length > 0) console.warn('Some endpoints unreachable (may be CORS):', failed);
+    const ctl = new AbortController();
+    const to = setTimeout(() => ctl.abort(), 6000);
+    try {
+      const results = await Promise.allSettled(
+        endpoints.map(url => fetch(url, { method: 'HEAD', mode: 'no-cors', signal: ctl.signal }).catch(() => true))
+      );
+      const failed = endpoints.filter((_, i) => results[i].status === 'rejected');
+      if (failed.length > 0) console.warn('Some endpoints unreachable (may be CORS):', failed);
+    } finally {
+      clearTimeout(to);
+    }
   }
 
   buildCube() {
@@ -562,21 +570,36 @@ function initApp() {
     setLoadingText(loading, '⚠️ Initialisation lente…', '#ffd23f');
   }, 5000);
 
+  // Garde-fou : l'écran de chargement ne doit jamais bloquer définitivement.
+  // Passé ce délai sans initialisation, on propose une erreur + réessai explicites.
+  const watchdogId = setTimeout(() => {
+    if (window.keffStation?.initialized) return;
+    clearTimeout(timeoutId);
+    if (loading) {
+      loading.innerHTML = '<div class="loading-text">❌ Initialisation impossible (réseau trop lent ?).<br><button type="button" id="init-retry" style="margin-top:12px;min-height:48px;padding:10px 22px;border-radius:999px;border:1px solid #ffd23f;background:transparent;color:#ffd23f;font-weight:700">↻ Réessayer</button></div>';
+      loading.style.color = '#ff3d9a';
+      document.getElementById('init-retry')?.addEventListener('click', () => window.location.reload());
+    }
+  }, 15000);
+
   try {
     window.keffStation = new KeffStation();
     console.log('KeffStation created, starting init...');
     window.keffStation.setProgress(2, '📦 Chargement module…');
     window.keffStation.init().then(() => {
       clearTimeout(timeoutId);
+      clearTimeout(watchdogId);
       setLoadingText(loading, '✅ KeffStation prêt', '#27d17f');
       setTimeout(() => loading.classList.add('hidden'), 1000);
     }).catch(e => {
       clearTimeout(timeoutId);
+      clearTimeout(watchdogId);
       console.error('App init failed:', e);
       setLoadingText(loading, '❌ Erreur: ' + (e?.message || e?.toString() || 'Erreur inconnue'), '#ff3d9a');
     });
   } catch (e) {
     clearTimeout(timeoutId);
+    clearTimeout(watchdogId);
     console.error('Constructor/InitApp sync error:', e);
     setLoadingText(loading, '❌ Erreur sync: ' + (e?.message || e?.toString() || 'Erreur inconnue'), '#ff3d9a');
   }

@@ -102,7 +102,7 @@
   .embed-btn.preloaded .embed-preload-status{background:#27d17f;transform:scale(1.2)}
   
   /* Navigation arrows */
-  .arrows{position:absolute;inset:0;z-index:5;pointer-events:none}
+  .arrows{position:absolute;inset:0;z-index:60;pointer-events:none}
   .arrows button{pointer-events:auto;position:absolute;width:clamp(44px,6vw,56px);height:clamp(44px,6vw,56px);border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(10,12,34,.8);color:#ffd23f;font-size:clamp(20px,3vw,26px);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s,background .15s,border-color .15s,box-shadow .15s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 20px rgba(0,0,0,.4);touch-action:manipulation;opacity:0.6}
   .arrows button:hover{opacity:1;background:rgba(30,107,255,.2);border-color:#1e6bff;transform:scale(1.1);box-shadow:0 0 25px rgba(30,107,255,.3)}
   .arrows button:active{transform:scale(.95)}
@@ -112,7 +112,7 @@
   .arrow-left{left:clamp(12px,2vw,20px);top:50%;transform:translateY(-50%)}
   .arrow-right{right:clamp(12px,2vw,20px);top:50%;transform:translateY(-50%)}
   @media (pointer:coarse){.arrows button{width:clamp(52px,7vw,64px);height:clamp(52px,7vw,64px)}.arrow-up{top:clamp(16px,3vh,24px)}.arrow-down{bottom:clamp(16px,3vh,24px)}.arrow-left{left:clamp(16px,3vw,24px)}.arrow-right{right:clamp(16px,3vw,24px)}}
-  .cube-face.expanded ~ .arrows button{opacity:0;pointer-events:none}
+  .cube.face-expanded ~ .arrows button{opacity:0;pointer-events:none}
   
   /* Bottom nav dots */
   .nav{display:flex;gap:clamp(8px,1.5vw,12px);margin-top:clamp(16px,3vh,24px);flex-shrink:0}
