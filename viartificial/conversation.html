@@ -114,6 +114,13 @@ body[data-min="1"] .msn{display:none}
 <h2>⚙️ Réglages</h2>
 <p id="pMsg" role="status" style="font-size:.85rem;color:#b9c0e6"></p>
 <p style="font-size:.85rem">Accord modèle IA : <strong id="consentState">—</strong></p>
+<p style="font-size:.85rem"><label style="display:flex;gap:8px;align-items:center;min-height:48px"><input id="pulseChk" type="checkbox" checked style="width:44px;min-height:44px"> Pulsation des réponses (mot à mot)</label></p>
+<p style="font-size:.85rem"><label style="display:flex;gap:8px;align-items:center;min-height:48px"><input id="xreadChk" type="checkbox" checked style="width:44px;min-height:44px"> Relecture croisée Geeko ↔ Geekette (une phrase max)</label></p>
+<div id="idcard" style="margin-top:8px;border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:10px 12px;font-size:.82rem">
+<h4 style="font-size:.85rem;color:#fff">Carte d’identité locale (token automatique, sur cet appareil uniquement)</h4>
+<p>Token : <strong id="idcToken">—</strong> · Modèle : <span id="idcModel">—</span></p>
+<p>Chargée : <span id="idcLoaded">—</span> · Accord : <span id="idcConsent">—</span></p>
+</div>
 <p style="font-size:.8rem;color:#8f96bd">Stockage navigateur : <span id="storageInfo">—</span></p>
 <p><button id="withdrawBtn" type="button">Retirer l’accord</button> <button id="deleteModelsBtn" type="button">Supprimer les modèles téléchargés</button></p>
 <details><summary style="min-height:44px;color:#ffd23f">Avancé (autre moteur, WebLLM, actions)</summary>
@@ -166,9 +173,36 @@ document.getElementById('title').textContent=b.avatar+' '+b.name+' — '+b.speci
 document.getElementById('avatar').textContent=b.avatar;
 document.getElementById('who').textContent=b.name;
 function add(who,text,botObj){var d=document.createElement('div');d.className='msg '+who;var s=document.createElement('span');s.className='meta';s.textContent=who==='me'?'Moi':(botObj?botObj.name+' (moteur local)':b.name+' (simulé)');if(who==='sys')s.textContent='ℹ️ info';d.appendChild(s);d.appendChild(document.createTextNode(text));thread.appendChild(d);thread.scrollTop=thread.scrollHeight;return d;}
-function addWait(bot){var d=document.createElement('div');d.className='msg bot';d.textContent=bot.name+' écrit…';thread.appendChild(d);thread.scrollTop=thread.scrollHeight;return d;}
+function addWait(bot){var d=document.createElement('div');d.className='msg bot';d.textContent=bot.name+' écrit… ';var c=document.createElement('span');c.className='blink';c.textContent='▊';c.setAttribute('aria-hidden','true');d.appendChild(c);thread.appendChild(d);thread.scrollTop=thread.scrollHeight;return d;}
+function pulseOn(){try{return localStorage.getItem('via-pulse')!=='off';}catch(e){return true;}}
+function reduceMotion(){try{return window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}}
+// Pulsation : affiche la réponse mot à mot (le bot respire). Réponses courtes =
+// vrombissement (tout d'un coup). Motion réduite ou pulsation coupée = tout d'un coup.
+function addPulsed(bot,text){
+  var d=document.createElement('div');d.className='msg bot';var s=document.createElement('span');s.className='meta';s.textContent=bot.name+' (moteur local)';d.appendChild(s);
+  var body=document.createElement('span');d.appendChild(body);thread.appendChild(d);thread.scrollTop=thread.scrollHeight;
+  var words=String(text).split(/(\s+)/);
+  if(!pulseOn()||reduceMotion()||words.length<40){body.textContent=text;return d;}
+  var i=0,cur='';
+  var t=setInterval(function(){
+    cur+=words[i++]||'';body.textContent=cur;thread.scrollTop=thread.scrollHeight;
+    if(i>=words.length){clearInterval(t);}
+  },120);
+  return d;
+}
 var eng=ViaProviders.load();
-var botsById={},selectedBots=[],queue=[],working=false,lastFailed=null,enginePromise=null,genCtl=null,loadCancelled=false;
+// Migration : un ancien réglage manuel « webllm » ne doit plus bloquer le parcours
+// automatique. Avec accord déjà enregistré : bascule vers le mode local automatique,
+// SANS supprimer conversations ni fichiers en cache (réutilisés par le moteur).
+(function migrateLegacyManual(){
+  try{
+    if(eng.provider==='webllm'&&ViaLocalEngine.getConsent()==='granted'){
+      eng={provider:'local',baseUrl:'',model:''};ViaProviders.save(eng);
+      var mm=document.getElementById('pMsg');if(mm)mm.textContent='Ancien réglage « WebLLM manuel » migré vers le mode automatique : accord conservé, conversations et fichiers en cache conservés.';
+    }
+  }catch(e){}
+})();
+var botsById={},selectedBots=[],queue=[],working=false,lastFailure=null,enginePromise=null,genCtl=null,loadCancelled=false;
 var hists={};function H(id){if(!hists[id])hists[id]=[];return hists[id];}
 var banner=document.getElementById('engineBanner'),eline=document.getElementById('engineLine'),dotEl=document.querySelector('#msn .dot'),statusEl=document.getElementById('status');
 function setState(st,msg){
@@ -187,6 +221,17 @@ function setState(st,msg){
   document.getElementById('retryBtn').hidden=(st!=='error');
   var pw=document.getElementById('progWrap');if(pw)pw.hidden=(st!=='downloading'&&st!=='loading');
 }
+// Cause réelle, en clair : jamais de message générique quand le code est connu.
+function explain(e){
+  var code=e&&e.code,msg=e&&e.message?e.message:'moteur indisponible';
+  if(code==='NEEDS_CONSENT')return 'Autorisation requise : autorise le téléchargement ci-dessus (un seul accord).';
+  if(code==='NOT_LOADED')return 'Modèle non chargé : autorise le téléchargement ci-dessus (un seul accord), ou recharge-le dans Réglages (Avancé).';
+  if(code==='NO_WEBGPU'||code==='NO_F16')return 'Appareil incompatible : '+msg+' Solution sans boucle ni payant : choisis Ollama gratuit dans Réglages (Avancé), ou reviens sur un appareil avec WebGPU.';
+  if(code==='STORAGE_FULL')return msg+' Libère de l’espace puis clique Réessayer (une seule tentative à la fois).';
+  if(code==='BUSY')return 'Moteur occupé : attends la fin ou clique Annuler, puis Réessaie.';
+  if(code==='ABORTED')return 'Annulé à ta demande.';
+  return msg;
+}
 function fillSettings(){var pp=document.getElementById('pProvider');if(pp)pp.value=eng.provider;document.getElementById('pUrl').value=eng.baseUrl||'';document.getElementById('pModel').value=eng.model||'';}
 function consentShown(v){document.getElementById('consentBar').hidden=!v;}
 function refreshConsent(){
@@ -198,13 +243,13 @@ function refreshConsent(){
   document.getElementById('consentModel').textContent=info.id.split('-Instruct')[0];
   document.getElementById('consentMB').textContent=info.downloadMB;
   var lic=document.getElementById('consentLicense');if(lic)lic.textContent=info.license+' — usage autorisé pour discuter avec les SuperBots sur cet appareil.';
-  paintStorage();
+  paintStorage();paintIdCard();
 }
 function paintStorage(){
   var el=document.getElementById('storageInfo');if(!el)return;el.textContent='calcul…';
   ViaLocalEngine.storageCheck(0).then(function(s){el.textContent=s.unknown?'non mesurable sur ce navigateur':'utilisé '+s.usageMB+' / quota '+s.quotaMB+' Mo';});
 }
-document.getElementById('consentGo').onclick=function(){ViaLocalEngine.setConsent('granted');refreshConsent();requestPlatformPerms().then(function(){paintPerms();});ensureEngine().catch(function(){});};
+document.getElementById('consentGo').onclick=function(){ViaLocalEngine.setConsent('granted');refreshConsent();requestPlatformPerms().then(function(){paintPerms();});ensureEngine().then(function(){updateIdCard();}).catch(function(){});};
 document.getElementById('consentLater').onclick=function(){ViaLocalEngine.setConsent('later');refreshConsent();setState('needs-consent');};
 document.getElementById('consentDetails').onclick=function(){var t=document.getElementById('consentDetailText');t.hidden=!t.hidden;if(!t.hidden)paintPerms();};
 // Autorisations réellement accordables en un geste : stockage persistant + notifications.
@@ -267,18 +312,17 @@ function ensureEngine(){
     orchSet('personnalite','OK');orchSet('regles','OK');
     setState('ready');return true;
   })();
-  enginePromise.then(function(){},function(e){enginePromise=null;if(e&&(e.code==='NEEDS_CONSENT'||e.code==='ABORTED')){if(e.code!=='NEEDS_CONSENT')setState('idle');}else{setState('error',(e&&e.message)||'échec');for(var k in orch){if(orch[k][1]==='>>'||orch[k][1]==='…')orch[k][1]='ERREUR';}paintTerm();lastFailed='engine';}});
+  enginePromise.then(function(){},function(e){enginePromise=null;if(e&&(e.code==='NEEDS_CONSENT'||e.code==='ABORTED')){if(e.code!=='NEEDS_CONSENT')setState('idle');}else{setState('error',explain(e));for(var k in orch){if(orch[k][1]==='>>'||orch[k][1]==='…')orch[k][1]='ERREUR';}paintTerm();lastFailure={stage:'engine',item:null};}});
   return enginePromise;
 }
-var eng=ViaProviders.load();
 fillSettings();
 document.getElementById('pProvider').onchange=function(){eng.provider=this.value;eng.baseUrl=document.getElementById('pUrl').value.trim();eng.model=document.getElementById('pModel').value.trim();ViaProviders.save(eng);fillSettings();if(eng.provider==='local'&&ViaLocalEngine.getConsent()==='granted')ensureEngine().catch(function(){});};
 document.getElementById('pUrl').onchange=function(){eng.baseUrl=this.value.trim();ViaProviders.save(eng);};
 document.getElementById('pModel').onchange=function(){eng.model=this.value.trim();ViaProviders.save(eng);};
-document.getElementById('withdrawBtn').onclick=function(){ViaLocalEngine.setConsent('withdrawn');enginePromise=null;try{ViaLocalEngine.unload();}catch(e){}setState('needs-consent');refreshConsent();document.getElementById('pMsg').textContent='Accord retiré. Les fichiers restent en cache : supprime-les ci-dessous si besoin.';};
+document.getElementById('withdrawBtn').onclick=function(){ViaLocalEngine.setConsent('withdrawn');enginePromise=null;lastFailure=null;try{ViaLocalEngine.unload();}catch(e){}setState('needs-consent');refreshConsent();document.getElementById('pMsg').textContent='Accord retiré. Les fichiers restent en cache : supprime-les ci-dessous si besoin.';};
 document.getElementById('deleteModelsBtn').onclick=function(){if(!confirm('Supprimer les fichiers du modèle téléchargé ? Ils seront re-téléchargés au prochain usage autorisé.'))return;var self=this;self.disabled=true;ViaLocalEngine.deleteModels().then(function(n){enginePromise=null;document.getElementById('pMsg').textContent='Modèles supprimés ('+n+' cache(s) vidé(s)).';setState(ViaLocalEngine.getConsent()==='granted'?'idle':'needs-consent');paintStorage();}).catch(function(e){document.getElementById('pMsg').textContent='Suppression incomplète : '+(e&&e.message?e.message:e);}).finally(function(){self.disabled=false;});};
 document.getElementById('pLoad').onclick=function(){var mid=document.getElementById('pLocalModel').value;eng={provider:'webllm',baseUrl:'',model:mid};ViaProviders.save(eng);fillSettings();enginePromise=null;document.getElementById('pProg').textContent='Démarrage…';ViaLocalEngine.load(mid,function(s){document.getElementById('pProg').textContent='Progression : '+s.progress+' % — '+s.detail;}).then(function(){document.getElementById('pProg').textContent='Modèle chargé en mémoire : '+mid+' (WebGPU).';}).catch(function(e){document.getElementById('pProg').textContent='Échec : '+(e&&e.message?e.message:e)+((e&&e.code==='NO_WEBGPU')?' Appareil non compatible avec le modèle local : Retire l’accord ou choisis un moteur distant gratuit dans Fournisseur.':(e&&e.code==='STORAGE_FULL')?' Libère de l’espace puis Réessaie (une seule tentative à la fois).':'');});};
-document.getElementById('pUnload').onclick=function(){enginePromise=null;ViaLocalEngine.unload();document.getElementById('pProg').textContent='Modèle déchargé.';setState('idle');};
+document.getElementById('pUnload').onclick=function(){enginePromise=null;lastFailure=null;ViaLocalEngine.unload();document.getElementById('pProg').textContent='Modèle déchargé.';setState('idle');};
 document.getElementById('pTest').onclick=function(){var k=document.getElementById('pKey').value;document.getElementById('pMsg').textContent='Test en cours…';var c=new AbortController();var t=setTimeout(function(){c.abort();},15000);ViaProviders.chat(eng,b,[{role:'user',content:'Dis juste : test OK.'}],c.signal,k||null).then(function(r){document.getElementById('pMsg').textContent='Test réussi : '+r.slice(0,80);}).catch(function(e){document.getElementById('pMsg').textContent='Échec : '+e.message;}).finally(function(){clearTimeout(t);});};
 add('bot',b.greeting+' — '+cfg.disclaimer);
 thread.lastChild.querySelector('.meta').textContent=b.name+' — accueil prédéfini (pas une réponse IA)';
@@ -288,7 +332,7 @@ renderChips();
 function renderChips(){var box=document.getElementById('chips');box.innerHTML='';cfg.bots.forEach(function(x){var on=selectedBots.indexOf(x.id)>-1;var c=document.createElement('button');c.type='button';c.className='chip'+(on?' on':'');c.textContent=x.avatar+' '+x.name;c.setAttribute('aria-pressed',on);c.onclick=function(){var i=selectedBots.indexOf(x.id);if(i>-1){if(selectedBots.length>1){selectedBots.splice(i,1);c.classList.remove('on');c.setAttribute('aria-pressed','false');}}else{selectedBots.push(x.id);c.classList.add('on');c.setAttribute('aria-pressed','true');}};box.appendChild(c);});}
 var form=document.getElementById('form'),input=document.getElementById('input'),cancelBtn=document.getElementById('cancel');
 cancelBtn.onclick=function(){loadCancelled=true;if(genCtl)genCtl.abort();};
-document.getElementById('retryBtn').onclick=function(){enginePromise=null;if(lastFailed&&lastFailed.text){queue.unshift({text:lastFailed.text,cancelled:false});lastFailed=null;}setState('idle');pump();};
+document.getElementById('retryBtn').onclick=function(){enginePromise=null;var f=lastFailure;lastFailure=null;if(f&&f.item){queue.unshift({text:f.item.text,cancelled:false});}setState('idle');pump();};
 function pump(){
   if(working)return;
   var item=queue.shift();
@@ -309,20 +353,69 @@ function runItem(item){
         genCtl=new AbortController();
         var h=H(bot.id);h.push({role:'user',content:item.text});
         return ViaLocalEngine.chat(bot,h.slice(-10),{signal:genCtl.signal}).then(function(r){
-          h.push({role:'assistant',content:r});wait.remove();add('bot',r,bot);
+          h.push({role:'assistant',content:r});wait.remove();addPulsed(bot,r);
         },function(e){
           wait.remove();
           if((e&&e.code)==='ABORTED'||(e&&e.name)==='AbortError'){add('sys','Réponse annulée à ta demande.');item.cancelled=true;}
-          else{add('sys','Erreur ('+bot.name+') : '+(e&&e.message?e.message:'moteur indisponible'));lastFailed=item;setState('error',(e&&e.message)||'échec');throw e;}
+          else{add('sys','Erreur ('+bot.name+') : '+explain(e));lastFailure={stage:'response',item:item};setState('error',explain(e));throw e;}
         }).then(function(){genCtl=null;});
       });
     });
-    return chain.then(function(){if(!item.cancelled){setState('ready');lastFailed=null;}});
+    return chain.then(function(){
+      if(item.cancelled)return;
+      return xreadTouch(item);
+    }).then(function(){if(!item.cancelled){setState('ready');lastFailure=null;}});
   },function(e){
     if(e&&e.code==='NEEDS_CONSENT'){add('sys','Autorise le téléchargement du modèle ci-dessus pour discuter (un seul accord, réutilisé ensuite).');consentShown(true);input.value=item.text;input.focus();}
     else if(e&&e.code==='ABORTED'){add('sys','Chargement annulé.');}
-    else{lastFailed=item;}
+    else{lastFailure={stage:'engine',item:item};}
   });
+}
+function xreadOn(){try{return localStorage.getItem('via-xread')!=='off';}catch(e){return true;}}
+// Synergetizer minimal : le binôme Geeko↔Geekette se relit (une phrase max).
+// Strict : une seule intervention par message, jamais de réponse à une réponse,
+// jamais si le binôme a déjà répondu. Silence en cas d'échec (pas de remplissage).
+function xreadTouch(item){
+  if(eng.provider!=='local'||!xreadOn())return Promise.resolve();
+  if(q!=='geeko'&&q!=='geekette')return Promise.resolve();
+  var pid=q==='geeko'?'geekette':'geeko';
+  if(selectedBots.indexOf(pid)>-1)return Promise.resolve();
+  var bot=botsById[pid];if(!bot)return Promise.resolve();
+  var aname=(botsById[q]||{}).name||q;
+  setState('responding',bot.name);
+  var wait=addWait(bot);
+  genCtl=new AbortController();
+  var h=H(pid);h.push({role:'user',content:item.text});
+  var rb={};for(var k in bot)rb[k]=bot[k];
+  rb.specialty=bot.specialty+' Consigne stricte : une seule phrase en réaction à ce que vient de dire '+aname+'. Complète ou contredis avec humour, sans répéter ses mots.';
+  return ViaLocalEngine.chat(rb,h.slice(-10),{signal:genCtl.signal}).then(function(r){
+    var m=String(r).match(/^[^.!?…]+[.!?…]/);var one=m?m[0]:r;
+    h.push({role:'assistant',content:one});wait.remove();addPulsed({name:bot.name+' (relecture)'},one);
+  },function(e){
+    wait.remove();
+    if((e&&e.code)==='ABORTED'||(e&&e.name)==='AbortError'){item.cancelled=true;}
+  }).then(function(){genCtl=null;});
+}
+// Carte d'identité locale (token automatique) : modèle, chargements, accord.
+// Rien ne quitte l'appareil : aucun serveur, aucun compte.
+function updateIdCard(){
+  var key='via-idcard',card=null;
+  try{card=JSON.parse(localStorage.getItem(key)||'null');}catch(e){card=null;}
+  var now=new Date(),p=function(n){return ('0'+n).slice(-2);};
+  var stamp=now.getFullYear()+'-'+p(now.getMonth()+1)+'-'+p(now.getDate())+' '+p(now.getHours())+':'+p(now.getMinutes());
+  var model=(ViaLocalEngine.summary().model)||ViaLocalEngine.MODELS[0].id;
+  if(!card||!card.token){var hh=0,s=model+stamp;for(var i=0;i<s.length;i++)hh=(hh*31+s.charCodeAt(i))>>>0;card={token:'VIA-'+hh.toString(36).toUpperCase(),firstLoaded:stamp,loads:0};}
+  card.model=model;card.lastLoaded=stamp;card.loads=(card.loads||0)+1;
+  try{localStorage.setItem(key,JSON.stringify(card));}catch(e){}
+  paintIdCard(card);
+}
+function paintIdCard(card){
+  try{if(!card)card=JSON.parse(localStorage.getItem('via-idcard')||'null');}catch(e){card=null;}
+  var t=document.getElementById('idcToken');if(t)t.textContent=card?card.token:'—';
+  var m=document.getElementById('idcModel');if(m)m.textContent=card?card.model:'—';
+  var l=document.getElementById('idcLoaded');if(l)l.textContent=card?('le '+card.lastLoaded+' ('+card.loads+' chargement(s))'):'—';
+  var c0=null;try{c0=JSON.parse(localStorage.getItem(ViaLocalEngine.CONSENT_KEY||'via-consent')||'null');}catch(e){}
+  var cs=document.getElementById('idcConsent');if(cs)cs.textContent=(c0&&c0.ts)?new Date(c0.ts).toLocaleString():'—';
 }
 function runRemote(item){
   var b0=botsById[q]||botsById[selectedBots[0]];
@@ -331,11 +424,14 @@ function runRemote(item){
   genCtl=new AbortController();
   var key=document.getElementById('pKey').value||null;var h=H(b0.id);h.push({role:'user',content:item.text});
   return ViaProviders.chat(eng,b0,h.slice(-10),genCtl.signal,key).then(function(r){
-    h.push({role:'assistant',content:r});wait.remove();add('bot',r,b0);setState('ready');lastFailed=null;
+    h.push({role:'assistant',content:r});wait.remove();addPulsed(b0,r);setState('ready');lastFailure=null;
   },function(e){
     wait.remove();
     if((e&&e.code)==='ABORTED'){add('sys','Réponse annulée à ta demande.');}
-    else{add('sys','Erreur : '+(e&&e.message?e.message:'moteur indisponible'));lastFailed=item;setState('error',(e&&e.message)||'échec');}
+    else{
+      if((e&&e.code)==='NOT_LOADED'&&ViaLocalEngine.getConsent()!=='granted')consentShown(true);
+      add('sys','Erreur : '+explain(e));lastFailure={stage:'response',item:item};setState('error',explain(e));
+    }
   }).then(function(){genCtl=null;});
 }
 form.addEventListener('submit',function(e){e.preventDefault();var v=input.value.trim();if(!v)return;add('me',v);input.value='';queue.push({text:v,cancelled:false});pump();input.focus();});
@@ -351,9 +447,13 @@ actCtl=new AbortController();actUI('en cours');add('bot','⚒️ Action « '+t.t
 ViaActions.run(t.id,{bot:q,botObj:b,text:txt,title:b.name+' — '+t.title,key:document.getElementById('pKey').value||null,signal:actCtl.signal},function(st,msg){document.getElementById('actState').textContent='État : en cours — '+msg;}).then(function(r){actUI('terminée',r);add('bot','⚒️ « '+t.title+' » terminé : '+r);}).catch(function(e){if(e&&e.name==='AbortError')actUI('arrêtée','Arrêtée à ta demande : reprends la main.');else actUI('erreur',(e&&e.message)||'échec');}).finally(function(){actCtl=null;document.getElementById('actStop').hidden=true;document.getElementById('actTake').hidden=true;});}
 renderActs();
 fillSettings();
+try{document.getElementById('pulseChk').checked=pulseOn();}catch(e){}
+document.getElementById('pulseChk').onchange=function(){try{localStorage.setItem('via-pulse',this.checked?'on':'off');}catch(e){}};
+try{document.getElementById('xreadChk').checked=xreadOn();}catch(e){}
+document.getElementById('xreadChk').onchange=function(){try{localStorage.setItem('via-xread',this.checked?'on':'off');}catch(e){}};
 document.getElementById('gearBtn').onclick=function(){var s=document.getElementById('settings');s.hidden=!s.hidden;if(!s.hidden){refreshConsent();paintPerms();}};
 refreshConsent();
-if(eng.provider==='local'&&ViaLocalEngine.getConsent()==='granted'){setState('checking');ensureEngine().catch(function(){});}else{setState(eng.provider==='local'?'needs-consent':'idle');if(eng.provider!=='local')document.getElementById('pMsg').textContent='Moteur manuel actif : '+eng.provider+'. Le modèle local automatique est en pause.';}
+if(eng.provider==='local'&&ViaLocalEngine.getConsent()==='granted'){setState('checking');ensureEngine().then(function(){updateIdCard();}).catch(function(){});}else{setState(eng.provider==='local'?'needs-consent':'idle');if(eng.provider!=='local')document.getElementById('pMsg').textContent='Moteur manuel actif : '+eng.provider+'. Le modèle local automatique est en pause.';}
 ViaCaps.paint('capsLine');
 input.focus();
 }).catch(function(){document.getElementById('who').textContent='Hors-ligne : recharge en ligne une fois.';});
